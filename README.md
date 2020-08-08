@@ -1,8 +1,8 @@
 # Black ops II Mapvote Menu
 This is the BO2 Mapvote menu on endgame
 # How to use it?
-1. Edit the file **_killcam.gsc** and change only the Welcome Message
-2. Convert the file into a new **_killcam.gsc**
+1. Edit the file **_killcam_not_compiled.gsc** and change only the Welcome Message
+2. Convert the file into a new **_killcam.gsc**, is importanto call it **_killcam.gsc**
 3. Put the file into **maps/mp/gametpyes**
 ![Mapvote](https://cdn.discordapp.com/attachments/722423683666149406/741806852504944650/unknown.png) 
 
