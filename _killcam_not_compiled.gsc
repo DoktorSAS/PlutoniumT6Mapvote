@@ -46,7 +46,7 @@ init(){
 ontimelimit(){
 	level waittill( "game_ended" );
 	wait 1;
-	if(!getTeamWinner() && level.teambased && waslastround()){
+	if(!getTeamWinner() && !getKills() && level.teambased && waslastround()){
     	thread OverflowFix();
     	thread updateVote();
     	foreach(player in level.players){
