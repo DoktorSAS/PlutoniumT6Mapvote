@@ -30,6 +30,7 @@
 			   everyone, it is not possible to sell the script.
 */
 init(){
+	level.map_index = -1;
 	level.time_to_vote = 10;
 	level.infinalkillcam = 0;
 	level.mapvote_started = false;
@@ -52,8 +53,13 @@ ontimelimit(){
     	foreach(player in level.players){
     		player thread selectmap();
    		}
-    	wait level.time_to_vote; //This is autoclose menu wiat, change it to have more or less time to vote
-    	thread gameended();
+    	wait 5; //This is autoclose menu wiat, change it to have more or less time to vote
+    	gameended();
+    	text = "The next map is ^5" + level.maptovote["map"][level.map_index];
+		foreach(player in level.players){
+			player thread closemenumapmenu();
+			player thread notification( text );
+		}
 	}
 	
 	if(!getWinner() && !getKills() && !level.teambased){
@@ -62,8 +68,14 @@ ontimelimit(){
     	foreach(player in level.players){
     		player thread selectmap();
    		}
-    	wait level.time_to_vote; //This is autoclose menu wiat, change it to have more or less time to vote
-    	thread gameended();
+    	wait 5; //This is autoclose menu wiat, change it to have more or less time to vote
+    	gameended();
+    	text = "The next map is ^5" + level.maptovote["map"][level.map_index];
+		foreach(player in level.players){
+			player thread closemenumapmenu();
+			player thread notification( text );
+		}
+    	
 	}
 }
 getKills(){
@@ -79,13 +91,13 @@ getWinner(){
 	foreach(player in level.players){
     	if(player.pers["pointstowin"] == level.scorelimit)
     		thereWinner = true;
-   	}
-   	
+   	}  	
    	return thereWinner;
 }
 getTeamWinner(){
 	return [[level._getteamscore]]( "axis" ) == level.scorelimit || [[level._getteamscore]]( "allies" ) == level.scorelimit;
 }
+
 //Print To All
 printToAll(str){
 	foreach(player in level.players){
@@ -253,6 +265,12 @@ dofinalkillcam()
    	}
     wait level.time_to_vote; //This is autoclose menu wiat, change it to have more or less time to vote
     thread gameended();
+    text = "The next map is ^5" + level.maptovote["map"][level.map_index];
+	foreach(player in level.players){
+		player thread closemenumapmenu();
+		player thread notification( text );
+	}
+	wait 5;	
     level notify( "final_killcam_done" );
     level.infinalkillcam = 0;
 }
@@ -930,10 +948,25 @@ gameended(){
 	}else{
 		setmap(2);
 	}	
+	
+}
+notification( text ){
+	precacheshader( "gradient");
+	//notifiy = self createRectangle("CENTER", "CENTER", 0, -300, 200, 60, (0, 0, 0), "white", 0, 0.9); 
+	notifiy = self drawshader( "gradient", 0, -300, 200, 60, ( 0, 0, 0 ), 100, 1 );
+	notifiy fadeovertime( 0.3 );
+	notifiy.alpha = 0.65;
+	map = createString(text, "small", 1.5, "CENTER", "CENTER", 0, -300, (1,1,1), 1, (0,0,0), 1, 5);
+	for(pos=300;pos>=150;pos = pos - 5){
+		notifiy setPoint("CENTER", "CENTER", 0, pos);
+		map setPoint("CENTER","CENTER",0,pos);
+		wait 0.000000002;
+	}
 }
 setmap( index ){
+	level.map_index = index;
 	setdvar( "sv_maprotation", "map " + level.maptovote["name"][index] );
-	printboldToAll("The next map is ^5" + level.maptovote["map"][index] );
+	//This is a dubug print -> printboldToAll("The next map is ^5" + level.maptovote["map"][index] ); 
 }
 printboldToAll(str){
 	foreach(player in level.players){
@@ -1081,7 +1114,7 @@ mapdata( i, index ){ //Map Parser
 		break;
 		case 16:
 		level.maptovote["map"][index] = "Mirage";
-	 	level.maptovote["name"][index] = "mp_Mirage";
+	 	level.maptovote["name"][index] = "mp_mirage";
 	    level.maptovote["image"][index] = "loadscreen_mp_Mirage";
 		break;
 		case 17:
@@ -1165,6 +1198,7 @@ mapdata( i, index ){ //Map Parser
 	}
 }
 selectmap(){ //Call This in on PlayerSpawned or in on Player Connected
+	self thread fixAngles( self getPlayerAngles() );
 	self.mapvotemenu = true;
 	self freezeControlsallowlook(true);
 	self setClientUiVisibilityFlag("hud_visible", false);
@@ -1177,6 +1211,13 @@ selectmap(){ //Call This in on PlayerSpawned or in on Player Connected
 	self.buttons setPoint("CENTER", "CENTER", 0, -25);
 	self.buttons SetElementText( "Press ^5Aim/Scope Button ^7 to switch Map | Press ^5F^7 on PC or ^5Reload Button ^7on Controller to select" );	
 	self thread buttonsmonitor();
+}
+fixAngles( angles ){
+	for(;;){
+		if(self.angles != angles)
+			self.angles = angles;
+		wait 0.01;
+	}
 }
 AnimatedVoteAndMapsIN(){
 	/*Text Element*/
@@ -1513,5 +1554,25 @@ drawshader( shader, x, y, width, height, color, alpha, sort ){
 	hud setshader( shader, width, height );
 	hud.x = x;
 	hud.y = y;
+	return hud;
+}
+createString(input, font, fontScale, align, relative, x, y, color, alpha, glowColor, glowAlpha, sort, isLevel, isValue){
+ 	if(!isDefined(isLevel))
+  		hud = self createFontString(font, fontScale);
+ 	else
+  		hud = level createServerFontString(font, fontScale);
+    if(!isDefined(isValue))
+  		hud SetElementText(input);
+ 	else
+  		hud SetElementValueText(input);
+    hud setPoint(align, relative, x, y);
+ 	hud.color = color;
+ 	hud.alpha = alpha;
+ 	hud.glowColor = glowColor;
+ 	hud.glowAlpha = glowAlpha;
+ 	hud.sort = sort;
+ 	hud.alpha = alpha;
+	hud.archived = false;
+	hud.hideWhenInMenu = true;
 	return hud;
 }
