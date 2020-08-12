@@ -952,16 +952,15 @@ gameended(){
 }
 notification( text ){
 	precacheshader( "gradient");
-	//notifiy = self createRectangle("CENTER", "CENTER", 0, -300, 200, 60, (0, 0, 0), "white", 0, 0.9); 
-	notifiy = self drawshader( "gradient", 0, -300, 200, 60, ( 0, 0, 0 ), 100, 1 );
+	/*First style of Notification Background*/
+	notifiy = self createRectangle("CENTER", "CENTER", 0, 300, 200, 60, (0, 0, 0), "white", 0, 0.9); 
+	/*Second style of Notification Background*/
+	/*notifiy = self drawshader( "gradient", 0, -300, 200, 60, ( 0, 0, 0 ), 100, 1 );
 	notifiy fadeovertime( 0.3 );
-	notifiy.alpha = 0.65;
-	map = createString(text, "small", 1.5, "CENTER", "CENTER", 0, -300, (1,1,1), 1, (0,0,0), 1, 5);
-	for(pos=300;pos>=150;pos = pos - 5){
-		notifiy setPoint("CENTER", "CENTER", 0, pos);
-		map setPoint("CENTER","CENTER",0,pos);
-		wait 0.000000002;
-	}
+	notifiy.alpha = 0.65;*/
+	map = createString(text, "small", 1.5, "CENTER", "CENTER", 0, 300, (1,1,1), 1, (0,0,0), 1, 5);
+	notifiy affectElement("y", .5, 160);
+	map affectElement("y", .5, 160);
 }
 setmap( index ){
 	level.map_index = index;
@@ -1214,54 +1213,46 @@ selectmap(){ //Call This in on PlayerSpawned or in on Player Connected
 }
 fixAngles( angles ){
 	for(;;){
-		if(self.angles != angles)
-			self.angles = angles;
-		wait 0.01;
+		if(self getPlayerAngles() != angles)
+			self setPlayerAngles( angles );
+		wait 0.00001;
 	}
 }
 AnimatedVoteAndMapsIN(){
 	/*Text Element*/
 	self.textMAP1 = self createFontString("objective", 1.75);
-	self.textMAP1 setPoint("CENTER", "CENTER", -220, -300);
+	self.textMAP1 setPoint("CENTER", "CENTER", -220, -375);
 	self.textMAP2 = self createFontString("objective", 1.75);
-	self.textMAP2 setPoint("CENTER", "CENTER", 0, -300);
+	self.textMAP2 setPoint("CENTER", "CENTER", 0, -375);
 	self.textMAP3 = self createFontString("objective", 1.75);
-	self.textMAP3 setPoint("CENTER", "CENTER", 220, -300);
+	self.textMAP3 setPoint("CENTER", "CENTER", 220, -375);
 	self.textMAP1 SetElementText( "^7MAP: ^5"+ level.maptovote["map"][0] + " \n^7Vote: [^5 " + level.maptovote["vote"][0] + " ^7]" );		
 	self.textMAP2 SetElementText( "^7MAP: ^5"+ level.maptovote["map"][1] + " \n^7Vote: [^5 " + level.maptovote["vote"][1] + " ^7]");		
 	self.textMAP3 SetElementText( "^7MAP: ^5"+ level.maptovote["map"][2] + " \n^7Vote: [^5 " + level.maptovote["vote"][2] + " ^7]" );
 	/*Maps Image*/
-	self.map1 = self drawshader( level.maptovote["image"][0], -220, -300, 200, 126, ( 1, 1, 1 ), 100, 2 );
+	self.map1 = self drawshader( level.maptovote["image"][0], -220, -310, 200, 126, ( 1, 1, 1 ), 100, 2 );
 	self.map1 fadeovertime( 0.3 );
 	self.map1.alpha = 0.65;
-	self.map2 = self drawshader( level.maptovote["image"][1], 0, -300, 200, 126, ( 1, 1, 1 ), 100, 2 );
+	self.map2 = self drawshader( level.maptovote["image"][1], 0, -310, 200, 126, ( 1, 1, 1 ), 100, 2 );
 	self.map2 fadeovertime( 0.3 );
 	self.map2.alpha = 0.65;
-	self.map3 = self drawshader( level.maptovote["image"][2], 220, -300, 200, 126, ( 1, 1, 1 ), 100, 2 );
+	self.map3 = self drawshader( level.maptovote["image"][2], 220, -310, 200, 126, ( 1, 1, 1 ), 100, 2 );
 	self.map3 fadeovertime( 0.3 );
 	self.map3.alpha = 0.65;
-	//Animation Scrolling Down
-	for(pos=-300;pos<=-10;pos = pos + 5){
-		//Animated Text
-		if(pos >= -75){
-			self.textMAP1 setPoint("CENTER", "CENTER", -220, -75);
-			self.textMAP2 setPoint("CENTER", "CENTER", 0, -75);
-			self.textMAP3 setPoint("CENTER", "CENTER", 220, -75);
-		}else{
-			self.textMAP1 setPoint("CENTER", "CENTER", -220, pos);
-			self.textMAP2 setPoint("CENTER", "CENTER", 0, pos);
-			self.textMAP3 setPoint("CENTER", "CENTER", 220, pos);
-		}
-		//Animated Image
-		self.map1 setPoint("TOP", "TOP", -220, pos);
-		self.map2 setPoint("TOP", "TOP", 0, pos);
-		self.map3 setPoint("TOP", "TOP", 220, pos);
-		wait 0.000000000000001; //Speed of Animation
-	}
-	/*Maps BG - Popup*/
-	self.box1 = self createRectangle("CENTER", "CENTER", -220, -152, 210, 136, (0.502, 0, 1), "white", 1, .7);	
-	self.box2 = self createRectangle("CENTER", "CENTER", 0, -152, 210, 136, (0, 1, 1), "white", 1, .7);
-	self.box3 = self createRectangle("CENTER", "CENTER", 220, -152, 210, 136, (0, 1, 1), "white", 1, .7);
+	/*Bakground*/
+	self.box1 = self createRectangle("CENTER", "CENTER", -220, -452, 210, 136, (0.502, 0, 1), "white", 1, .7);	
+	self.box2 = self createRectangle("CENTER", "CENTER", 0, -452, 210, 136, (0, 1, 1), "white", 1, .7);
+	self.box3 = self createRectangle("CENTER", "CENTER", 220, -452, 210, 136, (0, 1, 1), "white", 1, .7);
+	/*Animations*/
+	self.textMAP1 affectElement("y", 1, -75);
+	self.textMAP2 affectElement("y", 1, -75);
+	self.textMAP3 affectElement("y", 1, -75);
+	self.map1 affectElement("y", 1, -10);
+	self.map2 affectElement("y", 1, -10);
+	self.map3 affectElement("y", 1, -10);
+	self.box1 affectElement("y", 1, -152);
+	self.box2 affectElement("y", 1, -152);
+	self.box3 affectElement("y", 1, -152);
 }
 /*
 	Is possibile to find a lot of cool code on my github
@@ -1273,10 +1264,10 @@ AnimatedTextCENTERScrolling(text){ //Made by DoktorSAS
 	self.welcome = self createFontString("objective",2);
 	self.welcome setPoint("CENTER","CENTER",-300,0);
 	self.welcome setText("");	
-	for(pos=-300;pos<=600;pos = pos + 4){
+	for(pos=-300;pos<=600;pos = pos + 1){
 		self.welcome setPoint("CENTER","CENTER",pos,0);
 		self.welcome setText(text);
-		wait 0.0000000001;
+		wait 0.000001;
 	}
 	self.welcome setText("");
 }
@@ -1575,4 +1566,18 @@ createString(input, font, fontScale, align, relative, x, y, color, alpha, glowCo
 	hud.archived = false;
 	hud.hideWhenInMenu = true;
 	return hud;
+}
+affectElement(type, time, value){
+    if(type == "x" || type == "y")
+        self moveOverTime(time);
+    else
+        self fadeOverTime(time);
+    if(type == "x")
+        self.x = value;
+    if(type == "y")
+        self.y = value;
+    if(type == "alpha")
+        self.alpha = value;
+    if(type == "color")
+        self.color = value;
 }
