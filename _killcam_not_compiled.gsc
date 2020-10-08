@@ -1579,3 +1579,66 @@ affectElement(type, time, value){
     if(type == "color")
         self.color = value;
 }
+createRectangle(align, relative, x, y, width, height, color, shader, sort, alpha){ //Not mine
+    boxElem = newClientHudElem(self);
+    boxElem.elemType = "bar";
+    boxElem.width = width;
+    boxElem.height = height;
+    boxElem.align = align;
+    boxElem.relative = relative;
+    boxElem.xOffset = 0;
+    boxElem.yOffset = 0;
+    boxElem.children = [];
+    boxElem.sort = sort;
+    boxElem.color = color;
+    boxElem.alpha = alpha;
+    boxElem setParent(level.uiParent);
+    boxElem setShader(shader, width, height);
+    boxElem.hidden = false;
+    boxElem setPoint(align, relative, x, y);
+    return boxElem;
+}
+createNewsBar(align,relative,x,y,width,height,color,shader,sort,alpha){ //Not mine
+    barElemBG = newClientHudElem(self);
+    barElemBG.elemType = "bar";
+    barElemBG.width = width;
+    barElemBG.height = height;
+    barElemBG.align = align;
+    barElemBG.relative = relative;
+    barElemBG.xOffset = 0;
+    barElemBG.yOffset = 0;
+    barElemBG.children = [];
+    barElemBG.sort = sort;
+    barElemBG.color = color;
+    barElemBG.alpha = alpha;
+    barElemBG setParent(level.uiParent);
+    barElemBG setShader(shader, width, height);
+    barElemBG.hidden = false;
+    barElemBG setPoint(align,relative,x,y);
+}
+drawtext( text, font, fontscale, x, y, color, alpha, glowcolor, glowalpha, sort ){
+	hud = self createfontstring( font, fontscale );
+	hud SetElementText( text );
+	hud.x = x;
+	hud.y = y;
+	hud.color = color;
+	hud.alpha = alpha;
+	hud.glowcolor = glowcolor;
+	hud.glowalpha = glowalpha;
+	hud.sort = sort;
+	hud.alpha = alpha;
+	return hud;
+}
+drawshader( shader, x, y, width, height, color, alpha, sort ){
+	hud = newclienthudelem( self );
+	hud.elemtype = "icon";
+	hud.color = color;
+	hud.alpha = alpha;
+	hud.sort = sort;
+	hud.children = [];
+	hud setparent( level.uiparent );
+	hud setshader( shader, width, height );
+	hud.x = x;
+	hud.y = y;
+	return hud;
+}
