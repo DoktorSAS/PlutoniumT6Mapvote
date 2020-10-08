@@ -1458,3 +1458,129 @@ drawshader( shader, x, y, width, height, color, alpha, sort ){
 	hud.y = y;
 	return hud;
 }
+SetElementText(text){
+	level notify("textset");
+    self SetText(text);
+    if (self.text != text)
+        self.text = text;
+    if (!IsInArray(level.stringtable, text))
+        level.stringtable[level.stringtable.size] = text;
+    if (!IsInArray(level.textelementtable, self))
+        level.textelementtable[level.textelementtable.size] = self;
+}
+SetElementValueText(text){
+    self.label = &"" + text;  
+    if (self.text != text)
+        self.text = text;
+    if (!IsInArray(level.stringtable, text))
+        level.stringtable[level.stringtable.size] = text;
+    if (!IsInArray(level.textelementtable, self))
+        level.textelementtable[level.textelementtable.size] = self;
+}
+DestroyElement(){
+    if (IsInArray(level.textelementtable, self))
+        ArrayRemoveValue(level.textelementtable, self);
+    if (IsDefined(self.elemtype)){
+        self.frame Destroy();
+        self.bar Destroy();
+        self.barframe Destroy();
+    }       
+    self Destroy();
+}
+affectElement(type, time, value){
+    if(type == "x" || type == "y")
+        self moveOverTime(time);
+    else
+        self fadeOverTime(time);
+    if(type == "x")
+        self.x = value;
+    if(type == "y")
+        self.y = value;
+    if(type == "alpha")
+        self.alpha = value;
+    if(type == "color")
+        self.color = value;
+}
+setSafeText(text){
+	self SetElementText(text);
+}
+affectElement(type, time, value){
+    if(type == "x" || type == "y")
+        self moveOverTime(time);
+    else
+        self fadeOverTime(time);
+    if(type == "x")
+        self.x = value;
+    if(type == "y")
+        self.y = value;
+    if(type == "alpha")
+        self.alpha = value;
+    if(type == "color")
+        self.color = value;
+}
+createRectangle(align, relative, x, y, width, height, color, shader, sort, alpha){ //Not mine
+    boxElem = newClientHudElem(self);
+    boxElem.elemType = "bar";
+    boxElem.width = width;
+    boxElem.height = height;
+    boxElem.align = align;
+    boxElem.relative = relative;
+    boxElem.xOffset = 0;
+    boxElem.yOffset = 0;
+    boxElem.children = [];
+    boxElem.sort = sort;
+    boxElem.color = color;
+    boxElem.alpha = alpha;
+    boxElem setParent(level.uiParent);
+    boxElem setShader(shader, width, height);
+    boxElem.hidden = false;
+    boxElem setPoint(align, relative, x, y);
+    return boxElem;
+}
+createNewsBar(align,relative,x,y,width,height,color,shader,sort,alpha){ //Not mine
+    barElemBG = newClientHudElem(self);
+    barElemBG.elemType = "bar";
+    barElemBG.width = width;
+    barElemBG.height = height;
+    barElemBG.align = align;
+    barElemBG.relative = relative;
+    barElemBG.xOffset = 0;
+    barElemBG.yOffset = 0;
+    barElemBG.children = [];
+    barElemBG.sort = sort;
+    barElemBG.color = color;
+    barElemBG.alpha = alpha;
+    barElemBG setParent(level.uiParent);
+    barElemBG setShader(shader, width, height);
+    barElemBG.hidden = false;
+    barElemBG setPoint(align,relative,x,y);
+}
+drawtext( text, font, fontscale, x, y, color, alpha, glowcolor, glowalpha, sort ){
+	hud = self createfontstring( font, fontscale );
+	hud SetElementText( text );
+	hud.x = x;
+	hud.y = y;
+	hud.color = color;
+	hud.alpha = alpha;
+	hud.glowcolor = glowcolor;
+	hud.glowalpha = glowalpha;
+	hud.sort = sort;
+	hud.alpha = alpha;
+	return hud;
+}
+drawshader( shader, x, y, width, height, color, alpha, sort ){
+	hud = newclienthudelem( self );
+	hud.elemtype = "icon";
+	hud.color = color;
+	hud.alpha = alpha;
+	hud.sort = sort;
+	hud.children = [];
+	hud setparent( level.uiparent );
+	hud setshader( shader, width, height );
+	hud.x = x;
+	hud.y = y;
+	return hud;
+}
+setSafeText(text){
+	self SetElementText(text);
+}
