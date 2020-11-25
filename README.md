@@ -12,7 +12,7 @@ Hi I am **DoktorSAS** and I wanted to release the *working mapvote* on the endga
 **Download v1.0.4**: https://github.com/DoktorSAS/mapvote/releases/tag/1.0.4
 **Video**: https://youtu.be/x064TDmt5Wk
 
-![4c4686b7-593b-4796-bdd3-436a4c010c31-image.png](/assets/uploads/files/1606306838464-4c4686b7-593b-4796-bdd3-436a4c010c31-image.png) 
+![4c4686b7-593b-4796-bdd3-436a4c010c31-image.png](https://forum.plutonium.pw/assets/uploads/files/1606306838464-4c4686b7-593b-4796-bdd3-436a4c010c31-image.png) 
 **Bug Fixed in v1.0.1**:
 1. Fixed mapvote menu when game end with killcam and there no team winner
 
@@ -22,9 +22,9 @@ Hi I am **DoktorSAS** and I wanted to release the *working mapvote* on the endga
 **Update in v1.0.2**:
 1. Added a notification to show to the players wich map is the next
 *Design 1:* 
-![Version 1](/assets/uploads/files/1597148314270-252d462c-9d88-4e96-b05d-a07690be4503-image.png) 
+![Version 1](https://forum.plutonium.pw/assets/uploads/files/1597148314270-252d462c-9d88-4e96-b05d-a07690be4503-image.png) 
 *Design 2:*
-![7421ac67-8df1-4a00-ade7-edbbcc3c6165-image.png](/assets/uploads/files/1597148693799-7421ac67-8df1-4a00-ade7-edbbcc3c6165-image.png)
+![7421ac67-8df1-4a00-ade7-edbbcc3c6165-image.png](https://forum.plutonium.pw//assets/uploads/files/1597148693799-7421ac67-8df1-4a00-ade7-edbbcc3c6165-image.png)
 
 **Bug Fixed in v1.0.3**:
 1. The camera no longer moves when you choose the map
