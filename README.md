@@ -13,9 +13,11 @@ Hi I am **DoktorSAS** and I wanted to release the *working mapvote* on the endga
 **Video**: https://youtu.be/x064TDmt5Wk
 
 ![4c4686b7-593b-4796-bdd3-436a4c010c31-image.png](https://forum.plutonium.pw/assets/uploads/files/1606306838464-4c4686b7-593b-4796-bdd3-436a4c010c31-image.png) 
+###### V1.0.1
 **Bug Fixed in v1.0.1**:
 1. Fixed mapvote menu when game end with killcam and there no team winner
 
+###### V1.0.2
 **Bug Fixed in v1.0.2**:
 1. Nothing
 
@@ -26,15 +28,18 @@ Hi I am **DoktorSAS** and I wanted to release the *working mapvote* on the endga
 *Design 2:*
 ![7421ac67-8df1-4a00-ade7-edbbcc3c6165-image.png](https://forum.plutonium.pw//assets/uploads/files/1597148693799-7421ac67-8df1-4a00-ade7-edbbcc3c6165-image.png)
 
+###### V1.0.3
 **Bug Fixed in v1.0.3**:
 1. The camera no longer moves when you choose the map
 2. Animation now are cleaner
 
+###### V1.0.4
 **Bug Fixed in v1.0.4**:
 1. Now work on endgame with and without killcam 
 2. Work also on S&D, Domination or any round gamemodes
 3. Text in the middle screen hide when vote end
 
+###### V1.1.0
 **Bug Fixed in v1.1.0**:
 1. Now maps should load correctly everytime
 2. Some optimization 
