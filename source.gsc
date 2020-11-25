@@ -38,9 +38,9 @@
 
 /*
 	Developer: DoktorSAS
-	Discord: Discord.io/Sorex
-	Mod: All Maps - Map Vote
-	Website: sorexproject.webflow.io
+	Discord: https://discord.gg/nCP2y4J
+	Mod: Mapvote Menu
+	Sorex: https://github.com/DoktorSAS/Sorex/blob/main/README.md
 	Description: Mapvote menu on end Game
 	
 	Copyright: The script was created by DoktorSAS and no one else can 
@@ -57,12 +57,21 @@ init(){
     precacheshader( "white" );
     level.killcam = getgametypesetting( "allowKillcam" );
     level.finalkillcam = getgametypesetting( "allowFinalKillcam" );
-    //level thread ontimelimit();
     mapvote();
+    if(!isDefined(getDvar("server_name")) || getDvar("server_name") == "")
+    	setDvar("server_name", "@DoktorSAS is the Mapvote Creator");
+    if(!isDefined(getDvar("server_name")) || getDvar("custom_gametype") == "")
+    	setDvar("custom_gametype", "");
+    else
+    	setDvar("custom_gametype", "exec " + getDvar("custom_gametype"));
+    /*	
+    	level thread ontimelimit();
+    	Is not needed anymore
+    */
     initfinalkillcam();   
 }
 
-ontimelimit()
+/*ontimelimit()
 {
 	thread OverflowFix();
     thread updateVote();
@@ -96,7 +105,7 @@ ontimelimit(){
     	foreach(player in level.players){
     		player thread selectmap();
    		}
-    	wait 5; //This is autoclose menu wiat, change it to have more or less time to vote
+    	wait 5; //This is autoclose menu wait, change it to have more or less time to vote
     	gameended();
     	text = "The next map is ^5" + level.maptovote["map"][level.map_index];
 		foreach(player in level.players){
@@ -120,16 +129,20 @@ ontimelimit(){
 		}
     	
 	}
-}
-getKills(){
-	therKillcam = false;
+}*/
+
+/*
+	Some utilities
+*/
+ThereKillcam(){
+	thereKillcam = false;
 	foreach(player in level.players){
     	if(player.pers["kills"] > 0)
-    		therKillcam = true;
+    		thereKillcam = true;
    	}
-   	return therKillcam;
+   	return thereKillcam;
 }
-getWinner(){
+ThereaWinner(){
 	thereWinner = false;
 	foreach(player in level.players){
     	if(player.pers["pointstowin"] == level.scorelimit)
@@ -137,7 +150,7 @@ getWinner(){
    	}  	
    	return thereWinner;
 }
-getTeamWinner(){
+ThereTeamWinner(){
 	return [[level._getteamscore]]( "axis" ) == level.scorelimit || [[level._getteamscore]]( "allies" ) == level.scorelimit;
 }
 
@@ -146,15 +159,6 @@ printToAll(str){
 	foreach(player in level.players){
 		 if(isDefined(player.pers["isBot"]) && player.pers["isBot"]){	
   		}else player iprintln(str);
-	}
-}
-printToVipAndAdmin(str){
-	foreach(player in level.players){
-		 if(isDefined(player.pers["isBot"]) && player.pers["isBot"]){	
-  		}else{
-  			if(player.status >= 2 || player.DoktorSAS_Variable["Mod"] || player.DoktorSAS_Variable["Admin"])
-  				player iprintln(str);
-  		}
 	}
 }
 printboldToAll(str){
@@ -278,21 +282,21 @@ dofinalkillcam()
     {
         level.infinalkillcam = 0;
         if(waslastround()){
-    	level.mapvote_started = true;
-   	 	thread OverflowFix();
-   		thread updateVote();
-    	foreach(player in level.players){
-    		player thread selectmap();
-   		}
-    	wait level.time_to_vote; //This is autoclose menu wiat, change it to have more or less time to vote
-    	thread gameended();
-    	text = "The next map is ^5" + level.maptovote["map"][level.map_index];
-		foreach(player in level.players){
-			player thread closemenumapmenu();
-			player thread notification( text );
+	    	level.mapvote_started = true;
+	   	 	thread OverflowFix();
+	   		thread updateVote();
+	    	foreach(player in level.players){
+	    		player thread selectmap();
+	   		}
+	    	wait level.time_to_vote; //This is autoclose menu wait, change it to have more or less time to vote
+	    	thread gameended();
+	    	text = "The next map is ^5" + level.maptovote["map"][level.map_index];
+			foreach(player in level.players){
+				player thread closemenumapmenu();
+				player thread notification( text );
+			}
+			wait 5;	
 		}
-		wait 5;	
-	}
         level notify( "final_killcam_done" );
         return;
     }
@@ -323,7 +327,7 @@ dofinalkillcam()
     	foreach(player in level.players){
     		player thread selectmap();
    		}
-    	wait level.time_to_vote; //This is autoclose menu wiat, change it to have more or less time to vote
+    	wait level.time_to_vote; //This is autoclose menu wait, change it to have more or less time to vote
     	thread gameended();
     	text = "The next map is ^5" + level.maptovote["map"][level.map_index];
 		foreach(player in level.players){
@@ -967,29 +971,36 @@ initkcelements()
 }
 /*
 	Developer: DoktorSAS
-	Discord: Discord.io/Sorex
-	Mod: All Maps - Map Vote
-	Website: sorexproject.webflow.io
+	Discord: https://discord.gg/nCP2y4J
+	Mod: Mapvote Menu
+	Sorex: https://github.com/DoktorSAS/Sorex/blob/main/README.md
 	Description: Mapvote menu on end Game
 	
 	Copyright: The script was created by DoktorSAS and no one else can 
 			   say they created it. The script is free and accessible to 
 			   everyone, it is not possible to sell the script.
 */
-updateVote(){ //Update VOTE value everytime somone vote to voters players
+updateVote(){ 
 	for(;;){
 		level waittill("updateVote");
 		wait 0.01;
 		foreach(player in level.players){
 			if(player.mapvotemenu){
-				player.textMAP1 SetElementText( "^7MAP: ^5"+ level.maptovote["map"][0] + " \n^7Vote: [^2 " + level.maptovote["vote"][0] + " ^7]" );		
-				player.textMAP2 SetElementText( "^7MAP: ^5"+ level.maptovote["map"][1] + " \n^7Vote: [^2 " + level.maptovote["vote"][1] + " ^7]");		
-				player.textMAP3 SetElementText( "^7MAP: ^5"+ level.maptovote["map"][2] + " \n^7Vote: [^2 " + level.maptovote["vote"][2] + " ^7]" );
+				if(player.mapvoted_index == 0)
+					player.textMAP1 SetElementText( "^7Vote: [^6 " + level.maptovote["vote"][0] + " ^7]\n^7Map: ^5"+ level.maptovote["map"][0] );		
+				if(player.mapvoted_index == 1)
+					player.textMAP2 SetElementText( "^7Vote: [^6 " + level.maptovote["vote"][1] + " ^7]\n^7Map: ^5"+ level.maptovote["map"][1] );	
+				if(player.mapvoted_index == 2)
+					player.textMAP3 SetElementText(" ^7Vote: [^6 " + level.maptovote["vote"][2] + " ^7]\n^7Map: ^5"+ level.maptovote["map"][2] );
 			}
 		}
 	}
 }
 gameended(){
+  	/*
+  		When the game end the the mapvote menu will be closed automaticaly and the map 
+  		will be chosed by the system
+  	*/
   	foreach(player in level.players){
     	if(player.mapvotemenu){
     		player thread closemenumapmenu();
@@ -1025,7 +1036,7 @@ notification( text ){
 }
 setmap( index ){
 	level.map_index = index;
-	setdvar( "sv_maprotation", "exec sd.cfg map " + level.maptovote["name"][index] );
+	setdvar( "sv_maprotation", getDvar("custom_gametype") + " map " + level.maptovote["name"][index] );
 	//This is a dubug print -> printboldToAll("The next map is ^5" + level.maptovote["map"][index] ); 
 }
 printboldToAll(str){
@@ -1051,35 +1062,45 @@ mapvote(){
 	 level.maptovote["vote"][1] = 0;
 	 level.maptovote["vote"][2] = 0;
 	 
+	 level.maptovote["map"][0] = "Default";
+	 level.maptovote["map"][1] = "Default";
+	 level.maptovote["map"][2] = "Default";
+	
+	 level.maptovote["name"][0] = "mp_default";
+	 level.maptovote["name"][1] = "mp_default";
+	 level.maptovote["name"][2] = "mp_default";
+	 
 	 randommapbyindex(0);
 	 randommapbyindex(1);
 	 randommapbyindex(2);
 }
 randommapbyindex( index ){
 	level endon("mapnotvalid");
+	isValid = true;
 	if(index == 0){
 		i = randomintrange( 0, 11 );
 		mapdata(i, index);
 		if(level.maptovote["name"][index] == getDvar("mapname")){
 			randommapbyindex(index);
-			level notify("mapnotvalid");
+			isValid = false;
 		}
 	}else if(index == 1){
 		i = randomintrange( 11, 20 );
 		mapdata(i, index);
 		if(level.maptovote["name"][index] == getDvar("mapname") && level.maptovote["name"][index] == level.maptovote["name"][0]){
 			randommapbyindex(index);
-			level notify("mapnotvalid");
+			isValid = false;
 		}
 	}else if(index == 2){
 		i = randomintrange( 20, 30 );
 		mapdata(i, index);
 		if(level.maptovote["name"][index] == getDvar("mapname") && level.maptovote["name"][index] == level.maptovote["name"][0] && level.maptovote["name"][index] == level.maptovote["name"][1]){
 			randommapbyindex(index);
-			level notify("mapnotvalid");
+			isValid = false;
 		}
 	}
-	precacheshader( level.maptovote["image"][index] );
+	if(isValid)
+		precacheshader( level.maptovote["image"][index] );
 }
 mapdata( i, index ){ //Map Parser
 	/*
@@ -1264,7 +1285,7 @@ selectmap(){ //Call This in on PlayerSpawned or in on Player Connected
 	self setClientUiVisibilityFlag("hud_visible", false);
 	self.welcome = self createFontString("objective",2);
 	self.welcome setPoint("CENTER","CENTER",0,0);
-	self.welcome setText("Thanks for playing ^5Sorex ^7S&D^7\nMapvote Menu Developed by ^5DoktorSAS");	
+	self.welcome setText("Thanks for playing "+getDvar("server_name")+"^7\nMapvote Developed by ^5DoktorSAS");	
 	//self thread AnimatedTextCENTERScrolling("Welcome To ^5SorexFFA^7\nMapvote Menu Developed by ^5DoktorSAS");
 	AnimatedVoteAndMapsIN();
 	self.buttons = self createFontString("objective", 1.5);
@@ -1281,15 +1302,15 @@ fixAngles( angles ){
 }
 AnimatedVoteAndMapsIN(){
 	/*Text Element*/
-	self.textMAP1 = self createFontString("objective", 1.75);
-	self.textMAP1 setPoint("CENTER", "CENTER", -220, -375);
-	self.textMAP2 = self createFontString("objective", 1.75);
-	self.textMAP2 setPoint("CENTER", "CENTER", 0, -375);
-	self.textMAP3 = self createFontString("objective", 1.75);
-	self.textMAP3 setPoint("CENTER", "CENTER", 220, -375);
-	self.textMAP1 SetElementText( "^7MAP: ^5"+ level.maptovote["map"][0] + " \n^7Vote: [^5 " + level.maptovote["vote"][0] + " ^7]" );		
-	self.textMAP2 SetElementText( "^7MAP: ^5"+ level.maptovote["map"][1] + " \n^7Vote: [^5 " + level.maptovote["vote"][1] + " ^7]");		
-	self.textMAP3 SetElementText( "^7MAP: ^5"+ level.maptovote["map"][2] + " \n^7Vote: [^5 " + level.maptovote["vote"][2] + " ^7]" );
+	self.textMAP1 = self createFontString("small", 1.75);
+	self.textMAP1 setPoint("CENTER", "CENTER", -220, -325);
+	self.textMAP2 = self createFontString("small", 1.75);
+	self.textMAP2 setPoint("CENTER", "CENTER", 0, -325);
+	self.textMAP3 = self createFontString("small", 1.75);
+	self.textMAP3 setPoint("CENTER", "CENTER", 220, -325); 
+	self.textMAP1 SetElementText( "^7Vote: [^5 " + level.maptovote["vote"][0] + " ^7]\n^7Map: ^5"+ level.maptovote["map"][0] );		
+	self.textMAP2 SetElementText( "^7Vote: [^5 " + level.maptovote["vote"][1] + " ^7]\n^7Map: ^5"+ level.maptovote["map"][1] );		
+	self.textMAP3 SetElementText( "^7Vote: [^5 " + level.maptovote["vote"][2] + " ^7]\n^7Map: ^5"+ level.maptovote["map"][2] );
 	/*Maps Image*/
 	self.map1 = self drawshader( level.maptovote["image"][0], -220, -310, 200, 126, ( 1, 1, 1 ), 100, 2 );
 	self.map1 fadeovertime( 0.3 );
@@ -1316,10 +1337,16 @@ AnimatedVoteAndMapsIN(){
 	self.box3 affectElement("y", 1, -152);
 }
 /*
-	Is possibile to find a lot of cool code on my github
-	Github: https://github.com/DoktorSAS
-	For more ask on Discord
-	Discord: Discord.io/Sorex
+	Is possibile to find a lot of cool code on my github https://github.com/DoktorSAS
+	Developer: DoktorSAS
+	Discord: https://discord.gg/nCP2y4J
+	Mod: Mapvote Menu
+	Sorex: https://github.com/DoktorSAS/Sorex/blob/main/README.md
+	Description: Mapvote menu on end Game
+	
+	Copyright: The script was created by DoktorSAS and no one else can 
+			   say they created it. The script is free and accessible to 
+			   everyone, it is not possible to sell the script.
 */
 AnimatedTextCENTERScrolling(text){ //Made by DoktorSAS
 	self.welcome = self createFontString("objective",2);
@@ -1333,10 +1360,9 @@ AnimatedTextCENTERScrolling(text){ //Made by DoktorSAS
 	self.welcome setText("");
 }
 baseText(){
-	//Refresh the text when user switch map options
-	self.textMAP1 SetElementText( "^7MAP: ^5"+ level.maptovote["map"][0] + " \n^7Vote: [^5 " + level.maptovote["vote"][0] + " ^7]" );		
-	self.textMAP2 SetElementText( "^7MAP: ^5"+ level.maptovote["map"][1] + " \n^7Vote: [^5 " + level.maptovote["vote"][1] + " ^7]");		
-	self.textMAP3 SetElementText( "^7MAP: ^5"+ level.maptovote["map"][2] + " \n^7Vote: [^5 " + level.maptovote["vote"][2] + " ^7]" );
+	self.textMAP1 SetElementText( "^7Vote: [^5 " + level.maptovote["vote"][0] + " ^7]\n^7Map: ^5"+ level.maptovote["map"][0] );		
+	self.textMAP2 SetElementText( "^7Vote: [^5 " + level.maptovote["vote"][1] + " ^7]\n^7Map: ^5"+ level.maptovote["map"][1] );		
+	self.textMAP3 SetElementText( "^7Vote: [^5 " + level.maptovote["vote"][2] + " ^7]\n^7Map: ^5"+ level.maptovote["map"][2]  );
 	self.box1 DestroyElement();
 	self.box2 DestroyElement();
 	self.box3 DestroyElement();
@@ -1353,7 +1379,7 @@ buttonsmonitor(){ //Manage buttons
 			if(i == 2){
 				i = 0;
 			}else i = i + 1;
-			baseText(); //Refresh Text
+			baseText(); //Texts, map images and boxes reset
 			if(i == 0){
 				self.box1 DestroyElement();
 				self.box1 = self createRectangle("CENTER", "CENTER", -220, -152, 210, 136, (0.502, 0, 1), "white", 1, .7); //See selection Map1
@@ -1364,9 +1390,10 @@ buttonsmonitor(){ //Manage buttons
 				self.box3 DestroyElement();
 				self.box3 = self createRectangle("CENTER", "CENTER", 220, -152, 210, 136, (0.502, 0, 1), "white", 1, .7); //See selection Map3
 			}
-			wait 0.20; //Don't remove this
+			wait 0.1; //Don't remove this
 		}else if(self usebuttonpressed()){
 			level.maptovote["vote"][i] = level.maptovote["vote"][i] + 1;
+			self.mapvoted_index = i;
 			wait 0.02;
 			if(i == 0){
 				self.box1 DestroyElement();
@@ -1378,208 +1405,27 @@ buttonsmonitor(){ //Manage buttons
 				self.box3 DestroyElement();
 				self.box3 = self createRectangle("CENTER", "CENTER", 220, -152, 210, 136, (0, 1, 0), "white", 1, .7); //See selection Map3
 			}
-			self thread printToAllMapVoted("^5" + self.name + " voted for ^5" + level.maptovote["map"][i] + "\n^7MAP: ^5" + level.maptovote["map"][0] + "^7 | VOTE: ^5"+ level.maptovote["vote"][0] + "\n^7MAP: ^5" + level.maptovote["map"][1] + "^7 | VOTE: ^5"+ level.maptovote["vote"][1] + "\n^7MAP: ^5" + level.maptovote["map"][2] + "^7 | VOTE: ^5"+ level.maptovote["vote"][2]);
+			//self thread printToAllMapVoted("^5" + self.name + " voted for ^5" + level.maptovote["map"][i] + "\n^7MAP: ^5" + level.maptovote["map"][0] + "^7 | VOTE: ^5"+ level.maptovote["vote"][0] + "\n^7MAP: ^5" + level.maptovote["map"][1] + "^7 | VOTE: ^5"+ level.maptovote["vote"][1] + "\n^7MAP: ^5" + level.maptovote["map"][2] + "^7 | VOTE: ^5"+ level.maptovote["vote"][2]);
 			level notify("updateVote");
-			wait 1;
-			self.mapvotemenu = false;
-			closemenumapmenu();
+			self notify("closemapmenu");
 		}
 	}
 }
-closemenumapmenu(){ //Destroy Menu After vote
+closemenumapmenu(){ //This function is do destory and remove all menu text, box and map images 
+	self.buttons DestroyElement();
+	self.welcome DestroyElement();
 	self.textMAP1 DestroyElement();self.textMAP2 DestroyElement();self.textMAP3 DestroyElement();
 	self.box1 DestroyElement();self.box2 DestroyElement();self.box3 DestroyElement();
 	self.map1 DestroyElement();self.map2 DestroyElement();self.map3 DestroyElement();
-	self.buttons DestroyElement(); self.welcome DestroyElement();
 	self setClientUiVisibilityFlag("hud_visible", true);
 	self freezeControlsallowlook(false);
-	self notify("closemapmenu");
 }
+
 /*
-	Developer: DoktorSAS
-	Discord: Discord.io/Sorex
-	Mod: All Maps - Map Vote
-	Website: sorexproject.webflow.io
-	Description: Mapvote menu on end Game
-	
-	Copyright: The script was created by DoktorSAS and no one else can 
-			   say they created it. The script is free and accessible to 
-			   everyone, it is not possible to sell the script.
+	Utilities functions, is possibile to find this functions on some forum.
+	Just google GSC menu tutorial/guide
 */
-OverflowFix(){
-    level.stringtable = [];
-    level.textelementtable = [];
-    textanchor = CreateServerFontString("default", 1);
-    textanchor SetElementText("Anchor");
-    textanchor.alpha = 0; 
-
-    if (GetDvar("g_gametype") == "tdm" || GetDvar("g_gametype") == "hctdm")
-        limit = 54;
-
-    if (GetDvar("g_gametype") == "dm" || GetDvar("g_gametype") == "hcdm")
-        limit = 54;
-
-    if (GetDvar("g_gametype") == "dom" || GetDvar("g_gametype") == "hcdom")
-        limit = 38;
-
-    if (GetDvar("g_gametype") == "dem" || GetDvar("g_gametype") == "hcdem")
-        limit = 41;
-
-    if (GetDvar("g_gametype") == "conf" || GetDvar("g_gametype") == "hcconf")
-        limit = 53;
-
-    if (GetDvar("g_gametype") == "koth" || GetDvar("g_gametype") == "hckoth")
-        limit = 41;
-
-    if (GetDvar("g_gametype") == "hq" || GetDvar("g_gametype") == "hchq")
-        limit = 43;
-
-    if (GetDvar("g_gametype") == "ctf" || GetDvar("g_gametype") == "hcctf")
-        limit = 32;
-
-    if (GetDvar("g_gametype") == "sd" || GetDvar("g_gametype") == "hcsd")
-        limit = 38;
-
-    if (GetDvar("g_gametype") == "oneflag" || GetDvar("g_gametype") == "hconeflag")
-        limit = 25;
-
-    if (GetDvar("g_gametype") == "gun")
-        limit = 48;
-
-    if (GetDvar("g_gametype") == "oic")
-        limit = 51;
-
-    if (GetDvar("g_gametype") == "shrp")
-        limit = 48;
-
-    if (GetDvar("g_gametype") == "sas")
-        limit = 50;
-
-    if (IsDefined(level.stringoptimization))
-        limit += 172;
-
-    while (!level.gameended)    {      
-        if (IsDefined(level.stringoptimization) && level.stringtable.size >= 100 && !IsDefined(textanchor2)){
-            textanchor2 = CreateServerFontString("default", 1);
-            textanchor2 SetElementText("Anchor2");                
-            textanchor2.alpha = 0; 
-        }
-        if (level.stringtable.size >= limit){
-            if (IsDefined(textanchor2)){
-                textanchor2 ClearAllTextAfterHudElem();
-                textanchor2 DestroyElement();
-            } 
-			foreach(player in level.players){
-				player.bad SetElementText("Thanks to ^5DoktorSAS");
-				if(player.mapvotemenu){
-					player.textMAP1 SetElementText( "^7MAP: ^5"+ level.maptovote["map"][0] + " \n^7Vote: [^2 " + level.maptovote["vote"][0] + " ^7]" );		
-					player.textMAP2 SetElementText( "^7MAP: ^5"+ level.maptovote["map"][1] + " \n^7Vote: [^2 " + level.maptovote["vote"][1] + " ^7]");		
-					player.textMAP3 SetElementText( "^7MAP: ^5"+ level.maptovote["map"][2] + " \n^7Vote: [^2 " + level.maptovote["vote"][2] + " ^7]" );
-				}
-
-			}
-            textanchor ClearAllTextAfterHudElem();
-            level.stringtable = [];           
-
-            foreach (textelement in level.textelementtable){
-                if (!IsDefined(self.label))
-                    textelement SetElementText(textelement.text);
-                else
-                    textelement SetElementValueText(textelement.text);
-            }
-        }            
-        wait 0.01;
-    }
-}
-SetElementText(text){
-    self SetText(text);
-    if (self.text != text)
-        self.text = text;
-    if (!IsInArray(level.stringtable, text))
-        level.stringtable[level.stringtable.size] = text;
-    if (!IsInArray(level.textelementtable, self))
-        level.textelementtable[level.textelementtable.size] = self;
-}
-SetElementValueText(text){
-    self.label = &"" + text;  
-    if (self.text != text)
-        self.text = text;
-    if (!IsInArray(level.stringtable, text))
-        level.stringtable[level.stringtable.size] = text;
-    if (!IsInArray(level.textelementtable, self))
-        level.textelementtable[level.textelementtable.size] = self;
-}
-DestroyElement(){
-    if (IsInArray(level.textelementtable, self))
-        ArrayRemoveValue(level.textelementtable, self);
-    if (IsDefined(self.elemtype)){
-        self.frame Destroy();
-        self.bar Destroy();
-        self.barframe Destroy();
-    }       
-    self Destroy();
-}
-drawtext( text, font, fontscale, x, y, color, alpha, glowcolor, glowalpha, sort ){
-	hud = self createfontstring( font, fontscale );
-	hud SetElementText( text );
-	hud.x = x;
-	hud.y = y;
-	hud.color = color;
-	hud.alpha = alpha;
-	hud.glowcolor = glowcolor;
-	hud.glowalpha = glowalpha;
-	hud.sort = sort;
-	hud.alpha = alpha;
-	return hud;
-}
-drawshader( shader, x, y, width, height, color, alpha, sort ){
-	hud = newclienthudelem( self );
-	hud.elemtype = "icon";
-	hud.color = color;
-	hud.alpha = alpha;
-	hud.sort = sort;
-	hud.children = [];
-	hud setparent( level.uiparent );
-	hud setshader( shader, width, height );
-	hud.x = x;
-	hud.y = y;
-	return hud;
-}
-createString(input, font, fontScale, align, relative, x, y, color, alpha, glowColor, glowAlpha, sort, isLevel, isValue){
- 	if(!isDefined(isLevel))
-  		hud = self createFontString(font, fontScale);
- 	else
-  		hud = level createServerFontString(font, fontScale);
-    if(!isDefined(isValue))
-  		hud SetElementText(input);
- 	else
-  		hud SetElementValueText(input);
-    hud setPoint(align, relative, x, y);
- 	hud.color = color;
- 	hud.alpha = alpha;
- 	hud.glowColor = glowColor;
- 	hud.glowAlpha = glowAlpha;
- 	hud.sort = sort;
- 	hud.alpha = alpha;
-	hud.archived = false;
-	hud.hideWhenInMenu = true;
-	return hud;
-}
-affectElement(type, time, value){
-    if(type == "x" || type == "y")
-        self moveOverTime(time);
-    else
-        self fadeOverTime(time);
-    if(type == "x")
-        self.x = value;
-    if(type == "y")
-        self.y = value;
-    if(type == "alpha")
-        self.alpha = value;
-    if(type == "color")
-        self.color = value;
-}
-createRectangle(align, relative, x, y, width, height, color, shader, sort, alpha){ //Not mine
+createRectangle(align, relative, x, y, width, height, color, shader, sort, alpha){ 
     boxElem = newClientHudElem(self);
     boxElem.elemType = "bar";
     boxElem.width = width;
