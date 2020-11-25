@@ -1,5 +1,5 @@
 # Black ops II Mapvote Menu
-**Mapvote v1.0.4**
+**Mapvote v1.1.0**
 Developed by **DoktorSAS**
 
 Hi I am **DoktorSAS** and I wanted to release the *working mapvote* on the endgame, in order to release it I need to do some tests and that's why I ask you to enter my server. 
