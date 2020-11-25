@@ -3,14 +3,12 @@
 
 Developed by **DoktorSAS**
 
-Hi I am **DoktorSAS** and I wanted to release the *working mapvote* on the endgame, in order to release it I need to do some tests and that's why I ask you to enter my server. 
 **Tutorial**
-1. Edit the file **_killcam_not_compiled.gsc** and change only the Welcome Message
-2. Convert the file into a new **_killcam.gsc**, is important call it **_killcam.gsc**
-3. Put the file into **maps/mp/gametpyes**
-4. Change the **sv_maprotation** to only one map *(exemple sv_maprotation "map mp_carrier")*
-5. Add in your .cfg file **set server_name "Exemple Server Name"** to set the server name to show on the mapvote menu
-6. Add in your .cfg file **set custom_gametype "exemple.cfg"** to set the the default gametype for the next map (If you do not change the gamemode you may not add it). If you want change the gamemode just overwrite the **custom_gametype** dvar (use setDvar("custom_gametype", "exemple.cfg")) in your mods and when map rotate players will play the new gamemode
+1. Copy **_killcam.gsc** ( don't change the name of the file)
+2. Put the file into **maps/mp/gametpyes**
+3. Change the **sv_maprotation** to only one map *(exemple sv_maprotation "map mp_carrier")*
+4. Add in your .cfg file **set server_name "Exemple Server Name"** to set the server name to show on the mapvote menu
+5. Add in your .cfg file **set custom_gametype "exemple.cfg"** to set the the default gametype for the next map (If you do not change the gamemode you may not add it). If you want change the gamemode just overwrite the **custom_gametype** dvar (use setDvar("custom_gametype", "exemple.cfg")) in your mods and when map rotate players will play the new gamemode
 
 **Download v1.0.4**: https://github.com/DoktorSAS/mapvote/releases/tag/1.0.4
 **Video**: https://youtu.be/x064TDmt5Wk
