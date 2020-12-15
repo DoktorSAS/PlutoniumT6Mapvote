@@ -1,5 +1,5 @@
 # Black ops II Mapvote Menu
-**Mapvote v1.1.0**
+**Mapvote v1.2.0**
 Developed by **DoktorSAS**
 
 **How to add the mapvote to the server?**
@@ -10,7 +10,7 @@ Developed by **DoktorSAS**
 5. Add in your .cfg file **set custom_gametype "exemple.cfg"** to set the the default gametype for the next map (If you do not change the gamemode you may not add it). If you want change the gamemode just overwrite the **custom_gametype** dvar (use setDvar("custom_gametype", "exemple.cfg")) in your mods and when map rotate players will play the new gamemode
 6.  Add in your .cfg file **set time_to_vote {number} ** to set the the time to vote like **set time_to_vote 25** 
 
-**Download v1.1.0**: https://github.com/DoktorSAS/mapvote/releases/tag/1.1.0
+**Download v1.2.0**: https://github.com/DoktorSAS/mapvote/releases/tag/1.2.0
 **Video Tutorial**: https://youtu.be/ji3BBYS1ISE
 
 ![8c10eea4-449f-4147-9e07-7ffb925649c2-image.png](/assets/uploads/files/1608033246340-8c10eea4-449f-4147-9e07-7ffb925649c2-image.png) 
@@ -27,7 +27,7 @@ Developed by **DoktorSAS**
 *Design 1:* 
 ![Version 1](https://forum.plutonium.pw/assets/uploads/files/1597148314270-252d462c-9d88-4e96-b05d-a07690be4503-image.png) 
 *Design 2:*
-![7421ac67-8df1-4a00-ade7-edbbcc3c6165-image.png](https://forum.plutonium.pw//assets/uploads/files/1597148693799-7421ac67-8df1-4a00-ade7-edbbcc3c6165-image.png)
+![7421ac67-8df1-4a00-ade7-edbbcc3c6165-image.png](https://forum.plutonium.pw/assets/uploads/files/1608033246340-8c10eea4-449f-4147-9e07-7ffb925649c2-image.png)
 
 ###### V1.0.3
 **Bug Fixed in v1.0.3**:
