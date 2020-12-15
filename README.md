@@ -1,5 +1,6 @@
 # Black ops II Mapvote Menu
 **Mapvote v1.2.0**
+
 Developed by **DoktorSAS**
 
 **How to add the mapvote to the server?**
@@ -13,7 +14,7 @@ Developed by **DoktorSAS**
 **Download v1.2.0**: https://github.com/DoktorSAS/mapvote/releases/tag/1.2.0
 **Video Tutorial**: https://youtu.be/ji3BBYS1ISE
 
-![8c10eea4-449f-4147-9e07-7ffb925649c2-image.png](/assets/uploads/files/1608033246340-8c10eea4-449f-4147-9e07-7ffb925649c2-image.png) 
+![](https://media.discordapp.net/attachments/722423683666149406/788375898151714816/1608033246340-8c10eea4-449f-4147-9e07-7ffb925649c2-image.png?width=1202&height=676) 
 ###### V1.0.1
 **Bug Fixed in v1.0.1**:
 1. Fixed mapvote menu when game end with killcam and there no team winner
