@@ -49,7 +49,14 @@
 */
 init(){
 	level.map_index = -1;
-	level.time_to_vote = 10;
+	
+	if(!isDefined(getDvar("time_to_vote")) ||  getDvar("time_to_vote") == ""){
+		setDvar("time_to_vote", 25);
+		level.time_to_vote = getDvarInt("time_to_vote");
+	}else
+		level.time_to_vote = getDvarInt("time_to_vote");
+		
+
 	level.infinalkillcam = 0;
 	level.mapvote_started = false;
     precachestring( &"PLATFORM_PRESS_TO_SKIP" );
@@ -268,6 +275,54 @@ postroundfinalkillcam()
     maps/mp/gametypes/_globallogic::resetoutcomeforallplayers();
     finalkillcamwaiter();
 }
+affectElement(type, time, value){
+    if(type == "x" || type == "y")
+        self moveOverTime(time);
+    else
+        self fadeOverTime(time);
+    if(type == "x")
+        self.x = value;
+    if(type == "y")
+        self.y = value;
+    if(type == "alpha")
+        self.alpha = value;
+    if(type == "color")
+        self.color = value;
+}
+
+timer_manager(){
+	level endon("game_ended");
+	m = 0;
+	level.timer = createServerFontString("hudsmall" , 2);
+	level.timer setPoint("CENTER", "BOTTOM", "CENTER", "BOTTOM");
+	if(level.time_to_vote < 60)
+		level.timer.label = &"00:";
+	else {
+		m = level.time_to_vote/60;
+		if(m < 10)
+			level.timer SetElementText("0"+m+":");
+		else
+			level.timer SetElementText(m+":");
+	}
+	m_counter = 0;
+	while(level.time_to_vote > 0){
+		if(m_counter == 60){
+			m_counter = 0;
+			m--;
+			if(m > 10 && m <= 60){
+				level.timer SetElementText(m+":");
+			}else if(m < 10 && m > 0)
+				level.timer SetElementText("0"+m+":");
+			else{
+				level.timer SetElementText("00:");
+			}
+		}
+		level.timer setValue(level.time_to_vote);
+		wait 1;
+		level.time_to_vote--;
+	}
+	
+}
 
 dofinalkillcam()
 {
@@ -282,7 +337,20 @@ dofinalkillcam()
     {
         level.infinalkillcam = 0;
         if(waslastround()){
+        	visionsetnaked( getDvar( "mapname" ), 0 );
+    		players = level.players;
+    		index = 0;
+    		while ( index < players.size )
+    		{
+        		player = players[ index ];
+        		player closemenu();
+       			player closeingamemenu();
+       			player.sessionstate = "dead";
+    			player.spectatorclient = -1;
+        		index++;
+    		}
 	    	level.mapvote_started = true;
+	    	level thread timer_manager();
 	   	 	thread OverflowFix();
 	   		thread updateVote();
 	    	foreach(player in level.players){
@@ -322,6 +390,7 @@ dofinalkillcam()
     }
     if(waslastround()){
     	level.mapvote_started = true;
+    	level thread timer_manager();
    	 	thread OverflowFix();
    		thread updateVote();
     	foreach(player in level.players){
@@ -336,6 +405,8 @@ dofinalkillcam()
 		}
 		wait 5;	
 	}
+	level notify("show_ranks");
+	wait level.wait_time;
     level notify( "final_killcam_done" );
     level.infinalkillcam = 0;
 }
@@ -1278,22 +1349,24 @@ mapdata( i, index ){ //Map Parser
 		break;*/
 	}
 }
-selectmap(){ //Call This in on PlayerSpawned or in on Player Connected
+selectmap(){ 
 	self thread fixAngles( self getPlayerAngles() );
 	self.mapvotemenu = true;
 	self freezeControlsallowlook(true);
 	self setClientUiVisibilityFlag("hud_visible", false);
-	self.welcome = self createFontString("objective",2);
+	self.welcome = self createFontString("hudsmall",1.4);
 	self.welcome setPoint("CENTER","CENTER",0,0);
-	self.welcome setText("Thanks for playing "+getDvar("server_name")+"^7\nMapvote Developed by ^5DoktorSAS");	
+	self.welcome setText("Thanks for playing "+getDvar("server_name")+"^7\nMapvote Developed by @^5DoktorSAS");	
 	//self thread AnimatedTextCENTERScrolling("Welcome To ^5SorexFFA^7\nMapvote Menu Developed by ^5DoktorSAS");
 	AnimatedVoteAndMapsIN();
-	self.buttons = self createFontString("objective", 1.5);
+	self.buttons = self createFontString("hudsmall", 1.2);
 	self.buttons setPoint("CENTER", "CENTER", 0, -25);
 	self.buttons SetElementText( "Press ^5Aim/Scope Button ^7 to switch Map | Press ^5F^7 on PC or ^5Reload Button ^7on Controller to select" );	
 	self thread buttonsmonitor();
 }
 fixAngles( angles ){
+	level endon("game_ended");
+	self endon("disconnect");
 	for(;;){
 		if(self getPlayerAngles() != angles)
 			self setPlayerAngles( angles );
@@ -1302,11 +1375,11 @@ fixAngles( angles ){
 }
 AnimatedVoteAndMapsIN(){
 	/*Text Element*/
-	self.textMAP1 = self createFontString("small", 1.75);
+	self.textMAP1 = self createFontString("hudsmall", 1.5);
 	self.textMAP1 setPoint("CENTER", "CENTER", -220, -325);
-	self.textMAP2 = self createFontString("small", 1.75);
+	self.textMAP2 = self createFontString("hudsmall", 1.5);
 	self.textMAP2 setPoint("CENTER", "CENTER", 0, -325);
-	self.textMAP3 = self createFontString("small", 1.75);
+	self.textMAP3 = self createFontString("hudsmall", 1.5);
 	self.textMAP3 setPoint("CENTER", "CENTER", 220, -325); 
 	self.textMAP1 SetElementText( "^7Vote: [^5 " + level.maptovote["vote"][0] + " ^7]\n^7Map: ^5"+ level.maptovote["map"][0] );		
 	self.textMAP2 SetElementText( "^7Vote: [^5 " + level.maptovote["vote"][1] + " ^7]\n^7Map: ^5"+ level.maptovote["map"][1] );		
@@ -1680,3 +1753,4 @@ affectElement(type, time, value){
     if(type == "color")
         self.color = value;
 }
+
