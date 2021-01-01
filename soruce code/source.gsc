@@ -1753,4 +1753,3 @@ affectElement(type, time, value){
     if(type == "color")
         self.color = value;
 }
-
