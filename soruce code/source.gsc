@@ -1,40 +1,12 @@
-#include common_scripts/utility;
-#include maps/mp/gametypes/_hud_util;
-
-#include maps/mp/_utility;
-#include maps/mp/_challenges;
-#include maps/mp/_medals;
-#include maps/mp/_scoreevents;
-#include maps/mp/_tacticalinsertion;
-#include maps/mp/_demo;
-#include maps/mp/_popups;
 
 #include maps/mp/gametypes/_globallogic_spawn;
-#include maps/mp/gametypes/_globallogic_audio;
-#include maps/mp/gametypes/_globallogic_score;
-#include maps/mp/gametypes/_globallogic_utils;
-#include maps/mp/gametypes/_globallogic_audio;
-#include maps/mp/gametypes/_globallogic_score;
-#include maps/mp/gametypes/_globallogic_player;
-
 #include maps/mp/gametypes/_spectating;
-#include maps/mp/gametypes/_hud;
-#include maps/mp/gametypes/_rank;
-#include maps/mp/gametypes/_spawnlogic;
+#include maps/mp/_tacticalinsertion;
+#include maps/mp/_challenges;
 #include maps/mp/gametypes/_globallogic;
-#include maps/mp/gametypes/_globallogic_ui;
-#include maps/mp/gametypes/_globallogic_utils;
-#include maps/mp/gametypes/_spawning;
-#include maps/mp/gametypes/_spawnlogic;
-#include maps/mp/gametypes/_hostmigration;
-#include maps/mp/gametypes/_battlechatter_mp;
-#include maps/mp/gametypes/_spawnlogic;
-#include maps/mp/gametypes/_spawning;
-#include maps/mp/gametypes/_rank;
-#include maps/mp/gametypes/_globallogic_defaults;
-
-#include maps/mp/killstreaks/_killstreaks;
-
+#include maps/mp/gametypes/_hud_util;
+#include maps/mp/_utility;
+#include common_scripts/utility;
 
 /*
 	Developer: DoktorSAS
@@ -47,133 +19,25 @@
 			   say they created it. The script is free and accessible to 
 			   everyone, it is not possible to sell the script.
 */
+
 init(){
-	level.map_index = -1;
+    precacheStatusIcon("compassping_friendlyfiring_mp");
+    precacheStatusIcon("compassping_enemy");
+
+   	precachestring( &"PLATFORM_PRESS_TO_SKIP" );
+	precachestring( &"PLATFORM_PRESS_TO_RESPAWN" );
 	
-	if(!isDefined(getDvar("time_to_vote")) ||  getDvar("time_to_vote") == ""){
-		setDvar("time_to_vote", 25);
-		level.time_to_vote = getDvarInt("time_to_vote");
-	}else
-		level.time_to_vote = getDvarInt("time_to_vote");
-		
-
-	level.infinalkillcam = 0;
-	level.mapvote_started = false;
-    precachestring( &"PLATFORM_PRESS_TO_SKIP" );
-    precachestring( &"PLATFORM_PRESS_TO_RESPAWN" );
-    precacheshader( "white" );
-    level.killcam = getgametypesetting( "allowKillcam" );
-    level.finalkillcam = getgametypesetting( "allowFinalKillcam" );
-    mapvote();
-    if(!isDefined(getDvar("server_name")) || getDvar("server_name") == "")
-    	setDvar("server_name", "@DoktorSAS is the Mapvote Creator");
-    if(!isDefined(getDvar("server_name")) || getDvar("custom_gametype") == "")
-    	setDvar("custom_gametype", "");
-    else
-    	setDvar("custom_gametype", "exec " + getDvar("custom_gametype"));
-    /*	
-    	level thread ontimelimit();
-    	Is not needed anymore
-    */
-    initfinalkillcam();   
-}
-
-/*ontimelimit()
-{
-	thread OverflowFix();
-    thread updateVote();
-    foreach(player in level.players){
-    	player thread selectmap();
-   	}
-    wait 5; //This is autoclose menu wiat, change it to have more or less time to vote
-    gameended();
-    text = "The next map is ^5" + level.maptovote["map"][level.map_index];
-	foreach(player in level.players){
-		player thread closemenumapmenu();
-		player thread notification( text );
-	}
-    if ( level.teambased )
-    {
-        maps/mp/gametypes/sd::sd_endgame( game[ "defenders" ], game[ "strings" ][ "time_limit_reached" ] );
-    }
-    else
-    {
-        maps/mp/gametypes/sd::sd_endgame( undefined, game[ "strings" ][ "time_limit_reached" ] );
-    }
-}
-
-
-ontimelimit(){
-	level waittill( "game_ended" );
-	wait 1;
-	if(!getTeamWinner() && !getKills() && level.teambased && waslastround()){
-    	thread OverflowFix();
-    	thread updateVote();
-    	foreach(player in level.players){
-    		player thread selectmap();
-   		}
-    	wait 5; //This is autoclose menu wait, change it to have more or less time to vote
-    	gameended();
-    	text = "The next map is ^5" + level.maptovote["map"][level.map_index];
-		foreach(player in level.players){
-			player thread closemenumapmenu();
-			player thread notification( text );
-		}
-	}
+	precacheshader( "white" );
 	
-	if(!getWinner() && !getKills() && !level.teambased){
-    	thread OverflowFix();
-    	thread updateVote();
-    	foreach(player in level.players){
-    		player thread selectmap();
-   		}
-    	wait 5; //This is autoclose menu wiat, change it to have more or less time to vote
-    	gameended();
-    	text = "The next map is ^5" + level.maptovote["map"][level.map_index];
-		foreach(player in level.players){
-			player thread closemenumapmenu();
-			player thread notification( text );
-		}
-    	
-	}
-}*/
-
-/*
-	Some utilities
-*/
-ThereKillcam(){
-	thereKillcam = false;
-	foreach(player in level.players){
-    	if(player.pers["kills"] > 0)
-    		thereKillcam = true;
-   	}
-   	return thereKillcam;
-}
-ThereaWinner(){
-	thereWinner = false;
-	foreach(player in level.players){
-    	if(player.pers["pointstowin"] == level.scorelimit)
-    		thereWinner = true;
-   	}  	
-   	return thereWinner;
-}
-ThereTeamWinner(){
-	return [[level._getteamscore]]( "axis" ) == level.scorelimit || [[level._getteamscore]]( "allies" ) == level.scorelimit;
+	precacheshader( "ui_scrollbar_arrow_left" );
+	precacheshader( "ui_scrollbar_arrow_right" );
+	
+	level.killcam = getgametypesetting( "allowKillcam" );
+	level.finalkillcam = getgametypesetting( "allowFinalKillcam" );
+	initfinalkillcam();
+	mapvoteinit();
 }
 
-//Print To All
-printToAll(str){
-	foreach(player in level.players){
-		 if(isDefined(player.pers["isBot"]) && player.pers["isBot"]){	
-  		}else player iprintln(str);
-	}
-}
-printboldToAll(str){
-	foreach(player in level.players){
-		if(isDefined(player.pers["isBot"]) && player.pers["isBot"]){	
-  		}else player iprintlnbold(str);
-	}
-}
 initfinalkillcam()
 {
     level.finalkillcamsettings = [];
@@ -293,16 +157,24 @@ affectElement(type, time, value){
 timer_manager(){
 	level endon("game_ended");
 	m = 0;
+	if(level.show_social == 1){
+		credits = createServerFontString("hudsmall" , 1.2);
+		credits setPoint("BOTTOM_LEFT", "BOTTOM_LEFT");
+		credits SetElementText(level.server_sentence + "\nDeveloped by @^5DoktorSAS ^7\n" + level.social_name + ": " +  level.social_link);
+	}
 	level.timer = createServerFontString("hudsmall" , 2);
 	level.timer setPoint("CENTER", "BOTTOM", "CENTER", "BOTTOM");
 	if(level.time_to_vote < 60)
 		level.timer.label = &"00:";
 	else {
 		m = level.time_to_vote/60;
-		if(m < 10)
-			level.timer SetElementText("0"+m+":");
-		else
-			level.timer SetElementText(m+":");
+		if(m < 10){
+			while(level.isInOverflow) wait 0.01;
+			level.timer.label = &"0"+m+":";
+		}else{
+			while(level.isInOverflow) wait 0.01;
+			level.timer SetValue(m+":");
+		}
 	}
 	m_counter = 0;
 	while(level.time_to_vote > 0){
@@ -322,8 +194,86 @@ timer_manager(){
 		level.time_to_vote--;
 	}
 	
+	level notify("destroy_hud");
+	
+	level.timer DestroyElement();
+	if(level.show_social == 1)
+		credits DestroyElement();
+	
 }
-
+mapvote_texts(){
+	level.buttons = level createServerFontString("hudsmall", 2);
+	level.buttons SetElementText( "^7 ^3[{+speed_throw}]                ^7Press ^3[{+gostand}] ^7to select                ^3[{+attack}] ^7" );	
+	level.textMAP1 = createString( "^7[ ^" + level.votes_color   + level.maptovote["vote"][0] + " ^7] ^7"+ level.maptovote["mapname"][0], "hudsmall", 1.2, "CENTER", "CENTER", -220, -325, (1,1,1), 1, (0,0,0), 0.5, 5, true);		
+	level.textMAP2 = createString( "^7[ ^" + level.votes_color   + level.maptovote["vote"][1] + " ^7] ^7"+ level.maptovote["mapname"][1], "hudsmall", 1.2, "CENTER", "CENTER", 0, -325, (1,1,1), 1, (0,0,0), 0.5, 5, true);		
+	level.textMAP3 = createString( "^7[ ^" + level.votes_color   + level.maptovote["vote"][2] + " ^7] ^7"+ level.maptovote["mapname"][2], "hudsmall", 1.2, "CENTER", "CENTER", 220, -325, (1,1,1), 1, (0,0,0), 0.5, 5, true);
+	level.map1 = level drawshader( level.maptovote["image"][0], -220, -310, 200, 127, ( 1, 1, 1 ), 100, 2 , "CENTER", "CENTER", true);
+	level.map1 fadeovertime( 0.3 );
+	level.map1.alpha = 0.65;
+	level.map2 = level drawshader( level.maptovote["image"][1], 0, -310, 200, 127, ( 1, 1, 1 ), 100, 2 , "CENTER", "CENTER", true);
+	level.map2 fadeovertime( 0.3 );
+	level.map2.alpha = 0.65;
+	level.map3 = level drawshader( level.maptovote["image"][2], 220, -310, 200, 127, ( 1, 1, 1 ), 100, 2 , "RIGHT", "CENTER", true);
+	level.map3 fadeovertime( 0.3 );
+	level.map3.alpha = 0.65;
+	if(level.more_maps == 1){
+		level.arrow_right = level drawshader( "ui_scrollbar_arrow_right", 200, 340, 25, 25, level.arrow_color, 100, 2 , "CENTER", "bottom", true);
+		level.arrow_left = level drawshader( "ui_scrollbar_arrow_left", -200, 340, 25, 25, level.arrow_color, 100, 2 , "CENTER", "bottom", true);
+		level.buttons setPoint("center", "bottom", 0, 150);
+		level.textMAP4 = createString( "^7[ ^" + level.votes_color   + level.maptovote["vote"][3] + " ^7] ^7"+ level.maptovote["mapname"][3], "hudsmall", 1.2, "CENTER", "CENTER", -600, 54, (1,1,1), 1, (0,0,0), 0.5, 5, true);		
+		level.textMAP5 = createString( "^7[ ^" + level.votes_color   + level.maptovote["vote"][4] + " ^7] ^7"+ level.maptovote["mapname"][4], "hudsmall", 1.2, "CENTER", "CENTER", 600, 54, (1,1,1), 1, (0,0,0), 0.5, 5, true);	
+		level.map4 = drawshader( level.maptovote["image"][3], -600, 141, 200, 127, ( 1, 1, 1 ), 100, 2 , "CENTER", "CENTER", true);
+		level.map4 fadeovertime( 0.3 );
+		level.map4.alpha = 0.65;
+		level.map5 = drawshader( level.maptovote["image"][4], 600,  141, 200, 127, ( 1, 1, 1 ), 100, 2 , "CENTER", "CENTER", true);
+		level.map5 fadeovertime( 0.3 );
+		level.map5.alpha = 0.65;
+		level.map1 affectElement("y", 1, -11);
+		level.map2 affectElement("y", 1, -11);
+		level.map3 affectElement("y", 1, -11);
+		level.map4 affectElement("x", 1, -120);
+		level.map5 affectElement("x", 1, 120);
+		level.textMAP1 affectElement("y", 1, -97);
+		level.textMAP2 affectElement("y", 1, -97);
+		level.textMAP3 affectElement("y", 1, -97);
+		level.textMAP4 affectElement("x", 1, -120);
+		level.textMAP5 affectElement("x", 1, 120);
+		level waittill("destroy_hud");
+		level.buttons DestroyElement();
+		level.textMAP1 DestroyElement();
+		level.textMAP2 DestroyElement();
+		level.textMAP3 DestroyElement();
+		level.textMAP4 DestroyElement();
+		level.textMAP5 DestroyElement();
+		level.map1 DestroyElement();
+		level.map2 DestroyElement();
+		level.map3 DestroyElement();
+		level.map4 DestroyElement();
+		level.map5 DestroyElement();
+		level.arrow_right DestroyElement();
+		level.arrow_left DestroyElement();
+	}else{
+		level.arrow_right   = self drawshader( "ui_scrollbar_arrow_right", 200, 290, 25, 25, level.arrow_color, 100, 2 , "CENTER", "CENTER", true);
+		level.arrow_left = self drawshader( "ui_scrollbar_arrow_left", -200, 290, 25, 25, level.arrow_color, 100, 2 , "CENTER", "CENTER", true);
+		level.buttons setPoint("center", "	", 0, 100);
+		level.textMAP1 affectElement("y", 1, 24);
+		level.textMAP2 affectElement("y", 1, 24);
+		level.textMAP3 affectElement("y", 1, 24);
+		level.map1 affectElement("y", 1, 89);
+		level.map2 affectElement("y", 1, 89);
+		level.map3 affectElement("y", 1, 89);
+		level waittill("destroy_hud");
+		level.buttons DestroyElement();
+		level.textMAP1 DestroyElement();
+		level.textMAP2 DestroyElement();
+		level.textMAP3 DestroyElement();
+		level.map1 DestroyElement();
+		level.map2 DestroyElement();
+		level.map3 DestroyElement();
+		level.arrow_right DestroyElement();
+		level.arrow_left DestroyElement();
+	}
+}
 dofinalkillcam()
 {
     level waittill( "play_final_killcam" );
@@ -336,8 +286,7 @@ dofinalkillcam()
     if ( !isDefined( level.finalkillcamsettings[ winner ].targetentityindex ) )
     {
         level.infinalkillcam = 0;
-        if(waslastround()){
-        	visionsetnaked( getDvar( "mapname" ), 0 );
+        visionsetnaked( getDvar( "mapname" ), 0 );
     		players = level.players;
     		index = 0;
     		while ( index < players.size )
@@ -345,25 +294,32 @@ dofinalkillcam()
         		player = players[ index ];
         		player closemenu();
        			player closeingamemenu();
-       			player.sessionstate = "dead";
-    			player.spectatorclient = -1;
         		index++;
     		}
-	    	level.mapvote_started = true;
-	    	level thread timer_manager();
-	   	 	thread OverflowFix();
-	   		thread updateVote();
-	    	foreach(player in level.players){
-	    		player thread selectmap();
-	   		}
-	    	wait level.time_to_vote; //This is autoclose menu wait, change it to have more or less time to vote
-	    	thread gameended();
-	    	text = "The next map is ^5" + level.maptovote["map"][level.map_index];
-			foreach(player in level.players){
-				player thread closemenumapmenu();
-				player thread notification( text );
+        if(waslastround()){
+    		if(level.isMapvoteEnable == 1){
+    			
+		    	level.mapvote_started = true;
+		    	level thread timer_manager();
+		   	 	level thread OverflowFix_mapvote();
+	   	 		level thread mapvote_texts();
+	   			level thread updateVote();
+		   		thread updateVote();
+		    	foreach(player in level.players){
+		    		player thread selectmap();
+		   		}
+		    	wait level.time_to_vote; //This is autoclose menu wait, change it to have more or less time to vote
+		    	thread gameended();
+		    	wait 0.05;
+		    	text = "The next map is ^5" + level.maptovote["mapname"][level.map_index];
+				foreach(player in level.players){
+					player thread closemenumapmenu();
+					player thread notification( text );
+					player setblur(0, 4.0);
+				}
+				wait 5;	
+				level.mapvote_started = false;
 			}
-			wait 5;	
 		}
         level notify( "final_killcam_done" );
         return;
@@ -389,28 +345,32 @@ dofinalkillcam()
         wait 0.05;
     }
     if(waslastround()){
-    	level.mapvote_started = true;
-    	level thread timer_manager();
-   	 	thread OverflowFix();
-   		thread updateVote();
-    	foreach(player in level.players){
-    		player thread selectmap();
-   		}
-    	wait level.time_to_vote; //This is autoclose menu wait, change it to have more or less time to vote
-    	thread gameended();
-    	text = "The next map is ^5" + level.maptovote["map"][level.map_index];
-		foreach(player in level.players){
-			player thread closemenumapmenu();
-			player thread notification( text );
-		}
-		wait 5;	
+    	if (level.isMapvoteEnable == 1){
+    		level.mapvote_started = true;
+	    	level thread timer_manager();
+	   	 	level thread OverflowFix_mapvote();
+	   	 	level thread mapvote_texts();
+	   		level thread updateVote();
+	    	foreach(player in level.players){
+	    		player thread selectmap();
+	   		}
+	    	wait level.time_to_vote; //This is autoclose menu wait, change it to have more or less time to vote
+	    	thread gameended();
+	    	text = "The next map is ^5" + level.maptovote["mapname"][level.map_index];
+			foreach(player in level.players){
+				player thread closemenumapmenu();
+				player thread notification( text );
+			}
+			wait 5;
+			level.mapvote_started = false;
+    	}
 	}
 	level notify("show_ranks");
-	wait level.wait_time;
+	if (level.isMapvoteEnable == 1)
+		wait level.wait_time;
     level notify( "final_killcam_done" );
     level.infinalkillcam = 0;
 }
-
 startlastkillcam()
 {
 }
@@ -1051,22 +1011,61 @@ initkcelements()
 			   say they created it. The script is free and accessible to 
 			   everyone, it is not possible to sell the script.
 */
+ThreadVoteFix(){
+	level endon("game_ended");
+	while(level.isInOverflow) wait 0.01;
+	level.textMAP1 SetElementText( "^7[ ^" + level.votes_color   + level.maptovote["vote"][0] + " ^7] ^7"+ level.maptovote["mapname"][0] );	
+	while(level.isInOverflow) wait 0.01;
+	level.textMAP2 SetElementText( "^7[ ^" + level.votes_color   + level.maptovote["vote"][1] + " ^7] ^7"+ level.maptovote["mapname"][1] );
+	while(level.isInOverflow) wait 0.01;
+	level.textMAP3 SetElementText( "^7[ ^" + level.votes_color   + level.maptovote["vote"][2] + " ^7] ^7"+ level.maptovote["mapname"][2] );
+	while(level.isInOverflow) wait 0.01;
+	level.textMAP4 SetElementText( "^7[ ^" + level.votes_color   + level.maptovote["vote"][3] + " ^7] ^7"+ level.maptovote["mapname"][3] );	
+	while(level.isInOverflow) wait 0.01;
+	level.textMAP5 SetElementText( "^7[ ^" + level.votes_color   + level.maptovote["vote"][4] + " ^7] ^7"+ level.maptovote["mapname"][4] );
+}
 updateVote(){ 
+	level endon("game_ended");
 	for(;;){
 		level waittill("updateVote");
-		wait 0.01;
-		foreach(player in level.players){
-			if(player.mapvotemenu){
-				if(player.mapvoted_index == 0)
-					player.textMAP1 SetElementText( "^7Vote: [^6 " + level.maptovote["vote"][0] + " ^7]\n^7Map: ^5"+ level.maptovote["map"][0] );		
-				if(player.mapvoted_index == 1)
-					player.textMAP2 SetElementText( "^7Vote: [^6 " + level.maptovote["vote"][1] + " ^7]\n^7Map: ^5"+ level.maptovote["map"][1] );	
-				if(player.mapvoted_index == 2)
-					player.textMAP3 SetElementText(" ^7Vote: [^6 " + level.maptovote["vote"][2] + " ^7]\n^7Map: ^5"+ level.maptovote["map"][2] );
-			}
-		}
+		level thread ThreadVoteFix();
 	}
 }
+playerSetText(player){
+	player.textMAP1 SetElementText( "^7[ ^" + level.votes_color   + level.maptovote["vote"][0] + " ^7] ^7"+ level.maptovote["mapname"][0] );	
+	player.textMAP2 SetElementText( "^7[ ^" + level.votes_color   + level.maptovote["vote"][1] + " ^7] ^7"+ level.maptovote["mapname"][1] );
+	player.textMAP3 SetElementText( "^7[ ^" + level.votes_color   + level.maptovote["vote"][2] + " ^7] ^7"+ level.maptovote["mapname"][2] );
+	player.textMAP4 SetElementText( "^7[ ^" + level.votes_color   + level.maptovote["vote"][3] + " ^7] ^7"+ level.maptovote["mapname"][3] );	
+	player.textMAP5 SetElementText( "^7[ ^" + level.votes_color   + level.maptovote["vote"][4] + " ^7] ^7"+ level.maptovote["mapname"][4] );
+}
+
+most_voted_map( vector ){
+	logprint("mapvote;mapindex;" + 0 + ";votes;" +  vector[0] + "\n");
+	result = 0;
+	size = 0;
+	same_votes = 0;
+	map_with_same_votes = [];
+	for(i = result+1; i < vector.size; i++){
+		logprint("mapvote;mapindex;" + i + ";votes;" +  vector[i] + "\n");
+		if(vector[result] < vector[i])
+			result = i;
+		else if(vector[result] == vector[i]){
+			same_votes = i;
+			map_with_same_votes[size] = i;
+			size++;
+		}
+		logprint("mapvote;result;" + result + ";votes;" +  vector[result] + "\n");
+	}
+	if(vector[result] < vector[same_votes] && size >= 2){
+		result = randomintrange(0, size-1);
+		logprint("mapvote;finalresultvector;" + result + ";votes;" +  vector[result] + "\n");
+		return result;
+	}else{
+		logprint("mapvote;finalresult;" + result + ";votes;" +  vector[result] + "\n");
+		return result;
+	}
+}
+
 gameended(){
   	/*
   		When the game end the the mapvote menu will be closed automaticaly and the map 
@@ -1078,20 +1077,9 @@ gameended(){
     		player.mapvotemenu = false;
     	}
     }
-	if(level.maptovote["vote"][0] == level.maptovote["vote"][1] && level.maptovote["vote"][2] <= level.maptovote["vote"][0]){
-		setmap(randomintrange(0,1));
-	}else if(level.maptovote["vote"][2] <= level.maptovote["vote"][0] && level.maptovote["vote"][0] == level.maptovote["vote"][2]){
-		setmap(randomintrange(1,2));
-	}else if(level.maptovote["vote"][0] == level.maptovote["vote"][1] && level.maptovote["vote"][0] == level.maptovote["vote"][2]){
-		setmap(randomintrange(0,2));
-	}else if(level.maptovote["vote"][0] > level.maptovote["vote"][1] && level.maptovote["vote"][0] > level.maptovote["vote"][2]){
-		setmap(0);
-	}else if(level.maptovote["vote"][1] >= level.maptovote["vote"][0] && level.maptovote["vote"][1] >= level.maptovote["vote"][2]){
-		setmap(1);
-	}else{
-		setmap(2);
-	}	
-	
+    r = most_voted_map( level.maptovote["vote"] );
+    logprint("mapvote;finalresult;" + r + "\n");
+    setmap( r );
 }
 notification( text ){
 	precacheshader( "gradient");
@@ -1107,13 +1095,7 @@ notification( text ){
 }
 setmap( index ){
 	level.map_index = index;
-	setdvar( "sv_maprotation", getDvar("custom_gametype") + " map " + level.maptovote["name"][index] );
-	//This is a dubug print -> printboldToAll("The next map is ^5" + level.maptovote["map"][index] ); 
-}
-printboldToAll(str){
-	foreach(player in level.players){
-		player iprintlnbold(str);
-	}
+	setdvar( "sv_maprotation", getDvar("custom_gametype") + " map " + level.maptovote["mapid"][index] );
 }
 printToAllMapVoted(str){
 	if(!level.gameended){
@@ -1123,245 +1105,170 @@ printToAllMapVoted(str){
 		}
 	}
 }
-mapvote(){
-	 level.maptovote["map"] = [];
-	 level.maptovote["name"] = [];
-	 level.maptovote["image"] = [];
-	 level.maptovote["vote"] = [];
-	 
-	 level.maptovote["vote"][0] = 0;
-	 level.maptovote["vote"][1] = 0;
-	 level.maptovote["vote"][2] = 0;
-	 
-	 level.maptovote["map"][0] = "Default";
-	 level.maptovote["map"][1] = "Default";
-	 level.maptovote["map"][2] = "Default";
+mapvoteinit(){
+	level.map_index = 1;
+	level.mapvote_started = false;
 	
-	 level.maptovote["name"][0] = "mp_default";
-	 level.maptovote["name"][1] = "mp_default";
-	 level.maptovote["name"][2] = "mp_default";
+	SetDvarIfNotInizialized("time_to_vote", 25);
+    SetDvarIfNotInizialized("server_sentence", "Thanks for Playing by @DoktorSAS");
+    SetDvarIfNotInizialized("custom_gametype", "");
+    SetDvarIfNotInizialized("social_name", "Discord");
+    SetDvarIfNotInizialized("social_link", "https://discord.gg/nCP2y4J");
+    SetDvarIfNotInizialized("more_maps", 1);	
+    SetDvarIfNotInizialized("blur", 1.6);
+    SetDvarIfNotInizialized("isMapvoteEnable", 0);
+    SetDvarIfNotInizialized("no_current_map", 1);
+    SetDvarIfNotInizialized("show_social", 1);
+    SetDvarIfNotInizialized("arrow_color", "white");
+	level.time_to_vote = getDvarInt("time_to_vote");
+	level.show_social = getDvarInt("show_social");
+	level.server_sentence = getDvar("server_sentence");
+	level.social_name = getDvar("social_name");
+	level.social_link = getDvar("social_link");
+	level.more_maps = getDvarInt("more_maps");
+	level.blur =  getDvarInt("blur");
+	level.isMapvoteEnable = getDvarInt("isMapvoteEnable");
+	level.no_current_map = getDvarInt("no_current_map");
+	level.arrow_color = getColor(getDvar("arrow_color"));
+    	
+    level.bg_color = GetColor( getDvar("bg_color") );
+    level.select_color = GetColor( getDvar("select_color") ); 
+    level.scroll_color = GetColor( getDvar("scroll_color") );
+    if(isValidColor( getDvar("votes_color") ))
+    	level.votes_color = getDvar("votes_color") ;
+    else
+    	level.votes_color = 5;
+    
+    level.maps_list = undefined;
+    if(getDvar("maps") != ""){
+    	level.allmaps = [];
+    	logprint("mapvote:"+IsInizialized(getDvar("maps")) + ";value;" + getDvar("maps") + "\n");
+    	level.maps_list = [];
+    	level.maps_list = strTok(getDvar("maps"), " ");
+    	if(level.no_current_map == 1){
+    		current_map = getDvar("mapname");
+    		maps = "";
+    		for(i = 0; i < level.maps_list.size; i++){
+    			m = level.maps_list[i];
+    			level.allmaps[ m ] = spawnStruct();
+    			if(level.maps_list[i] != current_map){
+    				logprint("mapvote:value;" + level.maps_list[i] + "\n");
+    				maps = maps + level.maps_list[i] + " ";
+    			}
+    		}
+    		level.maps_list = [];
+    		level.maps_list = strTok(maps, " ");
+    	}
+    	if(level.maps_list.size >= 3 && level.more_maps == 0)
+    		SetupMapList();
+    	else if(level.maps_list.size >= 4 && level.more_maps == 1)
+    		SetupMapList();
+    	else{
+    		logprint("mapvote error;not defined the right numbers of maps\n");
+    		setDvar("maps","");
+    	}
+    }else{
+      
+    }
+    
+    level.mapnames = [];
+	level.mapnames = strTok("Aftermath-Cargo-Carrier-Drone-Express-Hijacked-Meltdown-Overflow-Plaza-Raid-Slums-Standoff-Turbine-Yemen-Nuketown 2025-Downhill-Mirage-Hydro-Grind-Encore-Magma-Vertigo-Studio-Uplink-Detour-Cove-Rush-Dig-Frost-Pod-Takeoff", "-");
+	level.mapids = [];
+	level.mapids= strTok("mp_la-mp_dockside-mp_carrier-mp_drone-mp_express-mp_hijacked-mp_meltdown-mp_overflow-mp_nightclub-mp_raid-mp_slums-mp_village-mp_turbine-mp_socotra-mp_nuketown_2020-mp_downhill-mp_mirage-mp_hydro-mp_skate-mp_concert-mp_magma-mp_vertigo-mp_studio-mp_uplink-mp_bridge-mp_castaway-mp_paintball-mp_dig-mp_frostbite-mp_pod-mp_takeoff", "-"); 
+		
+	level.maptovote["mapname"] = [];
+	level.maptovote["mapid"] = [];
+	level.maptovote["image"] = [];
+	level.maptovote["vote"] = [];
 	 
-	 randommapbyindex(0);
-	 randommapbyindex(1);
-	 randommapbyindex(2);
+	level.maptovote["vote"][0] = 0;
+	level.maptovote["vote"][1] = 0;
+	level.maptovote["vote"][2] = 0;
+	level.maptovote["vote"][3] = 0;
+	level.maptovote["vote"][4] = 0;
+	 
+	level.maptovote["mapname"][0] = "Default";
+	level.maptovote["mapname"][1] = "Default";
+	level.maptovote["mapname"][2] = "Default";
+	level.maptovote["mapname"][3] = "Default";
+	level.maptovote["mapname"][4] = "Default";
+	
+	level.maptovote["mapid"][0] = "mp_raid";
+	level.maptovote["mapid"][1] = "mp_raid";
+	level.maptovote["mapid"][2] = "mp_raid";
+	level.maptovote["mapid"][3] = "mp_raid";
+	level.maptovote["mapid"][4] = "mp_raid";
+	 
+	level.maptovote["image"][0] = "loadscreen_mp_raid";
+	level.maptovote["image"][1] = "loadscreen_mp_raid";
+	level.maptovote["image"][2] = "loadscreen_mp_raid";
+	level.maptovote["image"][3] = "loadscreen_mp_raid";
+	level.maptovote["image"][4] = "loadscreen_mp_raid";
+	precacheshader( "loadscreen_mp_raid" );
+	
+	if(level.more_maps == 0)
+		randommapbyindex( 3 );
+	else
+		randommapbyindex( 5 );
+	 
 }
-randommapbyindex( index ){
+randommapbyindex( maps ){
 	level endon("mapnotvalid");
-	isValid = true;
-	if(index == 0){
-		i = randomintrange( 0, 11 );
-		mapdata(i, index);
-		if(level.maptovote["name"][index] == getDvar("mapname")){
-			randommapbyindex(index);
-			isValid = false;
-		}
-	}else if(index == 1){
-		i = randomintrange( 11, 20 );
-		mapdata(i, index);
-		if(level.maptovote["name"][index] == getDvar("mapname") && level.maptovote["name"][index] == level.maptovote["name"][0]){
-			randommapbyindex(index);
-			isValid = false;
-		}
-	}else if(index == 2){
-		i = randomintrange( 20, 30 );
-		mapdata(i, index);
-		if(level.maptovote["name"][index] == getDvar("mapname") && level.maptovote["name"][index] == level.maptovote["name"][0] && level.maptovote["name"][index] == level.maptovote["name"][1]){
-			randommapbyindex(index);
-			isValid = false;
-		}
+	max = maps;
+	index = maps;
+	if(getDvar("maps") == ""){
+		range = int(30/maps);
+	}else{
+		float_range = (level.maps_list.size/maps);
+		range = int(float_range);
 	}
-	if(isValid)
+	start_range = 0;
+	while( maps > 0){
+		index = max - maps; 
+		start_range = range*index; 
+		end_range = start_range+range;
+		if(index == 4 && getDvar("maps") != "")
+			i = randomintrange( start_range, level.maps_list.size); 
+		else
+			i = randomintrange( start_range, end_range); 
+		logPrint("mapvote:start_range;" + start_range + ";end_range;" +  end_range + ";index;" + index + "\n");
+		logPrint("mapvote:" + isDefined(level.maps_list) + ";mapdata;" +  i + " " + level.maps_list[i] + ";size;"+ level.maps_list.size  +  "\n");
+		if(getDvar("maps") == ""){
+			mapdata(i, index);
+			if(level.no_current_map == 1){
+				while(level.maptovote["mapid"][index] == getDvar("mapname")){
+					if(index == 4)
+						i = randomintrange( start_range, 30); 
+					else
+						i = randomintrange( start_range, end_range); 
+					mapdata(i, index);
+					wait 0.01;
+				}
+			}
+		}else{
+			SetMapData(index, level.maps_list[i]);
+		}
+			
 		precacheshader( level.maptovote["image"][index] );
-}
-mapdata( i, index ){ //Map Parser
-	/*
-		This area convert a number i to a map with all information
-		about the maps.
-		 # Game Name
-		 # map mp
-		 # Map image
-	*/
-	switch( i ){
-		//Base MAP
-		case 0:
-		level.maptovote["map"][index] = "Aftermath";
-	 	level.maptovote["name"][index] = "mp_la";
-	    level.maptovote["image"][index] = "loadscreen_mp_la";
-		break;
-		case 1:
-		level.maptovote["map"][index] = "Cargo";
-	 	level.maptovote["name"][index] = "mp_dockside";
-	    level.maptovote["image"][index] = "loadscreen_mp_dockside";
-		break;
-		case 2:
-		level.maptovote["map"][index] = "Carrier";
-	 	level.maptovote["name"][index] = "mp_carrier";
-	    level.maptovote["image"][index] = "loadscreen_mp_carrier";
-		break;
-		case 3:
-		level.maptovote["map"][index] = "Drone";
-	 	level.maptovote["name"][index] = "mp_drone";
-	    level.maptovote["image"][index] = "loadscreen_mp_drone";
-		break;
-		case 4:
-		level.maptovote["map"][index] = "Express";
-	 	level.maptovote["name"][index] = "mp_express";
-	    level.maptovote["image"][index] = "loadscreen_mp_express";
-		break;
-		case 5:
-		level.maptovote["map"][index] = "Hijacked";
-	 	level.maptovote["name"][index] = "mp_Hijacked";
-	    level.maptovote["image"][index] = "loadscreen_mp_hijacked";
-		break;
-		case 6:
-		level.maptovote["map"][index] = "Meltdown";
-	 	level.maptovote["name"][index] = "mp_Meltdown";
-	    level.maptovote["image"][index] = "loadscreen_mp_meltdown";
-		case 7:
-		level.maptovote["map"][index] = "Overflow";
-	 	level.maptovote["name"][index] = "mp_Overflow";
-	    level.maptovote["image"][index] = "loadscreen_mp_overflow";
-		break;
-		case 8:
-		level.maptovote["map"][index] = "Plaza";
-	 	level.maptovote["name"][index] = "mp_nightclub";
-	    level.maptovote["image"][index] = "loadscreen_mp_nightclub";
-		break;
-		case 9:
-		level.maptovote["map"][index] = "Raid";
-	 	level.maptovote["name"][index] = "mp_raid";
-	    level.maptovote["image"][index] = "loadscreen_mp_raid";
-		break;
-		case 10:
-		level.maptovote["map"][index] = "Slums";
-	 	level.maptovote["name"][index] = "mp_Slums";
-	    level.maptovote["image"][index] = "loadscreen_mp_Slums";
-		break;
-		case 11:
-		level.maptovote["map"][index] = "Standoff";
-	 	level.maptovote["name"][index] = "mp_village";
-	    level.maptovote["image"][index] = "loadscreen_mp_village";
-		break;
-		case 12:
-		level.maptovote["map"][index] = "Turbine";
-	 	level.maptovote["name"][index] = "mp_Turbine";
-	    level.maptovote["image"][index] = "loadscreen_mp_Turbine";
-		break;
-		case 13:
-		level.maptovote["map"][index] = "Yemen";
-	 	level.maptovote["name"][index] = "mp_socotra";
-	    level.maptovote["image"][index] = "loadscreen_mp_socotra";
-		break;
-		//Bouns MAP
-		case 14:
-		level.maptovote["map"][index] = "Nuketown 2025";
-	 	level.maptovote["name"][index] = "mp_nuketown_2020";
-	    level.maptovote["image"][index] = "loadscreen_mp_nuketown_2020";
-		break;
-		//DLC MAP 1 Revolution
-		case 15:
-		level.maptovote["map"][index] = "Downhill";
-	 	level.maptovote["name"][index] = "mp_downhill";
-	    level.maptovote["image"][index] = "loadscreen_mp_downhill";
-		break;
-		case 16:
-		level.maptovote["map"][index] = "Mirage";
-	 	level.maptovote["name"][index] = "mp_mirage";
-	    level.maptovote["image"][index] = "loadscreen_mp_Mirage";
-		break;
-		case 17:
-		level.maptovote["map"][index] = "Hydro";
-	 	level.maptovote["name"][index] = "mp_Hydro";
-	    level.maptovote["image"][index] = "loadscreen_mp_Hydro";
-		break;
-		case 18:
-		level.maptovote["map"][index] = "Grind";
-	 	level.maptovote["name"][index] = "mp_skate";
-	    level.maptovote["image"][index] = "loadscreen_mp_skate";
-		break;
-		//DLC MAP 2 Uprising
-		case 19:
-		level.maptovote["map"][index] = "Encore";
-	 	level.maptovote["name"][index] = "mp_concert";
-	    level.maptovote["image"][index] = "loadscreen_mp_concert";
-		break;
-		case 20:
-		level.maptovote["map"][index] = "Magma";
-	 	level.maptovote["name"][index] = "mp_Magma";
-	    level.maptovote["image"][index] = "loadscreen_mp_Magma";
-		break;
-		case 21:
-		level.maptovote["map"][index] = "Vertigo";
-	 	level.maptovote["name"][index] = "mp_Vertigo";
-	    level.maptovote["image"][index] = "loadscreen_mp_Vertigo";
-		break;
-	    case 22:
-		level.maptovote["map"][index] = "Studio";
-	 	level.maptovote["name"][index] = "mp_Studio";
-	    level.maptovote["image"][index] = "loadscreen_mp_Studio";
-		break;
-		//DLC MAP 3 Vengeance
-		case 23:
-		level.maptovote["map"][index] = "Uplink";
-	 	level.maptovote["name"][index] = "mp_Uplink";
-	    level.maptovote["image"][index] = "loadscreen_mp_Uplink";
-		break;
-		case 24:
-		level.maptovote["map"][index] = "Detour";
-	 	level.maptovote["name"][index] = "mp_bridge";
-	    level.maptovote["image"][index] = "loadscreen_mp_bridge";
-		break;
-		case 25:
-		level.maptovote["map"][index] = "Cove";
-	 	level.maptovote["name"][index] = "mp_castaway";
-	    level.maptovote["image"][index] = "loadscreen_mp_castaway";
-		break;
-		case 26:
-		level.maptovote["map"][index] = "Rush";
-	 	level.maptovote["name"][index] = "mp_paintball";
-	    level.maptovote["image"][index] = "loadscreen_mp_paintball";
-		break;
-		//DLLC MAP 4 Apocalypse 
-		case 27:
-		level.maptovote["map"][index] = "Dig";
-	 	level.maptovote["name"][index] = "mp_Dig";
-	    level.maptovote["image"][index] = "loadscreen_mp_Dig";
-		break;
-		case 28:
-		level.maptovote["map"][index] = "Frost";
-	 	level.maptovote["name"][index] = "mp_frostbite";
-	    level.maptovote["image"][index] = "loadscreen_mp_frostbite";
-		break;
-		case 29:
-		level.maptovote["map"][index] = "Pod";
-	 	level.maptovote["name"][index] = "mp_Pod";
-	    level.maptovote["image"][index] = "loadscreen_mp_Pod";
-		break;
-		case 30:
-		level.maptovote["map"][index] = "Takeoff";
-	 	level.maptovote["name"][index] = "mp_Takeoff";
-	    level.maptovote["image"][index] = "loadscreen_mp_Takeoff";
-		break;
-		/*case def:
-		level.maptovote["map"][index] = "";
-	 	level.maptovote["name"][index] = "mp_";
-	    level.maptovote["image"][index] = "loadscreen_mp_";
-		break;*/
+		maps--;
 	}
+}
+
+SetMapData(index, map){
+	level.maptovote["mapname"][index] = level.allmaps[ map ].mapname;
+	level.maptovote["mapid"][index] = level.allmaps[ map ].mapid;
+	level.maptovote["image"][index] = level.allmaps[ map ].image;
+}
+	
+mapdata( i, index ){ 
+	level.maptovote["mapname"][index] = level.mapnames[i];
+	level.maptovote["mapid"][index] = level.mapids[i];
+	level.maptovote["image"][index] = "loadscreen_" + level.mapids[i];
 }
 selectmap(){ 
-	self thread fixAngles( self getPlayerAngles() );
 	self.mapvotemenu = true;
-	self freezeControlsallowlook(true);
-	self setClientUiVisibilityFlag("hud_visible", false);
-	self.welcome = self createFontString("hudsmall",1.4);
-	self.welcome setPoint("CENTER","CENTER",0,0);
-	self.welcome setText("Thanks for playing "+getDvar("server_name")+"^7\nMapvote Developed by @^5DoktorSAS");	
-	//self thread AnimatedTextCENTERScrolling("Welcome To ^5SorexFFA^7\nMapvote Menu Developed by ^5DoktorSAS");
-	AnimatedVoteAndMapsIN();
-	self.buttons = self createFontString("hudsmall", 1.2);
-	self.buttons setPoint("CENTER", "CENTER", 0, -25);
-	self.buttons SetElementText( "Press ^5Aim/Scope Button ^7 to switch Map | Press ^5F^7 on PC or ^5Reload Button ^7on Controller to select" );	
+	self thread AnimatedVoteAndMapsIN();
+	self thread fixAngles( self getPlayerAngles() );
 	self thread buttonsmonitor();
 }
 fixAngles( angles ){
@@ -1374,48 +1281,38 @@ fixAngles( angles ){
 	}
 }
 AnimatedVoteAndMapsIN(){
-	/*Text Element*/
-	self.textMAP1 = self createFontString("hudsmall", 1.5);
-	self.textMAP1 setPoint("CENTER", "CENTER", -220, -325);
-	self.textMAP2 = self createFontString("hudsmall", 1.5);
-	self.textMAP2 setPoint("CENTER", "CENTER", 0, -325);
-	self.textMAP3 = self createFontString("hudsmall", 1.5);
-	self.textMAP3 setPoint("CENTER", "CENTER", 220, -325); 
-	self.textMAP1 SetElementText( "^7Vote: [^5 " + level.maptovote["vote"][0] + " ^7]\n^7Map: ^5"+ level.maptovote["map"][0] );		
-	self.textMAP2 SetElementText( "^7Vote: [^5 " + level.maptovote["vote"][1] + " ^7]\n^7Map: ^5"+ level.maptovote["map"][1] );		
-	self.textMAP3 SetElementText( "^7Vote: [^5 " + level.maptovote["vote"][2] + " ^7]\n^7Map: ^5"+ level.maptovote["map"][2] );
-	/*Maps Image*/
-	self.map1 = self drawshader( level.maptovote["image"][0], -220, -310, 200, 126, ( 1, 1, 1 ), 100, 2 );
-	self.map1 fadeovertime( 0.3 );
-	self.map1.alpha = 0.65;
-	self.map2 = self drawshader( level.maptovote["image"][1], 0, -310, 200, 126, ( 1, 1, 1 ), 100, 2 );
-	self.map2 fadeovertime( 0.3 );
-	self.map2.alpha = 0.65;
-	self.map3 = self drawshader( level.maptovote["image"][2], 220, -310, 200, 126, ( 1, 1, 1 ), 100, 2 );
-	self.map3 fadeovertime( 0.3 );
-	self.map3.alpha = 0.65;
-	/*Bakground*/
-	self.box1 = self createRectangle("CENTER", "CENTER", -220, -452, 210, 136, (0.502, 0, 1), "white", 1, .7);	
-	self.box2 = self createRectangle("CENTER", "CENTER", 0, -452, 210, 136, (0, 1, 1), "white", 1, .7);
-	self.box3 = self createRectangle("CENTER", "CENTER", 220, -452, 210, 136, (0, 1, 1), "white", 1, .7);
+	self.isOM = false;
+	self setblur( level.blur, 1.5 );
+	/*Bakgrounds*/
+	self.box1 = self createRectangle("CENTER", "CENTER", -220, -452, 210, 136, level.scroll_color, "white", 1, .7);	
+	self.box2 = self createRectangle("CENTER", "CENTER", 0, -452, 210, 136, level.bg_color, "white", 1, .7);
+	self.box3 = self createRectangle("CENTER", "CENTER", 220, -452, 210, 136, level.bg_color, "white", 1, .7);
 	/*Animations*/
-	self.textMAP1 affectElement("y", 1, -75);
-	self.textMAP2 affectElement("y", 1, -75);
-	self.textMAP3 affectElement("y", 1, -75);
-	self.map1 affectElement("y", 1, -10);
-	self.map2 affectElement("y", 1, -10);
-	self.map3 affectElement("y", 1, -10);
-	self.box1 affectElement("y", 1, -152);
-	self.box2 affectElement("y", 1, -152);
-	self.box3 affectElement("y", 1, -152);
-}
+	if(level.more_maps == 1){	
+		self.box4 = self createRectangle("CENTER", "CENTER",  -600, 0, 210, 136, level.bg_color, "white", 1, .7);	
+		self.box5 = self createRectangle("CENTER", "CENTER", 600,  0, 210, 136, level.bg_color, "white", 1, .7);
+		self.box1 affectElement("y", 1, -152);
+		self.box2 affectElement("y", 1, -152);
+		self.box3 affectElement("y", 1, -152);
+		self.box4 affectElement("x", 1, -120);
+		self.box5 affectElement("x", 1, 120);
+	}else{
+		self.arrow_right   = self drawshader( "ui_scrollbar_arrow_right", 200, 290, 25, 25, level.arrow_color, 100, 2 , "CENTER", "CENTER");
+		self.arrow_left = self drawshader( "ui_scrollbar_arrow_left", -200, 290, 25, 25, level.arrow_color, 100, 2 , "CENTER", "CENTER");
+		self.box1 affectElement("y", 1, -52);
+		self.box2 affectElement("y", 1, -52);
+		self.box3 affectElement("y", 1, -52);
+	}
+	
+	
+} 
 /*
 	Is possibile to find a lot of cool code on my github https://github.com/DoktorSAS
 	Developer: DoktorSAS
 	Discord: https://discord.gg/nCP2y4J
 	Mod: Mapvote Menu
 	Sorex: https://github.com/DoktorSAS/Sorex/blob/main/README.md
-	Description: Mapvote menu on end Game
+	Description: Mapvote menu on End Game
 	
 	Copyright: The script was created by DoktorSAS and no one else can 
 			   say they created it. The script is free and accessible to 
@@ -1432,155 +1329,155 @@ AnimatedTextCENTERScrolling(text){ //Made by DoktorSAS
 	}
 	self.welcome setText("");
 }
-baseText(){
-	self.textMAP1 SetElementText( "^7Vote: [^5 " + level.maptovote["vote"][0] + " ^7]\n^7Map: ^5"+ level.maptovote["map"][0] );		
-	self.textMAP2 SetElementText( "^7Vote: [^5 " + level.maptovote["vote"][1] + " ^7]\n^7Map: ^5"+ level.maptovote["map"][1] );		
-	self.textMAP3 SetElementText( "^7Vote: [^5 " + level.maptovote["vote"][2] + " ^7]\n^7Map: ^5"+ level.maptovote["map"][2]  );
-	self.box1 DestroyElement();
-	self.box2 DestroyElement();
-	self.box3 DestroyElement();
-	self.box1 = self createRectangle("CENTER", "CENTER", -220, -152, 210, 136, (0, 1, 1), "white", 1, .7);
-	self.box2 = self createRectangle("CENTER", "CENTER", 0, -152, 210, 136, (0, 1, 1), "white", 1, .7);
-	self.box3 = self createRectangle("CENTER", "CENTER", 220, -152, 210, 136, (0, 1, 1), "white", 1, .7);
+reset_all( ){
+	/*self.textMAP1 SetElementText( "^7[ ^" + level.votes_color + level.maptovote["vote"][0] + " ^7] ^7"+ level.maptovote["mapname"][0] );		
+	self.textMAP2 SetElementText( "^7[ ^" + level.votes_color + level.maptovote["vote"][1] + " ^7] ^7"+ level.maptovote["mapname"][1] );		
+	self.textMAP3 SetElementText( "^7[ ^" + level.votes_color + level.maptovote["vote"][2] + " ^7] ^7"+ level.maptovote["mapname"][2]  );*/
+	self.box1.color = level.bg_color;
+	self.box2.color = level.bg_color;
+	self.box3.color = level.bg_color;
 }
+
+reset_all_5_maps( ){ 
+	/*self.textMAP1 SetElementText( "^7[ ^" + level.votes_color + level.maptovote["vote"][0] + " ^7] ^7"+ level.maptovote["mapname"][0] );		
+	self.textMAP2 SetElementText( "^7[ ^" + level.votes_color + level.maptovote["vote"][1] + " ^7] ^7"+ level.maptovote["mapname"][1] );		
+	self.textMAP3 SetElementText( "^7[ ^" + level.votes_color + level.maptovote["vote"][2] + " ^7] ^7"+ level.maptovote["mapname"][2] );
+	self.textMAP4 SetElementText( "^7[ ^" + level.votes_color + level.maptovote["vote"][3] + " ^7] ^7"+ level.maptovote["mapname"][3] );		
+	self.textMAP5 SetElementText( "^7[ ^" + level.votes_color + level.maptovote["vote"][4] + " ^7] ^7"+ level.maptovote["mapname"][4] );*/
+	self.box1.color = level.bg_color;
+	self.box2.color = level.bg_color;
+	self.box3.color = level.bg_color;
+	self.box4.color = level.bg_color;
+	self.box5.color = level.bg_color;
+}
+
 buttonsmonitor(){ //Manage buttons
+	level endon("game_ended");
+	self endon("disconnect");
 	self endon("closemapmenu");
+	//self freeze_player_controls( 0 );
+	//self freezecontrols( 0 );
+	mapvote_refresh = ::reset_all;
+	more_maps = level.more_maps;
+	if(more_maps == 1)
+		mapvote_refresh = ::reset_all_5_maps;
 	i = 0;
 	for(;;){
+		if(self.statusicon != "compassping_enemy" || self.statusicon != "compassping_friendlyfiring_mp")
+			self.statusicon = "compassping_enemy";
 		wait 0.05;
-		if(self adsbuttonpressed()){ //Go on next map
-			if(i == 2){
+		if(self attackbuttonpressed()){ //Go on next map
+			if(i == 2 && more_maps == 0){
+				i = 0;
+			}else if(i == 4 && more_maps == 1){
 				i = 0;
 			}else i = i + 1;
-			baseText(); //Texts, map images and boxes reset
-			if(i == 0){
-				self.box1 DestroyElement();
-				self.box1 = self createRectangle("CENTER", "CENTER", -220, -152, 210, 136, (0.502, 0, 1), "white", 1, .7); //See selection Map1
-			}else if(i == 1){
-				self.box2 DestroyElement();
-				self.box2 = self createRectangle("CENTER", "CENTER", 0, -152, 210, 136, (0.502, 0, 1), "white", 1, .7); //See selection Map2
-			}else if(i == 2){
-				self.box3 DestroyElement();
-				self.box3 = self createRectangle("CENTER", "CENTER", 220, -152, 210, 136, (0.502, 0, 1), "white", 1, .7); //See selection Map3
+			self [[mapvote_refresh]]( ); //Texts, map images and boxes reset
+			if(more_maps == 0){
+				if(i == 0){
+					self.box1 affectElement("color", 0.2, level.scroll_color);
+				}else if(i == 1){
+					self.box2 affectElement("color", 0.2, level.scroll_color);
+				}else if(i == 2){
+					self.box3 affectElement("color", 0.2, level.scroll_color);
+				}
+			}else{
+				if(i == 0){
+					self.box1 affectElement("color", 0.2, level.scroll_color);
+				}else if(i == 1){
+					self.box2 affectElement("color", 0.2, level.scroll_color);
+				}else if(i == 2){
+					self.box3 affectElement("color", 0.2, level.scroll_color);
+				}else if(i == 3){
+					self.box4 affectElement("color", 0.2, level.scroll_color);
+				}else if(i == 4){
+					self.box5 affectElement("color", 0.2, level.scroll_color);
+				}
 			}
+			
 			wait 0.1; //Don't remove this
-		}else if(self usebuttonpressed()){
-			level.maptovote["vote"][i] = level.maptovote["vote"][i] + 1;
-			self.mapvoted_index = i;
-			wait 0.02;
-			if(i == 0){
-				self.box1 DestroyElement();
-				self.box1 = self createRectangle("CENTER", "CENTER", -220, -152, 210, 136, (0, 1, 0), "white", 1, .7);	//See selection Map1
-			}else if(i == 1){
-				self.box2 DestroyElement();
-				self.box2 = self createRectangle("CENTER", "CENTER", 0, -152, 210, 136, (0, 1, 0), "white", 1, .7); //See selection Map2	
-			}else if(i == 2){
-				self.box3 DestroyElement();
-				self.box3 = self createRectangle("CENTER", "CENTER", 220, -152, 210, 136, (0, 1, 0), "white", 1, .7); //See selection Map3
+		}else if(self adsbuttonpressed()){ //Go on next map
+			if(i == 0 && more_maps == 0){
+				i = 2;
+			}else if(i == 0 && more_maps == 1){
+				i = 4;
+			}else i = i - 1;
+			self [[mapvote_refresh]]( ); //Texts, map images and boxes reset
+			if(more_maps == 0){
+				if(i == 0){
+					self.box1 affectElement("color", 0.2, level.scroll_color);
+				}else if(i == 1){
+					self.box2 affectElement("color", 0.2, level.scroll_color);
+				}else if(i == 2){
+					self.box3 affectElement("color", 0.2, level.scroll_color);
+				}
+			}else{
+				if(i == 0){
+					self.box1 affectElement("color", 0.2, level.scroll_color);
+				}else if(i == 1){
+					self.box2 affectElement("color", 0.2, level.scroll_color);
+				}else if(i == 2){
+					self.box3 affectElement("color", 0.2, level.scroll_color);
+				}else if(i == 3){
+					self.box4 affectElement("color", 0.2, level.scroll_color);
+				}else if(i == 4){
+					self.box5 affectElement("color", 0.2, level.scroll_color);
+				}
 			}
-			//self thread printToAllMapVoted("^5" + self.name + " voted for ^5" + level.maptovote["map"][i] + "\n^7MAP: ^5" + level.maptovote["map"][0] + "^7 | VOTE: ^5"+ level.maptovote["vote"][0] + "\n^7MAP: ^5" + level.maptovote["map"][1] + "^7 | VOTE: ^5"+ level.maptovote["vote"][1] + "\n^7MAP: ^5" + level.maptovote["map"][2] + "^7 | VOTE: ^5"+ level.maptovote["vote"][2]);
+			
+			wait 0.1; //Don't remove this
+		}else if(self jumpbuttonpressed()){
+			self.mapvoted_index = i;
+			level.maptovote["vote"][i] = level.maptovote["vote"][i] + 1;
+			wait 0.02;
+			if(more_maps == 0){
+				if(i == 0){
+					self.box1 affectElement("color", 0.2, level.select_color);
+				}else if(i == 1){
+					self.box2 affectElement("color", 0.2, level.select_color);
+				}else if(i == 2){
+					self.box3 affectElement("color", 0.2, level.select_color);
+				}
+			}else{
+				if(i == 0){
+					self.box1 affectElement("color", 0.5, level.select_color);
+				}else if(i == 1){
+					self.box2 affectElement("color", 0.5, level.select_color);
+				}else if(i == 2){
+					self.box3 affectElement("color", 0.5, level.select_color);
+				}else if(i == 3){
+					self.box4 affectElement("color", 0.5, level.select_color);
+				}else if(i == 4){
+					self.box5 affectElement("color", 0.5, level.select_color);
+				}
+			}
+			self.statusicon = "compassping_friendlyfiring_mp";
+			//self thread printToAllMapVoted("^5" + self.name + " voted for ^5" + level.maptovote["mapname"][i] + "\n^7MAP: ^5" + level.maptovote["mapname"][0] + "^7 | VOTE: ^5"+ level.maptovote["vote"][0] + "\n^7MAP: ^5" + level.maptovote["mapname"][1] + "^7 | VOTE: ^5"+ level.maptovote["vote"][1] + "\n^7MAP: ^5" + level.maptovote["mapname"][2] + "^7 | VOTE: ^5"+ level.maptovote["vote"][2]);
 			level notify("updateVote");
 			self notify("closemapmenu");
 		}
 	}
 }
 closemenumapmenu(){ //This function is do destory and remove all menu text, box and map images 
-	self.buttons DestroyElement();
-	self.welcome DestroyElement();
-	self.textMAP1 DestroyElement();self.textMAP2 DestroyElement();self.textMAP3 DestroyElement();
 	self.box1 DestroyElement();self.box2 DestroyElement();self.box3 DestroyElement();
-	self.map1 DestroyElement();self.map2 DestroyElement();self.map3 DestroyElement();
-	self setClientUiVisibilityFlag("hud_visible", true);
-	self freezeControlsallowlook(false);
-}
-
-/*
-	Utilities functions, is possibile to find this functions on some forum.
-	Just google GSC menu tutorial/guide
-*/
-createRectangle(align, relative, x, y, width, height, color, shader, sort, alpha){ 
-    boxElem = newClientHudElem(self);
-    boxElem.elemType = "bar";
-    boxElem.width = width;
-    boxElem.height = height;
-    boxElem.align = align;
-    boxElem.relative = relative;
-    boxElem.xOffset = 0;
-    boxElem.yOffset = 0;
-    boxElem.children = [];
-    boxElem.sort = sort;
-    boxElem.color = color;
-    boxElem.alpha = alpha;
-    boxElem setParent(level.uiParent);
-    boxElem setShader(shader, width, height);
-    boxElem.hidden = false;
-    boxElem setPoint(align, relative, x, y);
-    return boxElem;
-}
-createNewsBar(align,relative,x,y,width,height,color,shader,sort,alpha){ //Not mine
-    barElemBG = newClientHudElem(self);
-    barElemBG.elemType = "bar";
-    barElemBG.width = width;
-    barElemBG.height = height;
-    barElemBG.align = align;
-    barElemBG.relative = relative;
-    barElemBG.xOffset = 0;
-    barElemBG.yOffset = 0;
-    barElemBG.children = [];
-    barElemBG.sort = sort;
-    barElemBG.color = color;
-    barElemBG.alpha = alpha;
-    barElemBG setParent(level.uiParent);
-    barElemBG setShader(shader, width, height);
-    barElemBG.hidden = false;
-    barElemBG setPoint(align,relative,x,y);
-}
-drawtext( text, font, fontscale, x, y, color, alpha, glowcolor, glowalpha, sort ){
-	hud = self createfontstring( font, fontscale );
-	hud SetElementText( text );
-	hud.x = x;
-	hud.y = y;
-	hud.color = color;
-	hud.alpha = alpha;
-	hud.glowcolor = glowcolor;
-	hud.glowalpha = glowalpha;
-	hud.sort = sort;
-	hud.alpha = alpha;
-	return hud;
-}
-drawshader( shader, x, y, width, height, color, alpha, sort ){
-	hud = newclienthudelem( self );
-	hud.elemtype = "icon";
-	hud.color = color;
-	hud.alpha = alpha;
-	hud.sort = sort;
-	hud.children = [];
-	hud setparent( level.uiparent );
-	hud setshader( shader, width, height );
-	hud.x = x;
-	hud.y = y;
-	return hud;
+	self.box4 DestroyElement();self.box5 DestroyElement();
 }
 /*
 	Developer: DoktorSAS
-	Discord: Discord.io/Sorex
-	Mod: All Maps - Map Vote
-	Website: sorexproject.webflow.io
+	Discord: https://discord.gg/nCP2y4J
+	Mod: Mapvote Menu
+	Sorex: https://github.com/DoktorSAS/Sorex/blob/main/README.md
 	Description: Mapvote menu on end Game
 	
 	Copyright: The script was created by DoktorSAS and no one else can 
 			   say they created it. The script is free and accessible to 
 			   everyone, it is not possible to sell the script.
-			   
-	The OverFlow fix is a fixed based on AIO Menu overflow fix
 */
-OverflowFix(){
-    level.stringtable = [];
-    level.textelementtable = [];
+OverflowFix_mapvote(){
     textanchor = CreateServerFontString("default", 1);
     textanchor SetElementText("Anchor");
     textanchor.alpha = 0; 
-
+    level.isInOverflow = false;
     if (GetDvar("g_gametype") == "tdm" || GetDvar("g_gametype") == "hctdm")
         limit = 54;
 
@@ -1626,28 +1523,18 @@ OverflowFix(){
     if (IsDefined(level.stringoptimization))
         limit += 172;
 
-    while (!level.gameended)    {      
+    while (true){      
         if (IsDefined(level.stringoptimization) && level.stringtable.size >= 100 && !IsDefined(textanchor2)){
             textanchor2 = CreateServerFontString("default", 1);
             textanchor2 SetElementText("Anchor2");                
             textanchor2.alpha = 0; 
         }
         if (level.stringtable.size >= limit){
+        	level.isInOverflow = true;
             if (IsDefined(textanchor2)){
                 textanchor2 ClearAllTextAfterHudElem();
                 textanchor2 DestroyElement();
             } 
-			foreach(player in level.players){
-				player.bad SetElementText("Thanks to ^5DoktorSAS");
-				if(player.mapvotemenu){
-					if(player.mapvoted_index == 0)
-						player.textMAP1 SetElementText( "^7Vote: [^6 " + level.maptovote["vote"][0] + " ^7]\n^7Map: ^5"+ level.maptovote["map"][0] );		
-					if(player.mapvoted_index == 1)
-						player.textMAP2 SetElementText( "^7Vote: [^6 " + level.maptovote["vote"][1] + " ^7]\n^7Map: ^5"+ level.maptovote["map"][1] );	
-					if(player.mapvoted_index == 2)
-						player.textMAP3 SetElementText(" ^7Vote: [^6 " + level.maptovote["vote"][2] + " ^7]\n^7Map: ^5"+ level.maptovote["map"][2] );
-				}
-			}
             textanchor ClearAllTextAfterHudElem();
             level.stringtable = [];           
 
@@ -1657,8 +1544,9 @@ OverflowFix(){
                 else
                     textelement SetElementValueText(textelement.text);
             }
+            level.isInOverflow = false;
         }            
-        wait 0.01;
+        wait 0.00000001;
     }
 }
 SetElementText(text){
@@ -1693,7 +1581,19 @@ DestroyElement(){
 	Utilities functions, is possibile to find this functions on some forum.
 	Just google GSC menu tutorial/guide
 */
-drawtext( text, font, fontscale, x, y, color, alpha, glowcolor, glowalpha, sort ){
+printToAll(str){
+	foreach(player in level.players){
+		 if(isDefined(player.pers["isBot"]) && player.pers["isBot"]){	
+  		}else player iprintln(str);
+	}
+}
+printboldToAll(str){
+	foreach(player in level.players){
+		if(isDefined(player.pers["isBot"]) && player.pers["isBot"]){	
+  		}else player iprintlnbold(str);
+	}
+}
+/*drawtext( text, font, fontscale, x, y, color, alpha, glowcolor, glowalpha, sort ){
 	hud = self createfontstring( font, fontscale );
 	hud SetElementText( text );
 	hud.x = x;
@@ -1705,8 +1605,8 @@ drawtext( text, font, fontscale, x, y, color, alpha, glowcolor, glowalpha, sort 
 	hud.sort = sort;
 	hud.alpha = alpha;
 	return hud;
-}
-drawshader( shader, x, y, width, height, color, alpha, sort ){
+}*/
+/*drawshader( shader, x, y, width, height, color, alpha, sort ){
 	hud = newclienthudelem( self );
 	hud.elemtype = "icon";
 	hud.color = color;
@@ -1718,7 +1618,7 @@ drawshader( shader, x, y, width, height, color, alpha, sort ){
 	hud.x = x;
 	hud.y = y;
 	return hud;
-}
+}*/
 createString(input, font, fontScale, align, relative, x, y, color, alpha, glowColor, glowAlpha, sort, isLevel, isValue){
  	if(!isDefined(isLevel))
   		hud = self createFontString(font, fontScale);
@@ -1752,4 +1652,255 @@ affectElement(type, time, value){
         self.alpha = value;
     if(type == "color")
         self.color = value;
+}
+createRectangle(align, relative, x, y, width, height, color, shader, sort, alpha){ 
+    boxElem = newClientHudElem(self);
+    boxElem.elemType = "bar";
+    boxElem.width = width;
+    boxElem.height = height;
+    boxElem.align = align;
+    boxElem.relative = relative;
+    boxElem.xOffset = 0;
+    boxElem.yOffset = 0;
+    boxElem.children = [];
+    boxElem.sort = sort;
+    boxElem.color = color;
+    boxElem.alpha = alpha;
+    boxElem setParent(level.uiParent);
+    boxElem setShader(shader, width, height);
+    boxElem.hidden = false;
+    boxElem setPoint(align, relative, x, y);
+    boxElem.hideWhenInMenu = true;
+    return boxElem;
+}
+createNewsBar(align,relative,x,y,width,height,color,shader,sort,alpha){ //Not mine
+    barElemBG = newClientHudElem(self);
+    barElemBG.elemType = "bar";
+    barElemBG.width = width;
+    barElemBG.height = height;
+    barElemBG.align = align;
+    barElemBG.relative = relative;
+    barElemBG.xOffset = 0;
+    barElemBG.yOffset = 0;
+    barElemBG.children = [];
+    barElemBG.sort = sort;
+    barElemBG.color = color;
+    barElemBG.alpha = alpha;
+    barElemBG setParent(level.uiParent);
+    barElemBG setShader(shader, width, height);
+    barElemBG.hidden = false;
+    barElemBG setPoint(align,relative,x,y);
+    barElemBG.hideWhenInMenu = true;
+}
+drawtext( text, font, fontscale, x, y, color, alpha, glowcolor, glowalpha, sort ){
+	hud = self createfontstring( font, fontscale );
+	hud SetElementText( text );
+	hud.x = x;
+	hud.y = y;
+	hud.color = color;
+	hud.alpha = alpha;
+	hud.glowcolor = glowcolor;
+	hud.glowalpha = glowalpha;
+	hud.sort = sort;
+	hud.alpha = alpha;
+	hud.hideWhenInMenu = true;
+	return hud;
+}
+drawshader( shader, x, y, width, height, color, alpha, sort, align, relative, isLevel){
+	if(isDefined(isLevel))
+		hud = newhudelem( ); // Fix for level shader
+	else
+		hud = newclienthudelem( self );
+	hud.elemtype = "icon";
+	hud.color = color;
+	hud.alpha = alpha;
+	hud.sort = sort;
+	hud.children = [];
+	if(isDefined(align))
+   		hud.align = align;
+   	if(isDefined(relative))
+   		hud.relative = relative;
+   	hud setparent( level.uiparent );
+   	hud.x = x;
+	hud.y = y;
+	hud setshader( shader, width, height );
+	hud.hideWhenInMenu = true;
+	return hud;
+}
+ThereKillcam(){
+	thereKillcam = false;
+	foreach(player in level.players){
+    	if(player.pers["kills"] > 0)
+    		thereKillcam = true;
+   	}
+   	return thereKillcam;
+}
+ThereaWinner(){
+	thereWinner = false;
+	foreach(player in level.players){
+    	if(player.pers["pointstowin"] == level.scorelimit)
+    		thereWinner = true;
+   	}  	
+   	return thereWinner;
+}
+ThereTeamWinner(){
+	return [[level._getteamscore]]( "axis" ) == level.scorelimit || [[level._getteamscore]]( "allies" ) == level.scorelimit;
+}
+
+
+SetDvarIfNotInizialized(dvar, value){ // DoktorSAS Dvar utilities
+	if(!IsInizialized(dvar))
+		setDvar(dvar, value);
+}
+IsInizialized(dvar){ // DoktorSAS Dvar utilities
+	result = getDvar(dvar);
+	return result != undefined || result != "";
+} 
+GetColor( color ){ // DoktorSAS Dvar utilities
+	switch(tolower(color)){
+    	case "red":
+    		return (0.960, 0.180, 0.180);
+    	break;
+    	case "black":
+    		return (0, 0, 0);
+    	break;
+    	case "purple":
+    		return (1, 0.282, 1);
+    	break;
+    	case "pink":
+    		return  (1, 0.623, 0.811);
+    	break;
+    	case "green":
+    		return  (0, 0.69, 0.15);
+    	break;
+    	case "blue":
+    		return  (0, 0, 1);
+    	break;
+    	case "lightblue":
+    	case "light blue":
+    		return  (0.152, 0329, 0.929);
+    	break;
+    	case "lightgreen":
+    	case "light green":
+    		return  (0.09, 1, 0.09);
+    	break;
+    	case "orange":
+    		return  (1, 0662, 0.035);
+    	break;
+    	case "yellow":
+    		return (0.968, 0.992, 0.043);
+    	break;
+    	case "brown":
+    		return (0.501, 0.250, 0);
+    	break;
+    	case "cyan":
+    		return  (0, 1, 1);
+    	break;
+    	case "white":
+    		return  (1, 1, 1);
+    	break;
+    }
+}
+
+SetupMapList( )
+{
+		level.allmaps["mp_la"].mapname = "Aftermath";
+		level.allmaps["mp_la"].mapid = "mp_la";
+		level.allmaps["mp_la"].image = "loadscreen_mp_la";
+		level.allmaps["mp_meltdown"].mapname = "Meltdown";
+		level.allmaps["mp_meltdown"].mapid = "mp_meltdown";
+		level.allmaps["mp_meltdown"].image = "loadscreen_mp_meltdown";
+		level.allmaps["mp_overflow"].mapname = "Overflow";
+		level.allmaps["mp_overflow"].mapid = "mp_overflow";
+		level.allmaps["mp_overflow"].image = "loadscreen_mp_overflow";
+		level.allmaps["mp_nightclub"].mapname = "Plaza";
+		level.allmaps["mp_nightclub"].mapid = "mp_nightclub";
+		level.allmaps["mp_nightclub"].image = "loadscreen_mp_nightclub";
+		level.allmaps["mp_dockside"].mapname = "Cargo";
+		level.allmaps["mp_dockside"].mapid = "mp_dockside";
+		level.allmaps["mp_dockside"].image = "loadscreen_mp_dockside";
+		level.allmaps["mp_carrier"].mapname = "Carrier";
+		level.allmaps["mp_carrier"].mapid = "mp_carrier";
+		level.allmaps["mp_carrier"].image = "loadscreen_mp_carrier";
+		level.allmaps["mp_drone"].mapname = "Drone";
+		level.allmaps["mp_drone"].mapid = "mp_drone";
+		level.allmaps["mp_drone"].image = "loadscreen_mp_drone";
+		level.allmaps["mp_express"].mapname = "Express";
+		level.allmaps["mp_express"].mapid = "mp_express";
+		level.allmaps["mp_express"].image = "loadscreen_mp_express";
+		level.allmaps["mp_hijacked"].mapname = "Hijacked";
+		level.allmaps["mp_hijacked"].mapid = "mp_hijacked";
+		level.allmaps["mp_hijacked"].image = "loadscreen_mp_hijacked";
+		level.allmaps["mp_raid"].mapname = "Raid";
+		level.allmaps["mp_raid"].mapid = "mp_raid";
+		level.allmaps["mp_raid"].image = "loadscreen_mp_raid";
+		level.allmaps["mp_slums"].mapname = "Slums";
+		level.allmaps["mp_slums"].mapid = "mp_slums";
+		level.allmaps["mp_slums"].image = "loadscreen_mp_Slums";
+		level.allmaps["mp_village"].mapname = "Standoff";
+		level.allmaps["mp_village"].mapid = "mp_village";
+		level.allmaps["mp_village"].image = "loadscreen_mp_village";
+		level.allmaps["mp_turbine"].mapname = "Turbine";
+		level.allmaps["mp_turbine"].mapid = "mp_turbine";
+		level.allmaps["mp_turbine"].image = "loadscreen_mp_Turbine";
+		level.allmaps["mp_socotra"].mapname = "Yemen";
+		level.allmaps["mp_socotra"].mapid = "mp_socotra";
+		level.allmaps["mp_socotra"].image = "loadscreen_mp_socotra";
+		level.allmaps["mp_nuketown_2020"].mapname = "Nuketown 2025";
+		level.allmaps["mp_nuketown_2020"].mapid = "mp_nuketown_2020";
+		level.allmaps["mp_nuketown_2020"].image = "loadscreen_mp_nuketown_2020";
+		level.allmaps["mp_downhill"].mapname = "Downhill";
+		level.allmaps["mp_downhill"].mapid = "mp_downhill";
+		level.allmaps["mp_downhill"].image = "loadscreen_mp_downhill";
+		level.allmaps["mp_mirage"].mapname = "Mirage";
+		level.allmaps["mp_mirage"].mapid = "mp_mirage";
+		level.allmaps["mp_mirage"].image = "loadscreen_mp_Mirage";
+		level.allmaps["mp_hydro"].mapname = "Hydro";
+		level.allmaps["mp_hydro"].mapid = "mp_hydro";
+		level.allmaps["mp_hydro"].image = "loadscreen_mp_Hydro";
+		level.allmaps["mp_skate"].mapname = "Grind";
+		level.allmaps["mp_skate"].mapid = "mp_skate";
+		level.allmaps["mp_skate"].image = "loadscreen_mp_skate";
+		level.allmaps["mp_concert"].mapname = "Encore";
+		level.allmaps["mp_concert"].mapid = "mp_concert";
+		level.allmaps["mp_concert"].image = "loadscreen_mp_concert";
+		level.allmaps["mp_magma"].mapname = "Magma";
+		level.allmaps["mp_magma"].mapid = "mp_magma";
+		level.allmaps["mp_magma"].image = "loadscreen_mp_Magma";
+		level.allmaps["mp_vertigo"].mapname = "Vertigo";
+		level.allmaps["mp_vertigo"].mapid = "mp_vertigo";
+		level.allmaps["mp_vertigo"].image = "loadscreen_mp_Vertigo";
+		level.allmaps["mp_studio"].mapname = "Studio";
+		level.allmaps["mp_studio"].mapid = "mp_studio";
+		level.allmaps["mp_studio"].image = "loadscreen_mp_Studio";
+		level.allmaps["mp_uplink"].mapname = "Uplink";
+		level.allmaps["mp_uplink"].mapid = "mp_uplink";
+		level.allmaps["mp_uplink"].image = "loadscreen_mp_Uplink";
+		level.allmaps["mp_bridge"].mapname = "Detour";
+		level.allmaps["mp_bridge"].mapid = "mp_bridge";
+		level.allmaps["mp_bridge"].image = "loadscreen_mp_bridge";
+		level.allmaps["mp_castaway"].mapname = "Cove";
+		level.allmaps["mp_castaway"].mapid = "mp_castaway";
+		level.allmaps["mp_castaway"].image = "loadscreen_mp_castaway";
+		level.allmaps["mp_paintball"].mapname = "Rush";
+		level.allmaps["mp_paintball"].mapid = "mp_paintball";
+		level.allmaps["mp_paintball"].image = "loadscreen_mp_paintball";
+		level.allmaps["mp_dig"].mapname = "Dig";
+		level.allmaps["mp_dig"].mapid = "mp_dig";
+		level.allmaps["mp_dig"].image = "loadscreen_mp_Dig";
+		level.allmaps["mp_frostbite"].mapname = "Frost";
+		level.allmaps["mp_frostbite"].mapid = "mp_frostbite";
+		level.allmaps["mp_frostbite"].image = "loadscreen_mp_frostbite";
+		level.allmaps["mp_pod"].mapname = "Pod";
+		level.allmaps["mp_pod"].mapid = "mp_pod";
+		level.allmaps["mp_pod"].image = "loadscreen_mp_Pod";
+		level.allmaps["mp_takeoff"].mapname = "Takeoff";
+		level.allmaps["mp_takeoff"].mapid = "mp_takeoff";
+		level.allmaps["mp_takeoff"].image = "loadscreen_mp_Takeoff";
+		level.allmaps["mp_dockside"].mapname = "Cargo";
+		level.allmaps["mp_dockside"].mapid = "mp_dockside";
+		level.allmaps["mp_dockside"].image = "loadscreen_mp_dockside";
+}
+isValidColor( value ){ // DoktorSAS Dvar utilities
+	return value == "0" || value == "1" || value == "2" || value == "3" || value == "4" || value == "5" || value == "6" || value == "7" ;
 }
