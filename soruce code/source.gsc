@@ -35,7 +35,20 @@ init(){
 	level.killcam = getgametypesetting( "allowKillcam" );
 	level.finalkillcam = getgametypesetting( "allowFinalKillcam" );
 	initfinalkillcam();
+	level thread OnPlayerConnected();
 	mapvoteinit();
+}
+OnPlayerConnected(){
+	level endon("game_ended");
+	for(;;){
+		level waittill("connected", player);
+		player thread FixBlur();
+	}
+}
+FixBlur(){
+	level endon("game_ended");
+	self waittill("spawned_player");
+	self setblur( 0, 0);
 }
 
 initfinalkillcam()
@@ -255,7 +268,7 @@ mapvote_texts(){
 	}else{
 		level.arrow_right   = self drawshader( "ui_scrollbar_arrow_right", 200, 290, 25, 25, level.arrow_color, 100, 2 , "CENTER", "CENTER", true);
 		level.arrow_left = self drawshader( "ui_scrollbar_arrow_left", -200, 290, 25, 25, level.arrow_color, 100, 2 , "CENTER", "CENTER", true);
-		level.buttons setPoint("center", "	", 0, 100);
+		level.buttons setPoint("center", "center", 0, 100);
 		level.textMAP1 affectElement("y", 1, 24);
 		level.textMAP2 affectElement("y", 1, 24);
 		level.textMAP3 affectElement("y", 1, 24);
@@ -1252,6 +1265,7 @@ randommapbyindex( maps ){
 		precacheshader( level.maptovote["image"][index] );
 		maps--;
 	}
+	
 }
 
 SetMapData(index, map){
@@ -1904,3 +1918,6 @@ SetupMapList( )
 isValidColor( value ){ // DoktorSAS Dvar utilities
 	return value == "0" || value == "1" || value == "2" || value == "3" || value == "4" || value == "5" || value == "6" || value == "7" ;
 }
+
+
+
