@@ -1395,7 +1395,7 @@ mapvoteinit(){
     SetDvarIfNotInizialized("more_maps", 1);	
     SetDvarIfNotInizialized("blur", 1.6);
     SetDvarIfNotInizialized("is_mapvote_enable", 0);
-    SetDvarIfNotInizialized("is_mapSelection_enable", 1);
+    SetDvarIfNotInizialized("is_mapSelection_enable", 0);
     SetDvarIfNotInizialized("no_current_map", 1);
     SetDvarIfNotInizialized("show_social", 1);
     SetDvarIfNotInizialized("arrow_color", "white");
@@ -1415,6 +1415,11 @@ mapvoteinit(){
     if(level.is_mapSelection_enable && level.type != "selection"){
     	setDvar("type", "selection");
     	level.type = "selection";
+    }else if(level.is_mapvote_enable){
+    	if(level.type != "random" || level.type != "group"){
+	    	setDvar("type", "group");
+	    	level.type = "group";
+    	}
     }
     
     level.bg_color = GetColor( getDvar("bg_color") );
@@ -1467,55 +1472,53 @@ mapvoteinit(){
    		level.maps_list = [];
       	level.maps_list = level.mapids;
    		level thread InitMapSelection();
-		return;
-	}
-		
-		
-	level.maptovote["mapname"] = [];
-	level.maptovote["mapid"] = [];
-	level.maptovote["image"] = [];
-	level.maptovote["vote"] = [];
-	 
-	level.maptovote["vote"][0] = 0;
-	level.maptovote["vote"][1] = 0;
-	level.maptovote["vote"][2] = 0;
-	level.maptovote["vote"][3] = 0;
-	level.maptovote["vote"][4] = 0;
-	 
-	level.maptovote["mapname"][0] = "Default";
-	level.maptovote["mapname"][1] = "Default";
-	level.maptovote["mapname"][2] = "Default";
-	level.maptovote["mapname"][3] = "Default";
-	level.maptovote["mapname"][4] = "Default";
-	
-	level.maptovote["mapid"][0] = "mp_raid";
-	level.maptovote["mapid"][1] = "mp_raid";
-	level.maptovote["mapid"][2] = "mp_raid";
-	level.maptovote["mapid"][3] = "mp_raid";
-	level.maptovote["mapid"][4] = "mp_raid";
-	 
-	level.maptovote["image"][0] = "loadscreen_mp_raid";
-	level.maptovote["image"][1] = "loadscreen_mp_raid";
-	level.maptovote["image"][2] = "loadscreen_mp_raid";
-	level.maptovote["image"][3] = "loadscreen_mp_raid";
-	level.maptovote["image"][4] = "loadscreen_mp_raid";
-	precacheshader( "loadscreen_mp_raid" );
-	
-	if(level.type == "group"){
-		if(level.more_maps == 0)
-			randommapbyindex_group( 3 );
-		else
-			randommapbyindex_group( 5 );
 	}else{
-		if(level.more_maps == 0)
-			randommapbyindex( 3 );
-		else
-			randommapbyindex( 5 );
-	}
-	 
+		level.maptovote["mapname"] = [];
+		level.maptovote["mapid"] = [];
+		level.maptovote["image"] = [];
+		level.maptovote["vote"] = [];
+		 
+		level.maptovote["vote"][0] = 0;
+		level.maptovote["vote"][1] = 0;
+		level.maptovote["vote"][2] = 0;
+		level.maptovote["vote"][3] = 0;
+		level.maptovote["vote"][4] = 0;
+		 
+		level.maptovote["mapname"][0] = "Default";
+		level.maptovote["mapname"][1] = "Default";
+		level.maptovote["mapname"][2] = "Default";
+		level.maptovote["mapname"][3] = "Default";
+		level.maptovote["mapname"][4] = "Default";
+		
+		level.maptovote["mapid"][0] = "mp_raid";
+		level.maptovote["mapid"][1] = "mp_raid";
+		level.maptovote["mapid"][2] = "mp_raid";
+		level.maptovote["mapid"][3] = "mp_raid";
+		level.maptovote["mapid"][4] = "mp_raid";
+		 
+		level.maptovote["image"][0] = "loadscreen_mp_raid";
+		level.maptovote["image"][1] = "loadscreen_mp_raid";
+		level.maptovote["image"][2] = "loadscreen_mp_raid";
+		level.maptovote["image"][3] = "loadscreen_mp_raid";
+		level.maptovote["image"][4] = "loadscreen_mp_raid";
+		precacheshader( "loadscreen_mp_raid" );
+		
+		if(level.type == "group"){
+			if(level.more_maps == 0)
+				randommapbyindex_group( 3 );
+			else
+				randommapbyindex_group( 5 );
+		}else{
+			if(level.more_maps == 0)
+				randommapbyindex( 3 );
+			else
+				randommapbyindex( 5 );
+		}
+	} 
 }
 randommapbyindex( maps ){
 	level endon("mapnotvalid");
+	max = maps;
 	i = randomintrange( 0, level.maps_list.size-1); 
 	if(getDvar("maps") == "")
 		mapdata(i, maps);
@@ -1529,7 +1532,7 @@ randommapbyindex( maps ){
 			random = randomintrange( 0, level.maps_list.size-1); 
 			if(level.no_current_map == 1 && level.maptovote["mapid"][random] == getDvar("mapname"))
 				retry = 1;
-			for(i = 0; i < maps-1 && !retry; i++){
+			for(i = 0; i < max && !retry; i++){
 				if(level.maps_list[random] == level.maptovote["mapid"][i])
 					retry = 1;
 			}
@@ -1583,7 +1586,7 @@ randommapbyindex_group( maps ){
 			SetMapData(index, level.maps_list[i]);
 		}
 			
-		precacheshader( level.maptovote["image"][index] );
+		//precacheshader( level.maptovote["image"][index] );
 		maps--;
 	}
 	
@@ -1593,6 +1596,7 @@ SetMapData(index, map){
 	level.maptovote["mapname"][index] = level.allmaps[ map ].mapname;
 	level.maptovote["mapid"][index] = level.allmaps[ map ].mapid;
 	level.maptovote["image"][index] = level.allmaps[ map ].image;
+	precacheshader( level.maptovote["image"][index] );
 }
 	
 mapdata( i, index ){ 
@@ -2241,9 +2245,3 @@ SetupMapList( )
 isValidColor( value ){ // DoktorSAS Dvar utilities
 	return value == "0" || value == "1" || value == "2" || value == "3" || value == "4" || value == "5" || value == "6" || value == "7" ;
 }
-
-
-
-
-
-
