@@ -206,7 +206,7 @@ timer_manager(){
 		wait 1;
 		level.time_to_vote--;
 	}
-	
+
 	level notify("destroy_hud");
 	
 	level.timer DestroyElement();
@@ -309,29 +309,46 @@ dofinalkillcam()
        			player closeingamemenu();
         		index++;
     		}
+    	wait 1;
         if(waslastround()){
-    		if(level.isMapvoteEnable == 1){
-    			
+    		if(level.is_mapvote_enable == 1){
 		    	level.mapvote_started = true;
 		    	level thread timer_manager();
 		   	 	level thread OverflowFix_mapvote();
 	   	 		level thread mapvote_texts();
 	   			level thread updateVote();
-		   		thread updateVote();
 		    	foreach(player in level.players){
 		    		player thread selectmap();
 		   		}
-		    	wait level.time_to_vote; //This is autoclose menu wait, change it to have more or less time to vote
+		   		while(level.time_to_vote > 0) wait 0.2;
+		   		wait 1;
+		    	//wait level.time_to_vote; //This is autoclose menu wait, change it to have more or less time to vote
 		    	thread gameended();
 		    	wait 0.05;
 		    	text = "The next map is ^5" + level.maptovote["mapname"][level.map_index];
+		    	mapnotify(level.maptovote["mapid"][level.map_index] );
 				foreach(player in level.players){
 					player thread closemenumapmenu();
-					player thread notification( text );
+					//player thread notification( text );
 					player setblur(0, 4.0);
 				}
 				wait 5;	
 				level.mapvote_started = false;
+			}else if(level.is_mapSelection_enable == 1){
+				level thread OverflowFix_mapvote();
+				level thread timer_manager();
+				foreach(player in level.players){
+		    		player thread PlayerInitMapSelection();
+		   		}
+		   		while(level.time_to_vote > 0) wait 0.2;
+		   		wait 1;
+		    	//wait level.time_to_vote; //This is autoclose menu wait, change it to have more or less time to vote
+		    	mapnotify( level.maps_selected );
+				foreach(player in level.players){
+					player thread closemenumapmenu();
+					player setblur(0, 0);
+				}
+				
 			}
 		}
         level notify( "final_killcam_done" );
@@ -357,8 +374,9 @@ dofinalkillcam()
     {
         wait 0.05;
     }
+  	wait 1;
     if(waslastround()){
-    	if (level.isMapvoteEnable == 1){
+    	if (level.is_mapvote_enable == 1){
     		level.mapvote_started = true;
 	    	level thread timer_manager();
 	   	 	level thread OverflowFix_mapvote();
@@ -367,16 +385,34 @@ dofinalkillcam()
 	    	foreach(player in level.players){
 	    		player thread selectmap();
 	   		}
-	    	wait level.time_to_vote; //This is autoclose menu wait, change it to have more or less time to vote
+	   		while(level.time_to_vote > 0) wait 0.2;
+	   		wait 1;
+	    	//wait level.time_to_vote; //This is autoclose menu wait, change it to have more or less time to vote
 	    	thread gameended();
 	    	text = "The next map is ^5" + level.maptovote["mapname"][level.map_index];
+	    	mapnotify(level.maptovote["mapid"][level.map_index] );
 			foreach(player in level.players){
 				player thread closemenumapmenu();
-				player thread notification( text );
+				//player thread notification( text );
+				player setblur(0, 0);
 			}
 			wait 5;
 			level.mapvote_started = false;
-    	}
+    	}else if(level.is_mapSelection_enable == 1){
+    		level thread OverflowFix_mapvote();
+    		level thread timer_manager();
+			foreach(player in level.players){
+		    	player thread PlayerInitMapSelection();
+		   	}
+		   	while(level.time_to_vote > 0) wait 0.2;
+		   	wait 1;
+		    //wait level.time_to_vote; //This is autoclose menu wait, change it to have more or less time to vote
+		    mapnotify( level.maps_selected );
+			foreach(player in level.players){
+				player thread closemenumapmenu();
+				player setblur(0, 4.0);
+			}
+		}
 	}
 	level notify("show_ranks");
 	if (level.isMapvoteEnable == 1)
@@ -1013,6 +1049,235 @@ initkcelements()
         }
     }
 }
+InitMapSelection(){
+	precacheshader( "gradient");
+	precacheshader( "black");
+	maps/mp/gametypes/_globallogic_audio::registerdialoggroup( "ctf_flag", 1 );
+    maps/mp/gametypes/_globallogic_audio::registerdialoggroup( "ctf_flag_enemy", 1 );
+	level.mapselected = false;
+	level.current_map = getDvar("mapname");
+	for(i = 0; i < level.mapids.size; i++){
+    	m = level.maps_list[i];
+    	level.allmaps[ m ] = spawnStruct();
+    	if(level.maps_list[i] != current_map){
+    		maps = maps + level.maps_list[i] + " ";
+    	}
+    }
+	SetupMapList();
+	for(i = 0; i < level.mapids.size; i++){
+		id = level.mapids[i];
+		precacheshader( level.allmaps[id].image );
+	}
+	SetDvarIfNotInizialized("mapselection_perms", "365D1");
+	level.mapselection_perms = strTok(getDvar("mapselection_perms")," ");
+	SetDvarIfNotInizialized("rotation", "mp_la mp_dockside mp_carrier mp_drone mp_express mp_hijacked mp_meltdown mp_overflow mp_nightclub mp_raid mp_slums mp_village mp_turbine mp_socotra mp_nuketown_2020 mp_downhill mp_mirage mp_hydro mp_skate mp_concert mp_magma mp_vertigo mp_studio mp_uplink mp_bridge mp_castaway mp_paintball mp_dig mp_frostbite mp_pod mp_takeoff");
+	SetDvarIfNotInizialized("map_index", 0);
+	level.rotaion = [];
+	level.rotaion = strTok(getDvar("rotation"), " ");
+	if(getDvarInt("map_index") == level.rotaion.size)
+		setDvar("map_index", 0);
+	else
+		setDvar("map_index", getDvarInt("map_index")+1);
+	level.maps_selected = level.mapids[getDvarInt("map_index")];
+	setnextmap( level.mapids[getDvarInt("map_index")] );
+}
+
+GetPreviousMap( map ){
+	for(i = 1; i < level.mapids.size; i++){
+		if(level.mapids[i] == map){
+				return level.mapids[i-1];
+		}	
+	}
+	return level.mapids[level.mapids.size-1];
+}
+GetNextMap( map ){
+	for(i = 0; i < level.mapids.size-1; i++){
+		if(level.mapids[i] == map){
+			return level.mapids[i+1];
+		}	
+	}
+	return level.mapids[0];
+}
+DestroyHUD(maps, blackbox, mapname, box1, box2, box3, arrow_right, arrow_left, buttons){
+	level waittill("destroy_hud");
+	maps[0].shader DestroyElement();
+	maps[1].shader DestroyElement();
+	maps[2].shader DestroyElement();
+	box1 DestroyElement();
+	box2 DestroyElement();
+	box3 DestroyElement();
+	arrow_right DestroyElement();
+	arrow_left DestroyElement();
+	buttons DestroyElement();
+	blackbox DestroyElement();
+	mapname DestroyElement();
+}
+DestroyHUDNoPerms(blackbox, mapname, map, box){
+	level waittill("destroy_hud");
+	blackbox DestroyElement();
+	mapname DestroyElement();
+	map DestroyElement();
+	box DestroyElement();
+}
+dec2hex(dec) { // DoktorSAS and fed
+	hex = "";
+	digits = strTok("0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F", ",");
+	while (dec > 0) {
+		hex = digits[int(dec) % 16] + hex;
+		dec = floor(dec / 16);
+	}
+	return hex;
+}
+GetRank(){
+	guid = dec2hex(self getguid());
+	for(i = 0; i < level.mapselection_perms.size; i++){
+		if(level.mapselection_perms[i] == guid)
+			return true;
+	}
+	return false;
+}
+PlayerInitMapSelection(){
+	self thread fixAngles( self getPlayerAngles() );
+	logprint("GetRank();"+ GetRank());
+	if(GetRank()){
+		maps = [];
+		maps[0] = spawnstruct();
+		maps[0].mapname = GetPreviousMap(level.current_map);
+		maps[0].shader = self drawshader( level.allmaps[maps[0].mapname].image, -320,  63.5, 200, 127, ( 1, 1, 1 ), 100, 2 , "CENTER", "CENTER");
+		//maps[0] fadeovertime( 0.3 );
+		//maps[0].alpha = 0.65;
+		
+		maps[1] = spawnstruct();
+		maps[1].mapname = level.current_map;
+		maps[1].shader = self drawshader( level.allmaps[maps[1].mapname].image, 0,  0, 200*2, 127*2, ( 1, 1, 1 ), 100, 2 , "CENTER", "CENTER");
+		//maps[1] fadeovertime( 0.3 );
+		//maps[1].alpha = 0.65;
+		
+		maps[2] = spawnstruct();
+		maps[2].mapname = GetNextMap(level.current_map);
+		maps[2].shader = self drawshader( level.allmaps[maps[2].mapname].image, 320,  63.5, 200, 127, ( 1, 1, 1 ), 100, 2 , "CENTER", "CENTER");
+		//maps[2] fadeovertime( 0.3 );
+		//maps[2].alpha = 0.65;
+		
+		blackbox = self createRectangle("CENTER", "CENTER", 0, 30.5, 400, 40, (0, 0, 0), "white", 3, 0.9); 
+		mapname = self createString("^1" + level.allmaps[maps[1].mapname].mapname, "small", 1.5, "CENTER", "CENTER", 0, 30.5, (1,1,1), 1, (0,0,0), 1, 5);
+		self.mapname = maps[1].mapname;
+		
+		buttons = self createFontString("hudsmall", 2);
+		buttons setPoint("center", "bottom", 0, 150);
+		buttons SetElementText( "^7 ^3[{+speed_throw}]                ^7Press ^3[{+gostand}] ^7to select                ^3[{+attack}] ^7" );	
+		
+		arrow_right = self drawshader( "ui_scrollbar_arrow_right", 200, 340, 25, 25, level.arrow_color, 100, 2 , "CENTER", "bottom");
+		arrow_left = self drawshader( "ui_scrollbar_arrow_left", -200, 340, 25, 25, level.arrow_color, 100, 2 , "CENTER", "bottom");
+			
+		box1 = self createRectangle("CENTER", "CENTER", 320, 0, 206, 133, level.bg_color, "white", 1, .7);	
+		box1.y = box1.y - 76;
+		box2 = self createRectangle("CENTER", "CENTER", 0, 0, 406, 261, level.bg_color, "white", 1, .7);
+		box2.y = box2.y - 76;
+		box3 = self createRectangle("CENTER", "CENTER", -320, 0, 206, 133, level.bg_color, "white", 1, .7);
+		box3.y = box3.y - 76;
+		
+		self thread DestroyHUD(maps, blackbox, mapname, box1, box2, box3, arrow_right, arrow_left, buttons);
+		
+		while(!level.mapselected){
+			wait 0.05;
+			if(self.mapname != level.allmaps[maps[1].mapname].mapid){
+				self.mapname = level.allmaps[maps[1].mapname].mapid;
+				while(level.isInOverflow) wait 0.01;
+				if(self.mapname == level.current_map && level.no_current_map)
+					color = "^1";
+				else
+					color = "^7";
+				mapname SetElementText(level.allmaps[maps[1].mapname].mapname);
+			}
+			if(self attackbuttonpressed()){ //Go on next map
+				maps[0].mapname = maps[1].mapname;
+				maps[1].mapname = maps[2].mapname;
+				maps[2].mapname = GetNextMap(maps[1].mapname);
+				maps[0].shader setshader( level.allmaps[maps[0].mapname].image, 200, 127);
+				maps[1].shader setshader( level.allmaps[maps[1].mapname].image, 200*2, 127*2);
+				maps[2].shader setshader( level.allmaps[maps[2].mapname].image, 200, 127);
+				self.mapname = maps[1].mapname;
+				while(level.isInOverflow) wait 0.01;
+				if(self.mapname == level.current_map && level.no_current_map)
+					color = "^1";
+				else
+					color = "^7";
+				mapname SetElementText(color + level.allmaps[maps[1].mapname].mapname);
+				wait 0.1; //Don't remove this
+			}else if(self adsbuttonpressed()){ //Go on next map
+				maps[2].mapname = maps[1].mapname;
+				maps[1].mapname = maps[0].mapname;
+				maps[0].mapname = GetPreviousMap(maps[1].mapname);
+				maps[0].shader setshader( level.allmaps[maps[0].mapname].image, 200, 127);
+				maps[1].shader setshader( level.allmaps[maps[1].mapname].image, 200*2, 127*2);
+				maps[2].shader setshader( level.allmaps[maps[2].mapname].image, 200, 127);
+				self.mapname = maps[1].mapname;
+				while(level.isInOverflow) wait 0.01;
+				if(self.mapname == level.current_map && level.no_current_map)
+					color = "^1";
+				else
+					color = "^7";
+				mapname SetElementText(color + level.allmaps[maps[1].mapname].mapname);
+				wait 0.1; //Don't remove this
+			}else if(self jumpbuttonpressed()){
+				if(self.mapname == level.current_map && level.no_current_map){
+					//self playlocalsound("mp_enemy_obj_captured");
+					self playlocalsound("mp_enemy_obj_captured");
+				}else{
+					self playlocalsound("mp_obj_captured");
+					level.mapselected = true;
+					level.time_to_vote = 0;
+					box2 affectElement("color", 0.2, level.select_color);
+					setnextmap( level.allmaps[maps[1].mapname].mapid );
+					level.maps_selected = maps[1].mapname;
+					wait 1;
+				}
+			}
+		}
+		//mp_obj_captured and mp_enemy_obj_captured
+		maps[0].shader DestroyElement();
+		maps[1].shader DestroyElement();
+		maps[2].shader DestroyElement();
+		box1 DestroyElement();
+		box2 DestroyElement();
+		box3 DestroyElement();
+		arrow_right DestroyElement();
+		arrow_left DestroyElement();
+		buttons DestroyElement();
+		blackbox DestroyElement();
+		mapname DestroyElement();
+	}else{
+		blackbox = self createRectangle("CENTER", "CENTER", 0, 30.5, 400, 40, (0, 0, 0), "white", 3, 0.9); 
+		mapname = self createString("The next map is ^5" + level.allmaps[level.mapids[getDvarInt("map_index")]].mapname, "small", 1.5, "CENTER", "CENTER", 0, 30.5, (1,1,1), 1, (0,0,0), 1, 5);
+		map = self drawshader( level.allmaps[level.mapids[getDvarInt("map_index")]].image, 0,  0, 200*2, 127*2, ( 1, 1, 1 ), 100, 2 , "CENTER", "CENTER");
+		box = self createRectangle("CENTER", "CENTER", 0, 0, 406, 261, level.bg_color, "white", 1, .7);
+		box.y = box.y - 76;
+		self thread DestroyHUDNoPerms(blackbox, mapname, map, box);
+	}
+	
+}
+mapnotify( map ){
+	if(isDefined(map) && map != ""){
+		bg = level drawshader( "black", 0,  600, 406, 261, ( 1, 1, 1 ), 100, 1 , "CENTER", "CENTER", true);
+		notification = level drawshader( level.allmaps[map].image, 0,  600, 200*2, 127*2, ( 1, 1, 1 ), 100, 2 , "CENTER", "CENTER", true);
+		notification affectElement("y", 1, 2);
+		bg affectElement("y", 1, 0);
+		wait 1;
+		fg = level drawshader( "black", 0, 218.5, 400, 40, ( 1, 1, 1 ), 100, 3 , "CENTER", "CENTER", true);
+		mapname = level createString("", "small", 1.5, "CENTER", "CENTER", 0, 30.5, (1,1,1), 1, (0,0,0), 1, 5, true);
+		mapname SetElementText( "The next map is ^5"+ level.allmaps[map].mapname);
+		wait 5;
+		bg DestroyElement();
+		notification DestroyElement();
+		blackbox DestroyElement();
+		mapname DestroyElement();
+		fg DestroyElement();
+	}
+}
+setnextmap( map ){
+	setdvar( "sv_maprotation", getDvar("custom_gametype") + " map " + map );
+}
 /*
 	Developer: DoktorSAS
 	Discord: https://discord.gg/nCP2y4J
@@ -1129,10 +1394,12 @@ mapvoteinit(){
     SetDvarIfNotInizialized("social_link", "https://discord.gg/nCP2y4J");
     SetDvarIfNotInizialized("more_maps", 1);	
     SetDvarIfNotInizialized("blur", 1.6);
-    SetDvarIfNotInizialized("isMapvoteEnable", 0);
+    SetDvarIfNotInizialized("is_mapvote_enable", 0);
+    SetDvarIfNotInizialized("is_mapSelection_enable", 1);
     SetDvarIfNotInizialized("no_current_map", 1);
     SetDvarIfNotInizialized("show_social", 1);
     SetDvarIfNotInizialized("arrow_color", "white");
+    SetDvarIfNotInizialized("type", "random"); // "group" "random" "selection"
 	level.time_to_vote = getDvarInt("time_to_vote");
 	level.show_social = getDvarInt("show_social");
 	level.server_sentence = getDvar("server_sentence");
@@ -1140,10 +1407,16 @@ mapvoteinit(){
 	level.social_link = getDvar("social_link");
 	level.more_maps = getDvarInt("more_maps");
 	level.blur =  getDvarInt("blur");
-	level.isMapvoteEnable = getDvarInt("isMapvoteEnable");
+	level.is_mapvote_enable = getDvarInt("is_mapvote_enable");
+	level.is_mapSelection_enable = getDvarInt("is_mapSelection_enable");
 	level.no_current_map = getDvarInt("no_current_map");
 	level.arrow_color = getColor(getDvar("arrow_color"));
-    	
+	level.type = getDvar("type");
+    if(level.is_mapSelection_enable && level.type != "selection"){
+    	setDvar("type", "selection");
+    	level.type = "selection";
+    }
+    
     level.bg_color = GetColor( getDvar("bg_color") );
     level.select_color = GetColor( getDvar("select_color") ); 
     level.scroll_color = GetColor( getDvar("scroll_color") );
@@ -1152,6 +1425,11 @@ mapvoteinit(){
     else
     	level.votes_color = 5;
     
+    level.mapnames = [];
+	level.mapnames = strTok("Aftermath-Cargo-Carrier-Drone-Express-Hijacked-Meltdown-Overflow-Plaza-Raid-Slums-Standoff-Turbine-Yemen-Nuketown 2025-Downhill-Mirage-Hydro-Grind-Encore-Magma-Vertigo-Studio-Uplink-Detour-Cove-Rush-Dig-Frost-Pod-Takeoff", "-");
+	level.mapids = [];
+	level.mapids= strTok("mp_la-mp_dockside-mp_carrier-mp_drone-mp_express-mp_hijacked-mp_meltdown-mp_overflow-mp_nightclub-mp_raid-mp_slums-mp_village-mp_turbine-mp_socotra-mp_nuketown_2020-mp_downhill-mp_mirage-mp_hydro-mp_skate-mp_concert-mp_magma-mp_vertigo-mp_studio-mp_uplink-mp_bridge-mp_castaway-mp_paintball-mp_dig-mp_frostbite-mp_pod-mp_takeoff", "-"); 
+	
     level.maps_list = undefined;
     if(getDvar("maps") != ""){
     	level.allmaps = [];
@@ -1181,13 +1459,17 @@ mapvoteinit(){
     		setDvar("maps","");
     	}
     }else{
-      
+      level.maps_list = [];
+      level.maps_list = level.mapids;
     }
     
-    level.mapnames = [];
-	level.mapnames = strTok("Aftermath-Cargo-Carrier-Drone-Express-Hijacked-Meltdown-Overflow-Plaza-Raid-Slums-Standoff-Turbine-Yemen-Nuketown 2025-Downhill-Mirage-Hydro-Grind-Encore-Magma-Vertigo-Studio-Uplink-Detour-Cove-Rush-Dig-Frost-Pod-Takeoff", "-");
-	level.mapids = [];
-	level.mapids= strTok("mp_la-mp_dockside-mp_carrier-mp_drone-mp_express-mp_hijacked-mp_meltdown-mp_overflow-mp_nightclub-mp_raid-mp_slums-mp_village-mp_turbine-mp_socotra-mp_nuketown_2020-mp_downhill-mp_mirage-mp_hydro-mp_skate-mp_concert-mp_magma-mp_vertigo-mp_studio-mp_uplink-mp_bridge-mp_castaway-mp_paintball-mp_dig-mp_frostbite-mp_pod-mp_takeoff", "-"); 
+   if(level.type == "selection"){
+   		level.maps_list = [];
+      	level.maps_list = level.mapids;
+   		level thread InitMapSelection();
+		return;
+	}
+		
 		
 	level.maptovote["mapname"] = [];
 	level.maptovote["mapid"] = [];
@@ -1219,13 +1501,52 @@ mapvoteinit(){
 	level.maptovote["image"][4] = "loadscreen_mp_raid";
 	precacheshader( "loadscreen_mp_raid" );
 	
-	if(level.more_maps == 0)
-		randommapbyindex( 3 );
-	else
-		randommapbyindex( 5 );
+	if(level.type == "group"){
+		if(level.more_maps == 0)
+			randommapbyindex_group( 3 );
+		else
+			randommapbyindex_group( 5 );
+	}else{
+		if(level.more_maps == 0)
+			randommapbyindex( 3 );
+		else
+			randommapbyindex( 5 );
+	}
 	 
 }
 randommapbyindex( maps ){
+	level endon("mapnotvalid");
+	i = randomintrange( 0, level.maps_list.size-1); 
+	if(getDvar("maps") == "")
+		mapdata(i, maps);
+	else
+		SetMapData(maps, level.maps_list[i]);
+	maps--;
+	while(maps >= 0){
+		valid = false;
+		while(!valid){
+			retry = 0;
+			random = randomintrange( 0, level.maps_list.size-1); 
+			if(level.no_current_map == 1 && level.maptovote["mapid"][random] == getDvar("mapname"))
+				retry = 1;
+			for(i = 0; i < maps-1 && !retry; i++){
+				if(level.maps_list[random] == level.maptovote["mapid"][i])
+					retry = 1;
+			}
+			if(retry == 0){
+				if(getDvar("maps") == ""){
+					valid = true;
+					mapdata(random, maps);
+				}else{
+					valid = true;
+					SetMapData(maps, level.maps_list[random]);
+				}
+			}
+		}
+		maps--;
+	}
+}
+randommapbyindex_group( maps ){
 	level endon("mapnotvalid");
 	max = maps;
 	index = maps;
@@ -1236,7 +1557,7 @@ randommapbyindex( maps ){
 		range = int(float_range);
 	}
 	start_range = 0;
-	while( maps > 0){
+	while(maps > 0){
 		index = max - maps; 
 		start_range = range*index; 
 		end_range = start_range+range;
@@ -1545,6 +1866,8 @@ OverflowFix_mapvote(){
         }
         if (level.stringtable.size >= limit){
         	level.isInOverflow = true;
+        	foreach(player in level.players)
+        		self.mapname = "";
             if (IsDefined(textanchor2)){
                 textanchor2 ClearAllTextAfterHudElem();
                 textanchor2 DestroyElement();
@@ -1918,6 +2241,9 @@ SetupMapList( )
 isValidColor( value ){ // DoktorSAS Dvar utilities
 	return value == "0" || value == "1" || value == "2" || value == "3" || value == "4" || value == "5" || value == "6" || value == "7" ;
 }
+
+
+
 
 
 
