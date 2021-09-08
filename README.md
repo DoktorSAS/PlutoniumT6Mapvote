@@ -8,11 +8,11 @@ Several Servers Owners require a mapvote for their quality servers. This mapvote
 There is no video tutorial on how to install mapvote, it will be done in the future. 
 However, all the necessary information has been written. Reading it is enough to make the script work.
 
-    1. Download the files from the [github release]()
-    2. Copy the file _mapvote.gsc_ in your scripts folder (by default is  _%localappdata%\Plutonium\storage\t6\scripts\mp_)
-    3. Open your server config file (The _.cfg_ file) and copy and paste the content of _config.cfg_
-    4. Edit your maprotation and set just one map like _`set sv_maprotation "map mp_nuketown_2025"`_
-    5. Start the server!
+1. Download the files from the [github release]()
+2. Copy the file _mapvote.gsc_ in your scripts folder (by default is  _%localappdata%\Plutonium\storage\t6\scripts\mp_)
+3. Open your server config file (The _.cfg_ file) and copy and paste the content of _config.cfg_
+4. Edit your maprotation and set just one map like _`set sv_maprotation "map mp_nuketown_2025"`_
+5. Start the server!
 
 ### Preview (Not available yet!)
 
