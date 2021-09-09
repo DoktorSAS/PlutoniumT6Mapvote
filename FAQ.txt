@@ -1,0 +1,21 @@
+How to use the script?
+    To use the script, just copy the compiled mapvote.gsc 
+    file into the folder %localappdata%\Plutonium\storage\t6\scripts\mp\
+
+Does it work in a private game?
+    The script is made to be Server Side and work with map rotation. Private games 
+    do not support map rotation and therefore the script cannot work if no changes are made.
+
+is it allowed to sell/share the script?
+    You are allowed to share the script but you are not allowed to sell or resell it. Since 
+    this is an open source project, selling even a slightly modified script is considered fraud.
+    P.S: 
+        I am not respnsible for what will be done, it just bothers me the resale of free stuff.
+    
+Who can I contact for support?
+    In case of support you just write under the post on the forum.
+
+Does it work on Console and Redacted T6?
+    It doesn't work without modifications, to make it work you have to modify 
+    the code that handles the pressed buttons.
+
