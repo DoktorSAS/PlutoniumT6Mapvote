@@ -158,7 +158,7 @@ mv_GetRandomMap( mapsIDs ) // Select random map from the list
 	mapschoosed = [];
 	index = randomIntRange(0,mapsIDs.size-1);
 	map = mapsIDs[index];
-	ArrayRemoveValue(mapsIDs, mapsIDs[index]);
+	ArrayRemoveValue(mapsIDs, index);
 	return mapsIDs[index];
 }
 
@@ -258,7 +258,6 @@ mv_PlayerButtonsMonitor( boxes )
 		boxes[index] affectElement("color", 0.2, select_color);
 	}
 
-
 	level waittill("mv_destroy_hud");
 	foreach(box in boxes) 
 	{
@@ -269,7 +268,7 @@ mv_PlayerButtonsMonitor( boxes )
 	{
 		box DestroyElement();
 	}
-	self setblur( getDvarFloat("mv_blur"), 0 );
+	
 }
 mv_VoteManager( map1, map2, map3 )
 {
@@ -472,8 +471,12 @@ mv_Timer()
 		wait 1;
 		level.__mapvote["time"]--;
 	}
-
+	wait 1;
     level notify("mv_destroy_hud");
+	foreach(player in level.players) 
+	{
+		player setblur( 0, 0 );
+	}
     if(mv_credits)
         credits DestroyElement();
     timer DestroyElement();
