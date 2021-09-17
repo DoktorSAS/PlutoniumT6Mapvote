@@ -114,6 +114,8 @@ FixBlur() // Reset blur effect to 0
 
 mv_Begin()
 {
+	if(getDvarInt("mv_enable") != 1) // Check if mapvote is enable
+		return; // End if the mapvote its not enable
     level thread mv_Timer();
 	//level thread mv_OverflowFix(); // Should be not needed anymore, but to be safe i leave it here
 	mapslist = [];
