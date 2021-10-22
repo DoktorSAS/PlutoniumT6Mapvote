@@ -114,31 +114,36 @@ FixBlur() // Reset blur effect to 0
 
 mv_Begin()
 {
+	level endon("mv_destroy_hud");
 	if(getDvarInt("mv_enable") != 1) // Check if mapvote is enable
 		return; // End if the mapvote its not enable
-    level thread mv_Timer();
-	//level thread mv_OverflowFix(); // Should be not needed anymore, but to be safe i leave it here
-	mapslist = [];
-	mapslist = getDvar("mv_maps");
-	mapslist = mv_GetMapsThatCanBeVoted( mapslist ); // Remove blacklisted maps
-	mapsIDs = [];
-    mapsIDs = strTok(mapslist, " "); 
-    mapsd = [];
-	mapsd = getMapsData( mapsIDs );
+	
+	if(!isDefined(level.mapvote_started))
+	{
+		level.mapvote_started = 1;  
+		level thread mv_Timer();
+		level thread mv_OverflowFix(); // Should be not needed anymore, but to be safe i leave it here
+		mapslist = [];
+		mapsIDs = [];
+		mapsIDs = strTok(getDvar("mv_maps"), " "); 
+		mapslist = mv_GetMapsThatCanBeVoted( mapsIDs ); // Remove blacklisted maps
+		mapsd = [];
+		mapsd = getMapsData( mapsIDs );
 
-	mapschoosed = [];
-	map1 = mapsd[ mv_GetRandomMap( mapsIDs ) ];
-	map2 = mapsd[ mv_GetRandomMap( mapsIDs ) ];
-	map3 = mapsd[ mv_GetRandomMap( mapsIDs ) ];
+		mapschoosed = [];
+		map1 = mapsd[ mv_GetRandomMap( mapsIDs ) ];
+		map2 = mapsd[ mv_GetRandomMap( mapsIDs ) ];
+		map3 = mapsd[ mv_GetRandomMap( mapsIDs ) ];
 
-    level thread mv_ServerUI( map1, map2, map3 );
-	foreach(player in level.players) {
-		if(!player is_bot())
-			player thread mv_PlayerUI();
+		level thread mv_ServerUI( map1, map2, map3 );
+		foreach(player in level.players) {
+			//if(!player is_bot())
+				player thread mv_PlayerUI();
+		}
+
+		mv_VoteManager( map1, map2, map3 );
 	}
-
-	mv_VoteManager( map1, map2, map3 );
-
+  
 }
 
 mv_GetMapsThatCanBeVoted( mapslist )
@@ -171,6 +176,7 @@ is_bot() // Check if a players is a bot
 
 mv_PlayerUI()
 {
+	level endon("mv_destroy_hud");
 	self setblur( getDvarFloat("mv_blur"), 1.5 );
 	
 	scroll_color = getColor( getDvar("mv_scrollcolor") );
@@ -192,16 +198,17 @@ mv_PlayerUI()
 mv_PlayerFixAngle()
 {
 	level endon("mv_destroy_hud");
-	angles = self.angles;
-	while(level.__mapvote["time"] > 0)
-	{
+	level waittill("mv_start_vote");
+	angles = self getPlayerAngles();
+
+	self waittill_any("left", "right");
+	if(self getPlayerAngles() != angles)
 		self setPlayerAngles(angles);
-		wait 0.05;
-	}
 }
 
 mv_PlayerUIUpdate(boxes, index)
 {
+	level endon("mv_destroy_hud");
 	scroll_color = getColor( getDvar("mv_scrollcolor") );
 	bg_color =  getColor( getDvar("mv_backgroundcolor") );
 	i = 0;
@@ -217,6 +224,7 @@ mv_PlayerUIUpdate(boxes, index)
 }
 mv_PlayerButtonsMonitor( boxes )
 {
+	level endon("game_ended");
 	self notifyonplayercommand("left"	, "+attack"		);
     self notifyonplayercommand("right"	, "+speed_throw");
 	self notifyonplayercommand("left"	, "+moveright"	);
@@ -226,7 +234,7 @@ mv_PlayerButtonsMonitor( boxes )
     self notifyonplayercommand("select"	, "+gostand"	);
 
 	self.statusicon = "compassping_enemy";	// Red dot
-	
+	level waittill("mv_start_vote");
 	index = 0;
 	isVoting = 1;
 	while(level.__mapvote["time"] > 0 && isVoting )
@@ -265,7 +273,7 @@ mv_PlayerButtonsMonitor( boxes )
 	{
 		box affectElement("alpha", 1, 0);
 	}
-	wait 1;
+	wait 2;
 	foreach(box in boxes) 
 	{
 		box DestroyElement();
@@ -274,26 +282,27 @@ mv_PlayerButtonsMonitor( boxes )
 }
 mv_VoteManager( map1, map2, map3 )
 {
+	level endon("mv_destroy_hud");
 	votes = [];
 	votes[0] = spawnStruct(); 
-	votes[0].votes = createServerFontString("hudsmall", 2);
- 	votes[0].votes setPoint("CENTER", "CENTER", -220+55, -325);
+	votes[0].votes = level createServerFontString("hudsmall", 2);
+ 	votes[0].votes setPoint("CENTER", "CENTER", 165, -325);
 	votes[0].votes.label = &"^" + getDvarInt("mv_votecolor");
 	votes[0].votes.sort = 4;
 	votes[0].value = 0;
 	votes[0].map = map1;
 
 	votes[1] = spawnStruct(); 
-	votes[1].votes = createServerFontString("hudsmall", 2);
- 	votes[1].votes setPoint("CENTER", "CENTER", 0+55, -325);	
+	votes[1].votes = level createServerFontString("hudsmall", 2);
+ 	votes[1].votes setPoint("CENTER", "CENTER", 55, -325);	
 	votes[1].votes.label = &"^" + getDvarInt("mv_votecolor");
 	votes[1].votes.sort = 4;
 	votes[1].value = 0;
 	votes[1].map = map2;
 
 	votes[2] = spawnStruct(); 
-	votes[2].votes = createServerFontString("hudsmall", 2);
- 	votes[2].votes setPoint("CENTER", "CENTER", 220+55, -325);
+	votes[2].votes = level createServerFontString("hudsmall", 2);
+ 	votes[2].votes setPoint("CENTER", "CENTER", 165, -325);
 	votes[2].votes.label = &"^" + getDvarInt("mv_votecolor");
 	votes[2].votes.sort = 4;
 	votes[2].value = 0;
@@ -351,6 +360,8 @@ mv_VoteManager( map1, map2, map3 )
 	votes[0].votes DestroyElement();
 	votes[1].votes DestroyElement();
 	votes[2].votes DestroyElement();
+
+	wait 5;
 }
 
 mv_GetMostVotedMap( votes )
@@ -376,31 +387,32 @@ mv_SetRotation( mapid )
 
 mv_ServerUI( map1, map2, map3 )
 {
+	level endon("mv_destroy_hud");
 	preCacheShader(map1.shader);
 	preCacheShader(map2.shader);
 	preCacheShader(map3.shader);
 
-    buttons = createServerFontString("hudsmall", 2);
-	buttons SetElementText( "^7 ^3[{+speed_throw}]                ^7Press ^3[{+gostand}] ^7or ^3[{+activate}] ^7to select                ^3[{+attack}] ^7" + "\n^7  ^3[{+moveleft}]                                                                                 ^3[{+moveright}]^7" );	
-	buttons setPoint("center", "center", 0, 100);
+    buttons = level createServerFontString("hudsmall", 2);
+	buttons SetElementText( "^7 ^3[{+speed_throw}]              ^7Press ^3[{+gostand}] ^7or ^3[{+activate}] ^7to select              ^3[{+attack}] ^7" + "\n^7  ^3[{+moveleft}]                                                                                 ^3[{+moveright}]^7" );	
+	buttons setPoint("CENTER", "CENTER", 0, 100);
 	buttons.hideWhenInMenu = 1;
 
     mv_votecolor = getDvar("mv_votecolor");
 
-    mapUI1 = createString( "^7"+ map1.mapname, "hudsmall", 1.5, "CENTER", "CENTER", -220, -325, (1,1,1), 1, (0,0,0), 0.5, 5, true);		
-	mapUI2 = createString( "^7"+ map2.mapname, "hudsmall", 1.5, "CENTER", "CENTER",    0, -325, (1,1,1), 1, (0,0,0), 0.5, 5, true);		
-	mapUI3 = createString( "^7"+ map3.mapname, "hudsmall", 1.5, "CENTER", "CENTER",  220, -325, (1,1,1), 1, (0,0,0), 0.5, 5, true);
+    mapUI1 = level createString( "^7"+ map1.mapname, "hudsmall", 1.5, "CENTER", "CENTER", -220, -325, (1,1,1), 1, (0,0,0), 0.5, 5, true);		
+	mapUI2 = level createString( "^7"+ map2.mapname, "hudsmall", 1.5, "CENTER", "CENTER",    0, -325, (1,1,1), 1, (0,0,0), 0.5, 5, true);		
+	mapUI3 = level createString( "^7"+ map3.mapname, "hudsmall", 1.5, "CENTER", "CENTER",  220, -325, (1,1,1), 1, (0,0,0), 0.5, 5, true);
 
-	mapUIIMG1 = drawshader( map1.image, -220, -310, 200, 127, ( 1, 1, 1 ), 1, 2, "LEFT", "CENTER", true);
+	mapUIIMG1 = level drawshader( map1.image, -220, -310, 200, 127, ( 1, 1, 1 ), 1, 2, "LEFT", "CENTER", true);
 	mapUIIMG1 fadeovertime( 0.5 );
-	mapUIIMG2 = drawshader( map2.image, 0, -310, 200, 127, ( 1, 1, 1 ), 1, 2, "CENTER", "CENTER", true);
+	mapUIIMG2 = level drawshader( map2.image, 0, -310, 200, 127, ( 1, 1, 1 ), 1, 2, "CENTER", "CENTER", true);
 	mapUIIMG2 fadeovertime( 0.5 );
-	mapUIIMG3 = drawshader( map3.image, 220, -310, 200, 127, ( 1, 1, 1 ), 1, 2, "RIGHT", "CENTER", true);
+	mapUIIMG3 = level drawshader( map3.image, 220, -310, 200, 127, ( 1, 1, 1 ), 1, 2, "RIGHT", "CENTER", true);
 	mapUIIMG3 fadeovertime( 0.5 );
 
-	mapUIBTXT1 = drawshader( "black", -220,  89+97, 200, 30, ( 1, 1, 1 ), 1, 3 , mapUIIMG1.x, mapUIIMG1.y, true);
-	mapUIBTXT2 = drawshader( "black", 	 0,  89+97, 200, 30, ( 1, 1, 1 ), 1, 3 , mapUIIMG2.x, mapUIIMG2.y, true);
-	mapUIBTXT3 = drawshader( "black",  220,  89+97, 200, 30, ( 1, 1, 1 ), 1, 3 , mapUIIMG3.x, mapUIIMG3.y, true);
+	mapUIBTXT1 = level drawshader( "black",  -220,  186, 200, 30, ( 1, 1, 1 ), 1, 3 , "LEFT", "CENTER", true);
+	mapUIBTXT2 = level drawshader( "black", 	0,  186, 200, 30, ( 1, 1, 1 ), 1, 3 , "CENTER", "CENTER", true);
+	mapUIBTXT3 = level drawshader( "black",   220,  186, 200, 30, ( 1, 1, 1 ), 1, 3 , "RIGHT", "CENTER", true);
 	mapUIBTXT1.alpha = 0;
 	mapUIBTXT2.alpha = 0;
 	mapUIBTXT3.alpha = 0;
@@ -419,6 +431,9 @@ mv_ServerUI( map1, map2, map3 )
 
     arrow_right = drawshader( "ui_scrollbar_arrow_right", 200, 290, 25, 25, mv_arrowcolor, 100, 2 , "CENTER", "CENTER", true);
 	arrow_left  = drawshader( "ui_scrollbar_arrow_left", -200, 290, 25, 25, mv_arrowcolor, 100, 2 , "CENTER", "CENTER", true);
+	
+	wait 1;
+	level notify("mv_start_vote");
 
     level waittill("mv_destroy_hud");
 
@@ -432,7 +447,7 @@ mv_ServerUI( map1, map2, map3 )
 	mapUIBTXT2 affectElement("alpha", 1, 0);
 	mapUIBTXT3 affectElement("alpha", 1, 0);
 
-	wait 1.2;
+	wait 2;
 
     buttons DestroyElement();
     mapUI1 DestroyElement();
@@ -450,7 +465,7 @@ mv_ServerUI( map1, map2, map3 )
 }
 mv_Timer()
 {
-    level endon("game_ended");
+	level endon("mv_destroy_hud");
     mv_credits = getDvarInt("mv_credits");
 
 	if(mv_credits)
@@ -458,12 +473,12 @@ mv_Timer()
         mv_sentence = getDvar("mv_sentence");
         mv_socialname = getDvar("mv_socialname");
         mv_sociallink = getDvar("mv_sociallink");
-        credits = createServerFontString("hudsmall" , 1.2);
+        credits = level createServerFontString("hudsmall" , 1.2);
 		credits setPoint("BOTTOM_LEFT", "BOTTOM_LEFT");
 		credits setElementText(mv_sentence + "\nDeveloped by @^5DoktorSAS ^7\n" + mv_socialname + ": " + mv_sociallink);
     }
 
-    timer = createServerFontString("hudsmall" , 2);
+    timer = level createServerFontString("hudsmall" , 2);
 	timer setPoint("CENTER", "BOTTOM", "CENTER", "CENTER");
     timer.label = &"00:";
 	
@@ -473,8 +488,9 @@ mv_Timer()
 		wait 1;
 		level.__mapvote["time"]--;
 	}
-	wait 1;
-    level notify("mv_destroy_hud");
+	level.__mapvote["time"] = 0;
+	wait 2;
+    
 	foreach(player in level.players) 
 	{
 		player setblur( 0, 0 );
@@ -482,6 +498,7 @@ mv_Timer()
     if(mv_credits)
         credits DestroyElement();
     timer DestroyElement();
+	level notify("mv_destroy_hud");
 }
 
 
