@@ -114,7 +114,6 @@ FixBlur() // Reset blur effect to 0
 
 mv_Begin()
 {
-	level endon("mv_destroy_hud");
 	if(getDvarInt("mv_enable") != 1) // Check if mapvote is enable
 		return; // End if the mapvote its not enable
 	
@@ -130,10 +129,10 @@ mv_Begin()
 		mapsd = [];
 		mapsd = getMapsData( mapsIDs );
 
-		mapschoosed = [];
-		map1 = mapsd[ mv_GetRandomMap( mapsIDs ) ];
-		map2 = mapsd[ mv_GetRandomMap( mapsIDs ) ];
-		map3 = mapsd[ mv_GetRandomMap( mapsIDs ) ];
+		mapschoosed = mv_GetRandomMaps( mapsIDs ) ;
+		map1 = mapsd[ mapschoosed[0] ];
+		map2 = mapsd[ mapschoosed[1] ];
+		map3 = mapsd[ mapschoosed[2] ];
 
 		level thread mv_ServerUI( map1, map2, map3 );
 		foreach(player in level.players) {
@@ -154,19 +153,25 @@ mv_GetMapsThatCanBeVoted( mapslist )
 		maps = strTok(getDvar("mv_excludedmaps"), " ");
 		foreach(map in maps) 
 		{
-			ArrayRemoveValue(mapslist, map);
+			arrayremovevalue(mapslist, map);
 		}
 	}
 	return mapslist;
 }
 
-mv_GetRandomMap( mapsIDs ) // Select random map from the list
+mv_GetRandomMaps( mapsIDs ) // Select random map from the list
 {
 	mapschoosed = [];
-	index = randomIntRange(0,mapsIDs.size-1);
-	map = mapsIDs[index];
-	ArrayRemoveValue(mapsIDs, index);
-	return mapsIDs[index];
+	for(i = 0; i < 3;i++)
+	{
+		index = randomIntRange(0,mapsIDs.size-1);
+		map = mapsIDs[index];
+		logPrint("map;"+map+";index;"+index+"\n");
+		arrayremovevalue(mapsIDs, map);
+		mapschoosed[i] = map;
+	}
+	
+	return mapschoosed;
 }
 
 is_bot() // Check if a players is a bot
@@ -176,7 +181,6 @@ is_bot() // Check if a players is a bot
 
 mv_PlayerUI()
 {
-	level endon("mv_destroy_hud");
 	self setblur( getDvarFloat("mv_blur"), 1.5 );
 	
 	scroll_color = getColor( getDvar("mv_scrollcolor") );
@@ -197,7 +201,6 @@ mv_PlayerUI()
 
 mv_PlayerFixAngle()
 {
-	level endon("mv_destroy_hud");
 	level waittill("mv_start_vote");
 	angles = self getPlayerAngles();
 
@@ -208,7 +211,6 @@ mv_PlayerFixAngle()
 
 mv_PlayerUIUpdate(boxes, index)
 {
-	level endon("mv_destroy_hud");
 	scroll_color = getColor( getDvar("mv_scrollcolor") );
 	bg_color =  getColor( getDvar("mv_backgroundcolor") );
 	i = 0;
@@ -271,9 +273,9 @@ mv_PlayerButtonsMonitor( boxes )
 	level waittill("mv_destroy_hud");
 	foreach(box in boxes) 
 	{
-		box affectElement("alpha", 1, 0);
+		box affectElement("alpha", 0.5, 0);
 	}
-	wait 2;
+	wait 1.2;
 	foreach(box in boxes) 
 	{
 		box DestroyElement();
@@ -282,11 +284,10 @@ mv_PlayerButtonsMonitor( boxes )
 }
 mv_VoteManager( map1, map2, map3 )
 {
-	level endon("mv_destroy_hud");
 	votes = [];
 	votes[0] = spawnStruct(); 
 	votes[0].votes = level createServerFontString("hudsmall", 2);
- 	votes[0].votes setPoint("CENTER", "CENTER", 165, -325);
+ 	votes[0].votes setPoint("CENTER", "CENTER", -165, -325);
 	votes[0].votes.label = &"^" + getDvarInt("mv_votecolor");
 	votes[0].votes.sort = 4;
 	votes[0].value = 0;
@@ -327,7 +328,7 @@ mv_VoteManager( map1, map2, map3 )
 		
 		if(notify_value == "mv_destroy_hud")
 		{
-			isInVote = 0;
+			break;
 		}
 		else
 		{
@@ -346,17 +347,20 @@ mv_VoteManager( map1, map2, map3 )
 			votes[ index ].value++;
 			votes[ index ].votes setValue( votes[ index ].value );
 		}
+		winner = mv_GetMostVotedMap( votes );
+		map = winner.map;
+		mv_SetRotation(map.mapid);
+		logPrint("inside the loop map set to " + map.mapid + "\n");
 	}
 
-	votes[0].votes affectElement("alpha", 1, 0);
-	votes[1].votes affectElement("alpha", 1, 0);
-	votes[2].votes affectElement("alpha", 1, 0);
+	votes[0].votes affectElement("alpha", 0.5, 0);
+	votes[1].votes affectElement("alpha", 0.5, 0);
+	votes[2].votes affectElement("alpha", 0.5, 0);
+	
 
 	wait 1.2;
 	
-	winner = mv_GetMostVotedMap( votes );
-	map = winner.map;
-	mv_SetRotation(map.mapid);
+	
 	votes[0].votes DestroyElement();
 	votes[1].votes DestroyElement();
 	votes[2].votes DestroyElement();
@@ -387,7 +391,6 @@ mv_SetRotation( mapid )
 
 mv_ServerUI( map1, map2, map3 )
 {
-	level endon("mv_destroy_hud");
 	preCacheShader(map1.shader);
 	preCacheShader(map2.shader);
 	preCacheShader(map3.shader);
@@ -437,17 +440,17 @@ mv_ServerUI( map1, map2, map3 )
 
     level waittill("mv_destroy_hud");
 
-	mapUI1 affectElement("alpha", 1, 0);
-	mapUI2 affectElement("alpha", 1, 0);
-	mapUI3 affectElement("alpha", 1, 0);
-	mapUIIMG1 affectElement("alpha", 1, 0);
-	mapUIIMG2 affectElement("alpha", 1, 0);
-	mapUIIMG3 affectElement("alpha", 1, 0);
-	mapUIBTXT1 affectElement("alpha", 1, 0);
-	mapUIBTXT2 affectElement("alpha", 1, 0);
-	mapUIBTXT3 affectElement("alpha", 1, 0);
+	mapUI1 affectElement("alpha", 0.5, 0);
+	mapUI2 affectElement("alpha", 0.5, 0);
+	mapUI3 affectElement("alpha", 0.5, 0);
+	mapUIIMG1 affectElement("alpha", 0.5, 0);
+	mapUIIMG2 affectElement("alpha", 0.5, 0);
+	mapUIIMG3 affectElement("alpha", 0.5, 0);
+	mapUIBTXT1 affectElement("alpha", 0.5, 0);
+	mapUIBTXT2 affectElement("alpha", 0.5, 0);
+	mapUIBTXT3 affectElement("alpha", 0.5, 0);
 
-	wait 2;
+	wait 1.2;
 
     buttons DestroyElement();
     mapUI1 DestroyElement();
@@ -465,7 +468,6 @@ mv_ServerUI( map1, map2, map3 )
 }
 mv_Timer()
 {
-	level endon("mv_destroy_hud");
     mv_credits = getDvarInt("mv_credits");
 
 	if(mv_credits)
@@ -489,7 +491,9 @@ mv_Timer()
 		level.__mapvote["time"]--;
 	}
 	level.__mapvote["time"] = 0;
-	wait 2;
+	level notify("mv_destroy_hud");
+	logprint("time gone!");
+	wait 1.2;
     
 	foreach(player in level.players) 
 	{
@@ -498,7 +502,6 @@ mv_Timer()
     if(mv_credits)
         credits DestroyElement();
     timer DestroyElement();
-	level notify("mv_destroy_hud");
 }
 
 
