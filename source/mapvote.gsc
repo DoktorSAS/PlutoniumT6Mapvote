@@ -375,7 +375,7 @@ mv_GetMostVotedMap( votes )
 	tie = [];
 	for(i = 1; i < votes.size;i++)
 	{
-		logPrint("map;"+index+";votes;"+votes[i-1].value+"\n");
+		logPrint("map;"+i+";votes;"+votes[i-1].value+"\n");
 		if(votes[i].value > winner.value)
 		{
 			winner = votes[i];
@@ -493,7 +493,7 @@ mv_Timer()
 		level.__mapvote["time"]--;
 	}
 	level.__mapvote["time"] = 0;
-	level notify("mv_destroy_hud");
+
 	logprint("vote time experied;\n");
 	wait 1.2;
     
@@ -504,6 +504,7 @@ mv_Timer()
     if(mv_credits)
         credits DestroyElement();
     timer DestroyElement();
+	level notify("mv_destroy_hud");
 }
 
 
