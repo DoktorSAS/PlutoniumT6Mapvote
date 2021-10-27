@@ -347,11 +347,12 @@ mv_VoteManager( map1, map2, map3 )
 			votes[ index ].value++;
 			votes[ index ].votes setValue( votes[ index ].value );
 		}
-		winner = mv_GetMostVotedMap( votes );
-		map = winner.map;
-		mv_SetRotation(map.mapid);
-		logPrint("inside the loop map set to " + map.mapid + "\n");
+		
 	}
+
+	winner = mv_GetMostVotedMap( votes );
+	map = winner.map;
+	mv_SetRotation(map.mapid);
 
 	votes[0].votes affectElement("alpha", 0.5, 0);
 	votes[1].votes affectElement("alpha", 0.5, 0);
@@ -374,6 +375,7 @@ mv_GetMostVotedMap( votes )
 	tie = [];
 	for(i = 1; i < votes.size;i++)
 	{
+		logPrint("map;"+index+";votes;"+votes[i-1].value+"\n");
 		if(votes[i].value > winner.value)
 		{
 			winner = votes[i];
@@ -492,7 +494,7 @@ mv_Timer()
 	}
 	level.__mapvote["time"] = 0;
 	level notify("mv_destroy_hud");
-	logprint("time gone!");
+	logprint("vote time experied;\n");
 	wait 1.2;
     
 	foreach(player in level.players) 
