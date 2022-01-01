@@ -84,6 +84,7 @@ mv_PlayerUI()
 	boxes[1] = self createRectangle("CENTER", "CENTER", 0, -452, 205, 131, bg_color, "white", 1, .7);
 	boxes[2] = self createRectangle("CENTER", "CENTER", 220, -452, 205, 131, bg_color, "white", 1, .7);
 
+	level waittill("mv_start_animation");
 	boxes[0] affectElement("y", 1, -52);
 	boxes[1] affectElement("y", 1, -52);
 	boxes[2] affectElement("y", 1, -52);
@@ -104,7 +105,7 @@ mv_PlayerUI()
 	isVoting = 1;
 	while(level.__mapvote["time"] > 0 && isVoting )
 	{
-		command = self waittill_any_return("left", "right", "select");
+		command = self waittill_any_return("left", "right", "select", "done");
 		if(command == "right")
 		{
 			index++;
@@ -120,6 +121,11 @@ mv_PlayerUI()
 		
 		if(command == "select")
 		{
+			self.statusicon = "compassping_friendlyfiring_mp"; // Green dot
+			vote = "vote"+(index+1);
+			level notify(vote);
+			select_color = getColor( getDvar("mv_selectcolor") );
+			boxes[index] affectElement("color", 0.2, select_color);
 			isVoting = 0;
 		}
 		else
@@ -136,16 +142,6 @@ mv_PlayerUI()
 			
 	}
 
-	if(!isVoting)
-	{
-		self.statusicon = "compassping_friendlyfiring_mp"; // Green dot
-		vote = "vote"+(index+1);
-		level notify(vote);
-		select_color = getColor( getDvar("mv_selectcolor") );
-		boxes[index] affectElement("color", 0.2, select_color);
-	}
-
-	level waittill("mv_destroy_hud");
 	foreach(box in boxes) 
 	{
 		box affectElement("alpha", 0.5, 0);
@@ -391,6 +387,7 @@ mv_ServerUI( )
 	mapUIBTXT2.alpha = 0;
 	mapUIBTXT3.alpha = 0;
 
+	level notify("mv_start_animation");
     mapUI1 affectElement("y", 1, -4);
 	mapUI2 affectElement("y", 1, -4);
 	mapUI3 affectElement("y", 1, -4);
@@ -478,5 +475,9 @@ mv_Timer()
     if(mv_credits)
         credits destroyElem();
     timer destroyElem();
+	foreach(player in level.players) {
+			if(!player is_bot())
+				player notify("done");
+		}
 	level notify("mv_destroy_hud");
 }
