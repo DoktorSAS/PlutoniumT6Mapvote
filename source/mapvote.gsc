@@ -25,7 +25,6 @@
 
 init()
 {
-
     precacheStatusIcon("compassping_friendlyfiring_mp");
     precacheStatusIcon("compassping_enemy");
 	precacheshader( "white" );
@@ -120,7 +119,7 @@ mv_Begin()
 	if(!isDefined(level.mapvote_started))
 	{
 		level.mapvote_started = 1;  
-		level thread mv_Timer();
+		
 		//level thread mv_OverflowFix(); // Should be not needed anymore, but to be safe i leave it here
 		mapslist = [];
 		mapsIDs = [];
@@ -134,14 +133,13 @@ mv_Begin()
 		level.__mapvote["map1"] = mapsd[ mapschoosed[0] ];
 		level.__mapvote["map2"] = mapsd[ mapschoosed[1] ];
 		level.__mapvote["map3"] = mapsd[ mapschoosed[2] ];
-	
-
-
-		level thread mv_ServerUI( );
 		foreach(player in level.players) {
-			if(!player is_bot())
+			if(!is_bot(player))
 				player thread mv_PlayerUI();
 		}
+		wait 0.2;
+		level thread mv_ServerUI( );
+	
 
 		mv_VoteManager( );
 	}
@@ -178,13 +176,15 @@ mv_GetRandomMaps( mapsIDs ) // Select random map from the list
 	return mapschoosed;
 }
 
-is_bot() // Check if a players is a bot
+is_bot( entity ) // Check if a players is a bot
 {
-	return isDefined(self.pers["isBot"]) && self.pers["isBot"];
+	return isDefined(entity.pers["isBot"]) && entity.pers["isBot"];
+	//return 0;
 }
 
 mv_PlayerUI()
 {
+	//self endon("disconnect");
 	level endon("game_ended");
 
 	self setblur( getDvarFloat("mv_blur"), 1.5 );
@@ -197,12 +197,15 @@ mv_PlayerUI()
 	boxes[1] = self createRectangle("CENTER", "CENTER", 0, -452, 205, 131, bg_color, "white", 1, .7);
 	boxes[2] = self createRectangle("CENTER", "CENTER", 220, -452, 205, 131, bg_color, "white", 1, .7);
 
-	level waittill("mv_start_animation");
-	boxes[0] affectElement("y", 1, -52);
-	boxes[1] affectElement("y", 1, -52);
-	boxes[2] affectElement("y", 1, -52);
-
 	self thread mv_PlayerFixAngle();
+
+	level waittill("mv_start_animation");
+
+	boxes[0] affectElement("y", 1.2, -52);
+	boxes[1] affectElement("y", 1.2, -52);
+	boxes[2] affectElement("y", 1.2, -52);
+	self thread destroyBoxes( boxes );
+	
 	
 	self notifyonplayercommand("left"	, "+attack"		);
     self notifyonplayercommand("right"	, "+speed_throw");
@@ -214,9 +217,10 @@ mv_PlayerUI()
 
 	self.statusicon = "compassping_enemy";	// Red dot
 	level waittill("mv_start_vote");
+	
 	index = 0;
 	isVoting = 1;
-	while(level.__mapvote["time"] > 0 && isVoting )
+	while(level.__mapvote["time"] > 0 && isVoting)
 	{
 		command = self waittill_any_return("left", "right", "select", "done");
 		if(command == "right")
@@ -255,6 +259,15 @@ mv_PlayerUI()
 			
 	}
 
+	
+	//mv_PlayerButtonsMonitor( boxes );
+}
+
+destroyBoxes( boxes )
+{
+	//self endon("disconnect");
+	level endon("game_ended");
+	level waittill("mv_destroy_hud");
 	foreach(box in boxes) 
 	{
 		box affectElement("alpha", 0.5, 0);
@@ -264,12 +277,12 @@ mv_PlayerUI()
 	{
 		box destroyElem();
 	}
-
-	//mv_PlayerButtonsMonitor( boxes );
 }
 
 mv_PlayerFixAngle()
 {
+	//self endon("disconnect");
+	level endon("game_ended");
 	level waittill("mv_start_vote");
 	angles = self getPlayerAngles();
 
@@ -354,6 +367,7 @@ mv_PlayerFixAngle()
 
 mv_VoteManager( )
 {
+	level endon("game_ended");
 	votes = [];
 	votes[0] = spawnStruct(); 
 	votes[0].votes = level createServerFontString("objective", 2);
@@ -473,7 +487,7 @@ mv_ServerUI( )
 	preCacheShader(mapsdata[ level.__mapvote["map2"] ].image);
 	preCacheShader(mapsdata[ level.__mapvote["map3"] ].image);*/
 
-	wait 0.2;
+	level endon("game_ended");
 
     buttons = level createServerFontString("objective", 2);
 	buttons setText( "^3[{+speed_throw}]              ^7Press ^3[{+gostand}] ^7or ^3[{+activate}] ^7to select              ^3[{+attack}]" );	
@@ -501,12 +515,12 @@ mv_ServerUI( )
 	mapUIBTXT3.alpha = 0;
 
 	level notify("mv_start_animation");
-    mapUI1 affectElement("y", 1, -4);
-	mapUI2 affectElement("y", 1, -4);
-	mapUI3 affectElement("y", 1, -4);
-	mapUIIMG1 affectElement("y", 1, 89);
-	mapUIIMG2 affectElement("y", 1, 89);
-	mapUIIMG3 affectElement("y", 1, 89);
+    mapUI1 affectElement("y", 1.2, -4);
+	mapUI2 affectElement("y", 1.2, -4);
+	mapUI3 affectElement("y", 1.2, -4);
+	mapUIIMG1 affectElement("y", 1.2, 89);
+	mapUIIMG2 affectElement("y", 1.2, 89);
+	mapUIIMG3 affectElement("y", 1.2, 89);
 	mapUIBTXT1 affectElement("alpha", 1.5, 0.8);
 	mapUIBTXT2 affectElement("alpha", 1.5, 0.8);
 	mapUIBTXT3 affectElement("alpha", 1.5, 0.8);
@@ -518,6 +532,7 @@ mv_ServerUI( )
 	
 	wait 1;
 	level notify("mv_start_vote");
+	level thread mv_Timer();
 
     level waittill("mv_destroy_hud");
 
@@ -551,6 +566,7 @@ mv_ServerUI( )
 }
 mv_Timer()
 {
+	level endon("game_ended");
     mv_credits = getDvarInt("mv_credits");
 
 	if(mv_credits)
@@ -565,33 +581,26 @@ mv_Timer()
 
     timer = level createServerFontString("objective" , 2);
 	timer setPoint("CENTER", "BOTTOM", "CENTER", "CENTER");
-    timer.label = &"00:";
-	
-    while(level.__mapvote["time"] > 0)
-	{
-	    timer setValue(level.__mapvote["time"]);
-		wait 1;
-		level.__mapvote["time"]--;
-	}
-	level.__mapvote["time"] = 0;
+	timer setTimer( level.__mapvote["time"] );
+	wait level.__mapvote["time"];
 
-	//logprint("vote time experied;\n");
 	wait 1.2;
 
     credits affectElement("alpha", 0.5, 0);
 
 	foreach(player in level.players) 
 	{
-		if(!player is_bot())
+		if(!is_bot(player))
+		{
+			player notify("done");
 			player setblur( 0, 0 );
+		}
+			
 	}
     if(mv_credits)
         credits destroyElem();
     timer destroyElem();
-	foreach(player in level.players) {
-			if(!player is_bot())
-				player notify("done");
-		}
+	
 	level notify("mv_destroy_hud");
 }
 SetDvarIfNotInizialized(dvar, value)
@@ -777,7 +786,7 @@ getMapsData( mapsIDs )
 isValidColor( value ){
 	return value == "0" || value == "1" || value == "2" || value == "3" || value == "4" || value == "5" || value == "6" || value == "7" ;
 }
-addCmd(cmd, function)
+/*addCmd(cmd, function)
 {
 	self notifyOnPlayerCommand( cmd + "_cmd", cmd);
 	self thread cmdManager(cmd + "_cmd", function);
@@ -793,7 +802,7 @@ cmdManager(cmd, function)
 		self waittill( cmd );
 		self [[function]]();
 	}	
-}
+}*/
 GetColor( color ){
 	switch(tolower(color)){
     	case "red":
