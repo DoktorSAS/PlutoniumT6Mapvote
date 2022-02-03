@@ -47,10 +47,8 @@ mv_Config()
 	SetDvarIfNotInizialized("mv_maps", "mp_la mp_dockside mp_carrier mp_drone mp_express mp_hijacked mp_meltdown mp_overflow mp_nightclub mp_raid mp_slums mp_village mp_turbine mp_socotra mp_nuketown_2020 mp_downhill mp_mirage mp_hydro mp_skate mp_concert mp_magma mp_vertigo mp_studio mp_uplink mp_bridge mp_castaway mp_paintball mp_dig mp_frostbite mp_pod mp_takeoff");
 	
 	// PreCache maps images
-	mapsIDs = [];
-    mapsIDs = strTok(getDvar("mv_maps"), " "); 
     mapsd = [];
-	mapsd = getMapsData( mapsIDs );
+	mapsd = getMapsData( );
 
 	foreach(map in mapsd) 
 	{
@@ -90,8 +88,8 @@ mv_finalkillcamwaiter()
 	if( waslastround() )
 		mv_Begin();
 
-    wait 0.5;
     return 1;
+
 }
 
 
@@ -106,6 +104,7 @@ OnPlayerConnected()
 }
 FixBlur() // Reset blur effect to 0
 {
+	self endon("disconnect");
 	level endon("game_ended");
 	self waittill("spawned_player");
 	self setblur( 0, 0 );
@@ -113,6 +112,7 @@ FixBlur() // Reset blur effect to 0
 
 mv_Begin()
 {
+	level endon("mv_ended");
 	if(getDvarInt("mv_enable") != 1) // Check if mapvote is enable
 		return; // End if the mapvote its not enable
 	
@@ -120,13 +120,12 @@ mv_Begin()
 	{
 		level.mapvote_started = 1;  
 		
-		//level thread mv_OverflowFix(); // Should be not needed anymore, but to be safe i leave it here
 		mapslist = [];
 		mapsIDs = [];
 		mapsIDs = strTok(getDvar("mv_maps"), " "); 
 		mapslist = mv_GetMapsThatCanBeVoted( mapsIDs ); // Remove blacklisted maps
 		mapsd = [];
-		mapsd = getMapsData( mapsIDs );
+		mapsd = getMapsData( );
 
 		mapschoosed = mv_GetRandomMaps( mapsIDs );
 
@@ -258,8 +257,6 @@ mv_PlayerUI()
 		}
 			
 	}
-
-	
 	//mv_PlayerButtonsMonitor( boxes );
 }
 
@@ -272,11 +269,11 @@ destroyBoxes( boxes )
 	{
 		box affectElement("alpha", 0.5, 0);
 	}
-	wait 1.2;
+	/*wait 1.2;
 	foreach(box in boxes) 
 	{
 		box destroyElem();
-	}
+	}*/
 }
 
 mv_PlayerFixAngle()
@@ -290,80 +287,6 @@ mv_PlayerFixAngle()
 	if(self getPlayerAngles() != angles)
 		self setPlayerAngles(angles);
 }
-
-/*mv_PlayerUIUpdate(boxes, index)
-{
-	scroll_color = getColor( getDvar("mv_scrollcolor") );
-	bg_color =  getColor( getDvar("mv_backgroundcolor") );
-	i = 0;
-	foreach(box in boxes) 
-	{
-		if(i != index)
-			box affectElement("color", 0.2, bg_color);
-		else
-			box affectElement("color", 0.2, scroll_color);
-		i++;
-	}
-	
-}*/
-/*mv_PlayerButtonsMonitor( boxes )
-{
-	level endon("game_ended");
-	self notifyonplayercommand("left"	, "+attack"		);
-    self notifyonplayercommand("right"	, "+speed_throw");
-	self notifyonplayercommand("left"	, "+moveright"	);
-    self notifyonplayercommand("right"	, "+moveleft"	);
-    self notifyonplayercommand("select"	, "+usereload"	);
-    self notifyonplayercommand("select"	, "+activate"	);
-    self notifyonplayercommand("select"	, "+gostand"	);
-
-	self.statusicon = "compassping_enemy";	// Red dot
-	level waittill("mv_start_vote");
-	index = 0;
-	isVoting = 1;
-	while(level.__mapvote["time"] > 0 && isVoting )
-	{
-		command = self waittill_any_return("left", "right", "select");
-		if(command == "right")
-		{
-			index++;
-			if(index == boxes.size)
-				index = 0;
-		}
-		else if(command == "left")
-		{
-			index--;
-			if(index < 0)
-				index = boxes.size-1;
-		}
-		
-		if(command == "select")
-		{
-			isVoting = 0;
-		}else
-			mv_PlayerUIUpdate(boxes, index);
-	}
-	if(!isVoting)
-	{
-		self.statusicon = "compassping_friendlyfiring_mp"; // Green dot
-		vote = "vote"+(index+1);
-		level notify(vote);
-		select_color = getColor( getDvar("mv_selectcolor") );
-		boxes[index] affectElement("color", 0.2, select_color);
-	}
-
-	level waittill("mv_destroy_hud");
-	foreach(box in boxes) 
-	{
-		box affectElement("alpha", 0.5, 0);
-	}
-	wait 1.2;
-	foreach(box in boxes) 
-	{
-		box destroyElem();
-	}
-	
-}*/
 
 mv_VoteManager( )
 {
@@ -405,14 +328,15 @@ mv_VoteManager( )
 	votes[1].hideWhenInMenu = 1;
 	votes[2].hideWhenInMenu = 1;
 	
-	//isInVote = 1;
+	isInVote = 1;
 	index = 0;
-	while(1)
+	while( isInVote )
 	{
 		notify_value = level waittill_any_return("vote1", "vote2", "vote3", "mv_destroy_hud");
 		
 		if(notify_value == "mv_destroy_hud")
 		{
+			isInVote = 0;
 			break;
 		}
 		else
@@ -445,21 +369,20 @@ mv_VoteManager( )
 	
 	wait 1.2;
 	
-	votes[0].votes destroyElem();
+	/*votes[0].votes destroyElem();
 	votes[1].votes destroyElem();
 	votes[2].votes destroyElem();
 
-	wait 5;
+	wait 5;*/
 }
 
 mv_GetMostVotedMap( votes )
 {
 	winner = votes[0];
-	tie = [];
 	for(i = 1; i < votes.size;i++)
 	{
 		//logPrint("map;"+i+";votes;"+votes[i-1].value+"\n");
-		if(votes[i].value > winner.value)
+		if(isDefined(votes[i]) && votes[i].value > winner.value)
 		{
 			winner = votes[i];
 		}
@@ -476,16 +399,6 @@ mv_SetRotation( mapid )
 
 mv_ServerUI( )
 {
-	/*mapsIDs = [];
-	mapsIDs[0] = level.__mapvote["map1"];
-	mapsIDs[1] = level.__mapvote["map2"];
-	mapsIDs[2] = level.__mapvote["map3"];
-
-	mapsdata = getMapsData( mapsIDs );
-
-	preCacheShader(mapsdata[ level.__mapvote["map1"] ].image);
-	preCacheShader(mapsdata[ level.__mapvote["map2"] ].image);
-	preCacheShader(mapsdata[ level.__mapvote["map3"] ].image);*/
 
 	level endon("game_ended");
 
@@ -532,44 +445,10 @@ mv_ServerUI( )
 	
 	wait 1;
 	level notify("mv_start_vote");
-	level thread mv_Timer();
 
-    level waittill("mv_destroy_hud");
+    mv_credits = getDvar("mv_credits");
 
-	buttons affectElement("alpha", 0.5, 0);
-	mapUI1 affectElement("alpha", 0.5, 0);
-	mapUI2 affectElement("alpha", 0.5, 0);
-	mapUI3 affectElement("alpha", 0.5, 0);
-	mapUIIMG1 affectElement("alpha", 0.5, 0);
-	mapUIIMG2 affectElement("alpha", 0.5, 0);
-	mapUIIMG3 affectElement("alpha", 0.5, 0);
-	mapUIBTXT1 affectElement("alpha", 0.5, 0);
-	mapUIBTXT2 affectElement("alpha", 0.5, 0);
-	mapUIBTXT3 affectElement("alpha", 0.5, 0);
-	arrow_right affectElement("alpha", 0.5, 0);
-	arrow_right affectElement("alpha", 0.5, 0);
-
-	wait 1.2;
-
-    buttons destroyElem();
-    mapUI1 destroyElem();
-	mapUI2 destroyElem();
-	mapUI3 destroyElem();
-	mapUIIMG1 destroyElem();
-	mapUIIMG2 destroyElem();
-	mapUIIMG3 destroyElem();
-	mapUIBTXT1 destroyElem();
-	mapUIBTXT2 destroyElem();
-	mapUIBTXT3 destroyElem();
-	arrow_right destroyElem();
-	arrow_left destroyElem();
-}
-mv_Timer()
-{
-	level endon("game_ended");
-    mv_credits = getDvarInt("mv_credits");
-
-	if(mv_credits)
+	if(mv_credits != "")
     {
         mv_sentence = getDvar("mv_sentence");
         mv_socialname = getDvar("mv_socialname");
@@ -583,25 +462,44 @@ mv_Timer()
 	timer setPoint("CENTER", "BOTTOM", "CENTER", "CENTER");
 	timer setTimer( level.__mapvote["time"] );
 	wait level.__mapvote["time"];
-
-	wait 1.2;
+	level notify("mv_destroy_hud");
 
     credits affectElement("alpha", 0.5, 0);
-
+	buttons affectElement("alpha", 0.5, 0);
+	mapUI1 affectElement("alpha", 0.5, 0);
+	mapUI2 affectElement("alpha", 0.5, 0);
+	mapUI3 affectElement("alpha", 0.5, 0);
+	mapUIIMG1 affectElement("alpha", 0.5, 0);
+	mapUIIMG2 affectElement("alpha", 0.5, 0);
+	mapUIIMG3 affectElement("alpha", 0.5, 0);
+	mapUIBTXT1 affectElement("alpha", 0.5, 0);
+	mapUIBTXT2 affectElement("alpha", 0.5, 0);
+	mapUIBTXT3 affectElement("alpha", 0.5, 0);
+	arrow_right affectElement("alpha", 0.5, 0);
+	arrow_left affectElement("alpha", 0.5, 0);
+	timer affectElement("alpha", 0.5, 0);
+	//timer destroyElem();
+	
 	foreach(player in level.players) 
 	{
-		if(!is_bot(player))
-		{
-			player notify("done");
-			player setblur( 0, 0 );
-		}
-			
+		player notify("done");
+		player setblur( 0, 0 );
 	}
-    if(mv_credits)
-        credits destroyElem();
-    timer destroyElem();
-	
-	level notify("mv_destroy_hud");
+
+	/*wait 1.2;
+
+    buttons destroyElem();
+    mapUI1 destroyElem();
+	mapUI2 destroyElem();
+	mapUI3 destroyElem();
+	mapUIIMG1 destroyElem();
+	mapUIIMG2 destroyElem();
+	mapUIIMG3 destroyElem();
+	mapUIBTXT1 destroyElem();
+	mapUIBTXT2 destroyElem();
+	mapUIBTXT3 destroyElem();
+	arrow_right destroyElem();
+	arrow_left destroyElem();*/
 }
 SetDvarIfNotInizialized(dvar, value)
 {
@@ -786,23 +684,6 @@ getMapsData( mapsIDs )
 isValidColor( value ){
 	return value == "0" || value == "1" || value == "2" || value == "3" || value == "4" || value == "5" || value == "6" || value == "7" ;
 }
-/*addCmd(cmd, function)
-{
-	self notifyOnPlayerCommand( cmd + "_cmd", cmd);
-	self thread cmdManager(cmd + "_cmd", function);
-}
-cmdManager(cmd, function)
-{
-	self endon("disconnect");
-	self endon("round_ended");
-	level endon("game_ended");
-	level endon("round_end_finished");
-	for(;;)
-	{
-		self waittill( cmd );
-		self [[function]]();
-	}	
-}*/
 GetColor( color ){
 	switch(tolower(color)){
     	case "red":
@@ -967,113 +848,3 @@ affectElement(type, time, value){
     if(type == "color")
         self.color = value;
 }
-// Text Manager
-/*mv_OverflowFix(){
-	level endon("mv_destroy_hud");
-    textanchor = CreateServerFontString("default", 1);
-    textanchor setText("Anchor");
-    textanchor.alpha = 0; 
-    level.isInOverflow = 0;
-    if (GetDvar("g_gametype") == "tdm" || GetDvar("g_gametype") == "hctdm")
-        limit = 54;
-
-    if (GetDvar("g_gametype") == "dm" || GetDvar("g_gametype") == "hcdm")
-        limit = 54;
-
-    if (GetDvar("g_gametype") == "dom" || GetDvar("g_gametype") == "hcdom")
-        limit = 38;
-
-    if (GetDvar("g_gametype") == "dem" || GetDvar("g_gametype") == "hcdem")
-        limit = 41;
-
-    if (GetDvar("g_gametype") == "conf" || GetDvar("g_gametype") == "hcconf")
-        limit = 53;
-
-    if (GetDvar("g_gametype") == "koth" || GetDvar("g_gametype") == "hckoth")
-        limit = 41;
-
-    if (GetDvar("g_gametype") == "hq" || GetDvar("g_gametype") == "hchq")
-        limit = 43;
-
-    if (GetDvar("g_gametype") == "ctf" || GetDvar("g_gametype") == "hcctf")
-        limit = 32;
-
-    if (GetDvar("g_gametype") == "sd" || GetDvar("g_gametype") == "hcsd")
-        limit = 38;
-
-    if (GetDvar("g_gametype") == "oneflag" || GetDvar("g_gametype") == "hconeflag")
-        limit = 25;
-
-    if (GetDvar("g_gametype") == "gun")
-        limit = 48;
-
-    if (GetDvar("g_gametype") == "oic")
-        limit = 51;
-
-    if (GetDvar("g_gametype") == "shrp")
-        limit = 48;
-
-    if (GetDvar("g_gametype") == "sas")
-        limit = 50;
-
-    if (IsDefined(level.stringoptimization))
-        limit += 172;
-
-    while (1){      
-        if (IsDefined(level.stringoptimization) && level.stringtable.size >= 100 && !IsDefined(textanchor2)){
-            textanchor2 = CreateServerFontString("default", 1);
-            textanchor2 setText("Anchor2");                
-            textanchor2.alpha = 0; 
-        }
-        if (level.stringtable.size >= limit){
-        	level.isInOverflow = 1;
-            if (IsDefined(textanchor2)){
-                textanchor2 ClearAllTextAfterHudElem();
-                textanchor2 DestroyElement();
-            } 
-            textanchor ClearAllTextAfterHudElem();
-            level.stringtable = [];           
-
-            foreach (textelement in level.textelementtable){
-                if (!IsDefined(self.label))
-                    textelement setText(textelement.text);
-                else
-                    textelement setValue(textelement.text);
-            }
-            level.isInOverflow = 0;
-        }            
-       wait 0.05;
-    }
-}
-setText(text)
-{
-    self SetText(text);
-    if (self.text != text)
-        self.text = text;
-    if (!IsInArray(level.stringtable, text))
-        level.stringtable[level.stringtable.size] = text;
-    if (!IsInArray(level.textelementtable, self))
-        level.textelementtable[level.textelementtable.size] = self;
-}
-setValue(text)
-{
-    self.label = &"" + text;  
-    if (self.text != text)
-        self.text = text;
-    if (!IsInArray(level.stringtable, text))
-        level.stringtable[level.stringtable.size] = text;
-    if (!IsInArray(level.textelementtable, self))
-        level.textelementtable[level.textelementtable.size] = self;
-}
-DestroyElement()
-{
-    if (IsInArray(level.textelementtable, self))
-        ArrayRemoveValue(level.textelementtable, self);
-    if (IsDefined(self.elemtype))
-	{
-        self.frame Destroy();
-        self.bar Destroy();
-        self.barframe Destroy();
-    }       
-    self Destroy();
-}*/
