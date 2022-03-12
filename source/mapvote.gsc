@@ -5,7 +5,7 @@
 /*
 	Mod: Mapvote Menu
 	Developed by DoktorSAS
-	Version: Rebirth 1.0.0 -> 4.0.0
+	Version: Rebirth 1.0.0 -> 4.0.1
 
 	Config:
 	set mv_enable			1 						// Enable/Disable the mapvote
@@ -67,7 +67,7 @@ mv_Config()
 	SetDvarIfNotInizialized("mv_scrollcolor", "cyan");  
 	SetDvarIfNotInizialized("mv_selectcolor", "lightgreen");  
 	SetDvarIfNotInizialized("mv_backgroundcolor", "grey");
-	SetDvarIfNotInizialized("mv_gametype", "");  
+	SetDvarIfNotInizialized("mv_gametype", "dm");  
 	setDvarIfNotInizialized("mv_excludedmaps", "");  
 
 	/*if( level.roundlimit == 1)
@@ -132,6 +132,11 @@ mv_Begin()
 		level.__mapvote["map1"] = mapsd[ mapschoosed[0] ];
 		level.__mapvote["map2"] = mapsd[ mapschoosed[1] ];
 		level.__mapvote["map3"] = mapsd[ mapschoosed[2] ];
+		gametypes = strTok(getDvar("mv_gametype") + " ", " ");
+		level.__mapvote["map1"].gametype = gametypes[randomIntRange(0, gametypes.size)];
+		level.__mapvote["map2"].gametype = gametypes[randomIntRange(0, gametypes.size)];
+		level.__mapvote["map3"].gametype = gametypes[randomIntRange(0, gametypes.size)];
+
 		foreach(player in level.players) {
 			if(!is_bot(player))
 				player thread mv_PlayerUI();
@@ -361,7 +366,7 @@ mv_VoteManager( )
 
 	winner = mv_GetMostVotedMap( votes );
 	map = winner.map;
-	mv_SetRotation(map.mapid);
+	mv_SetRotation(map.mapid, map.gametype);
 
 	votes[0].votes affectElement("alpha", 0.5, 0);
 	votes[1].votes affectElement("alpha", 0.5, 0);
@@ -391,9 +396,10 @@ mv_GetMostVotedMap( votes )
 	return winner;
 
 }
-mv_SetRotation( mapid )
+mv_SetRotation( mapid, gametype )
 {
-	setdvar( "sv_maprotation", getDvar("mv_gametype") + " map " + mapid );
+	setdvar("g_gametype", gametype);
+	setdvar( "sv_maprotation", "g_gametype " + gametype  + " map " + mapid );
 	level notify("mv_ended");
 }
 
@@ -409,9 +415,9 @@ mv_ServerUI( )
 
     mv_votecolor = getDvar("mv_votecolor");
 
-    mapUI1 = level createString( "^7"+ level.__mapvote["map1"].mapname, "objective", 1.5, "CENTER", "CENTER", -220, -325, (1,1,1), 1, (0,0,0), 0.5, 5, 1);		
-	mapUI2 = level createString( "^7"+ level.__mapvote["map2"].mapname, "objective", 1.5, "CENTER", "CENTER",    0, -325, (1,1,1), 1, (0,0,0), 0.5, 5, 1);		
-	mapUI3 = level createString( "^7"+ level.__mapvote["map3"].mapname, "objective", 1.5, "CENTER", "CENTER",  220, -325, (1,1,1), 1, (0,0,0), 0.5, 5, 1);
+    mapUI1 = level createString( "^7"+ level.__mapvote["map1"].mapname + " " + gametypeToName(level.__mapvote["map1"].gametype), "objective", 1.5, "CENTER", "CENTER", -220, -325, (1,1,1), 1, (0,0,0), 0.5, 5, 1);		
+	mapUI2 = level createString( "^7"+ level.__mapvote["map2"].mapname + " " + gametypeToName(level.__mapvote["map2"].gametype), "objective", 1.5, "CENTER", "CENTER",    0, -325, (1,1,1), 1, (0,0,0), 0.5, 5, 1);		
+	mapUI3 = level createString( "^7"+ level.__mapvote["map3"].mapname + " " + gametypeToName(level.__mapvote["map3"].gametype), "objective", 1.5, "CENTER", "CENTER",  220, -325, (1,1,1), 1, (0,0,0), 0.5, 5, 1);
 
 	mapUIIMG1 = drawshader(level.__mapvote["map1"].image, -220, -310, 200, 127, ( 1, 1, 1 ), 1, 2, "LEFT", "CENTER", 1);
 	mapUIIMG1 fadeovertime( 0.5 );
@@ -511,6 +517,59 @@ IsInizialized(dvar)
 	result = getDvar(dvar);
 	return !isDefined(result) || result != "";
 } 
+
+gametypeToName( gametype )
+{
+	switch( tolower(gametype) ) {
+		case "dm":
+			return "FFA";
+			break;
+		case "war":
+			return "TDM";
+			break;
+		case "sd":
+			return "S&D";
+			break;
+		case "dm":
+			return "FFA";
+			break;
+		case "conf":
+			return "K. F.";
+			break;
+		case "ctf":
+			return "CTF";
+			break;
+		case "dom":
+			return "Domination";
+			break;
+		case "dem":
+			return "Demolition";
+			break;
+		case "gun":
+			return "G. G.";
+			break;
+		case "hq":
+			return "HQ";
+			break;
+		case "koth":
+			return "Hardpoint";
+			break;
+		case "oic":
+			return "OIC";
+			break;
+		case "oneflag":
+			return "CTF One Flag";
+			break;
+		case "sas":
+			return "S&S";
+			break;
+		case "shrp":
+			return "Sharpshooter";
+			break;
+	}
+	return "invalid";
+}
+
 getMapsData( mapsIDs )
 {
 	mapsdata = [];
