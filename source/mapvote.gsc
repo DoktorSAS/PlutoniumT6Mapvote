@@ -5,8 +5,7 @@
 /*
 	Mod: Mapvote Menu
 	Developed by DoktorSAS
-	Version: Rebirth 1.0.0 -> 4.0.1
-
+	Version: v1.0.2
 	Config:
 	set mv_enable			1 						// Enable/Disable the mapvote
 	set mv_maps				""						// Lits of maps that can be voted on the mapvote, leave empty for all maps
@@ -20,7 +19,22 @@
 	set mv_selectcolor 		"lighgreen"				// RGB Color when map get voted
 	set mv_backgroundcolor 	"grey"					// RGB Color of map background
 	set mv_blur 			"3"						// Blur effect power
-	set mv_gametype 		""						// This dvar can be used to have multiple gametypes with different maps, with this dvar you can load gamemode
+	set mv_gametypes 		"dm;dm.cfg"					// This dvar can be used to have multiple gametypes with different maps, with this dvar you can load gamemode cfg files
+
+	1.0.0:
+	- 3 maps support
+	- Credits, sentence and social on bottom left
+	- Simple keyboard and controller button support
+	- Better dvar organization
+	- Code optimization
+	- Redouce sharder variables to allow other mods to work as intended
+
+	1.0.1:
+	- Fixed client crash issue
+	- mv_gametypes added to set g_gametype before map change
+
+	1.0.2:
+	- mv_gametypes now support also custom cfg files
 */
 
 init()
@@ -67,7 +81,7 @@ mv_Config()
 	SetDvarIfNotInizialized("mv_scrollcolor", "cyan");  
 	SetDvarIfNotInizialized("mv_selectcolor", "lightgreen");  
 	SetDvarIfNotInizialized("mv_backgroundcolor", "grey");
-	SetDvarIfNotInizialized("mv_gametype", "dm");  
+	SetDvarIfNotInizialized("mv_gametypes", "dm");  
 	setDvarIfNotInizialized("mv_excludedmaps", "");  
 
 	/*if( level.roundlimit == 1)
@@ -132,7 +146,7 @@ mv_Begin()
 		level.__mapvote["map1"] = mapsd[ mapschoosed[0] ];
 		level.__mapvote["map2"] = mapsd[ mapschoosed[1] ];
 		level.__mapvote["map3"] = mapsd[ mapschoosed[2] ];
-		gametypes = strTok(getDvar("mv_gametype") + " ", " ");
+		gametypes = strTok(getDvar("mv_gametypes") + " ", " ");
 		level.__mapvote["map1"].gametype = gametypes[randomIntRange(0, gametypes.size)];
 		level.__mapvote["map2"].gametype = gametypes[randomIntRange(0, gametypes.size)];
 		level.__mapvote["map3"].gametype = gametypes[randomIntRange(0, gametypes.size)];
@@ -197,17 +211,17 @@ mv_PlayerUI()
 	bg_color =  getColor( getDvar("mv_backgroundcolor") );
 	self FreezeControlsAllowLook(0);
 	boxes = [];
-	boxes[0] = self createRectangle("CENTER", "CENTER", -220, -452, 205, 131, scroll_color, "white", 1, .7);	
-	boxes[1] = self createRectangle("CENTER", "CENTER", 0, -452, 205, 131, bg_color, "white", 1, .7);
-	boxes[2] = self createRectangle("CENTER", "CENTER", 220, -452, 205, 131, bg_color, "white", 1, .7);
+	boxes[0] = self createRectangle("CENTER", "CENTER", -220, -452, 205, 133, scroll_color, "white", 1, .7);	
+	boxes[1] = self createRectangle("CENTER", "CENTER", 0, -452, 205, 133, bg_color, "white", 1, .7);
+	boxes[2] = self createRectangle("CENTER", "CENTER", 220, -452, 205, 133, bg_color, "white", 1, .7);
 
 	self thread mv_PlayerFixAngle();
 
 	level waittill("mv_start_animation");
 
-	boxes[0] affectElement("y", 1.2, -52);
-	boxes[1] affectElement("y", 1.2, -52);
-	boxes[2] affectElement("y", 1.2, -52);
+	boxes[0] affectElement("y", 1.2, -50);
+	boxes[1] affectElement("y", 1.2, -50);
+	boxes[2] affectElement("y", 1.2, -50);
 	self thread destroyBoxes( boxes );
 	
 	
@@ -325,9 +339,9 @@ mv_VoteManager( )
 	votes[1].votes setValue(0);
 	votes[2].votes setValue(0);
 	
-	votes[0].votes affectElement("y", 1, -4);
-	votes[1].votes affectElement("y", 1, -4);
-	votes[2].votes affectElement("y", 1, -4);
+	votes[0].votes affectElement("y", 1, 0);
+	votes[1].votes affectElement("y", 1, 0);
+	votes[2].votes affectElement("y", 1, 0);
 
 	votes[0].hideWhenInMenu = 1;
 	votes[1].hideWhenInMenu = 1;
@@ -398,8 +412,14 @@ mv_GetMostVotedMap( votes )
 }
 mv_SetRotation( mapid, gametype )
 {
-	setdvar("g_gametype", gametype);
-	setdvar( "sv_maprotation", "g_gametype " + gametype  + " map " + mapid );
+	array = strTok(gametype, ";");
+	str = "";
+	if(array.size > 1)
+	{
+		str = "exec " + array[1];
+	}
+	setdvar("g_gametype", array[0]);
+	setdvar( "sv_maprotation", str  + " map " + mapid );
 	level notify("mv_ended");
 }
 
@@ -415,28 +435,28 @@ mv_ServerUI( )
 
     mv_votecolor = getDvar("mv_votecolor");
 
-    mapUI1 = level createString( "^7"+ level.__mapvote["map1"].mapname + " " + gametypeToName(level.__mapvote["map1"].gametype), "objective", 1.5, "CENTER", "CENTER", -220, -325, (1,1,1), 1, (0,0,0), 0.5, 5, 1);		
-	mapUI2 = level createString( "^7"+ level.__mapvote["map2"].mapname + " " + gametypeToName(level.__mapvote["map2"].gametype), "objective", 1.5, "CENTER", "CENTER",    0, -325, (1,1,1), 1, (0,0,0), 0.5, 5, 1);		
-	mapUI3 = level createString( "^7"+ level.__mapvote["map3"].mapname + " " + gametypeToName(level.__mapvote["map3"].gametype), "objective", 1.5, "CENTER", "CENTER",  220, -325, (1,1,1), 1, (0,0,0), 0.5, 5, 1);
+    mapUI1 = level createString( "^7"+ level.__mapvote["map1"].mapname + "\n" + strTok(gametypeToName(level.__mapvote["map1"].gametype), ";")[0], "objective", 1.2, "CENTER", "CENTER", -220, -325, (1,1,1), 1, (0,0,0), 0.5, 5, 1);		
+	mapUI2 = level createString( "^7"+ level.__mapvote["map2"].mapname + "\n" + strTok(gametypeToName(level.__mapvote["map2"].gametype), ";")[0], "objective", 1.2, "CENTER", "CENTER",    0, -325, (1,1,1), 1, (0,0,0), 0.5, 5, 1);		
+	mapUI3 = level createString( "^7"+ level.__mapvote["map3"].mapname + "\n" + strTok(gametypeToName(level.__mapvote["map3"].gametype), ";")[0], "objective", 1.2, "CENTER", "CENTER",  220, -325, (1,1,1), 1, (0,0,0), 0.5, 5, 1);
 
-	mapUIIMG1 = drawshader(level.__mapvote["map1"].image, -220, -310, 200, 127, ( 1, 1, 1 ), 1, 2, "LEFT", "CENTER", 1);
+	mapUIIMG1 = drawshader(level.__mapvote["map1"].image, -220, -310, 200, 129, ( 1, 1, 1 ), 1, 2, "LEFT", "CENTER", 1);
 	mapUIIMG1 fadeovertime( 0.5 );
-	mapUIIMG2 = drawshader(level.__mapvote["map2"].image, 0, -310, 200, 127, ( 1, 1, 1 ), 1, 2, "CENTER", "CENTER", 1);
+	mapUIIMG2 = drawshader(level.__mapvote["map2"].image, 0, -310, 200, 129, ( 1, 1, 1 ), 1, 2, "CENTER", "CENTER", 1);
 	mapUIIMG2 fadeovertime( 0.5 );
-	mapUIIMG3 = drawshader(level.__mapvote["map3"].image, 220, -310, 200, 127, ( 1, 1, 1 ), 1, 2, "RIGHT", "CENTER", 1);
+	mapUIIMG3 = drawshader(level.__mapvote["map3"].image, 220, -310, 200, 129, ( 1, 1, 1 ), 1, 2, "RIGHT", "CENTER", 1);
 	mapUIIMG3 fadeovertime( 0.5 );
 
-	mapUIBTXT1 = drawshader( "black",  -220,  186, 200, 30, ( 1, 1, 1 ), 1, 3 , "LEFT", "CENTER", 1);
-	mapUIBTXT2 = drawshader( "black", 	0,  186, 200, 30, ( 1, 1, 1 ), 1, 3 , "CENTER", "CENTER", 1);
-	mapUIBTXT3 = drawshader( "black",   220,  186, 200, 30, ( 1, 1, 1 ), 1, 3 , "RIGHT", "CENTER", 1);
+	mapUIBTXT1 = drawshader( "black",  -220,  186, 200, 32, ( 1, 1, 1 ), 1, 3 , "LEFT", "CENTER", 1);
+	mapUIBTXT2 = drawshader( "black", 	0,  186, 200, 32, ( 1, 1, 1 ), 1, 3 , "CENTER", "CENTER", 1);
+	mapUIBTXT3 = drawshader( "black",   220,  186, 200, 32, ( 1, 1, 1 ), 1, 3 , "RIGHT", "CENTER", 1);
 	mapUIBTXT1.alpha = 0;
 	mapUIBTXT2.alpha = 0;
 	mapUIBTXT3.alpha = 0;
 
 	level notify("mv_start_animation");
-    mapUI1 affectElement("y", 1.2, -4);
-	mapUI2 affectElement("y", 1.2, -4);
-	mapUI3 affectElement("y", 1.2, -4);
+    mapUI1 affectElement("y", 1.2, -9);
+	mapUI2 affectElement("y", 1.2, -9);
+	mapUI3 affectElement("y", 1.2, -9);
 	mapUIIMG1 affectElement("y", 1.2, 89);
 	mapUIIMG2 affectElement("y", 1.2, 89);
 	mapUIIMG3 affectElement("y", 1.2, 89);
@@ -522,22 +542,19 @@ gametypeToName( gametype )
 {
 	switch( tolower(gametype) ) {
 		case "dm":
-			return "FFA";
+			return "Free for all";
 			break;
 		case "war":
-			return "TDM";
+			return "Team Deathmatch";
 			break;
 		case "sd":
-			return "S&D";
-			break;
-		case "dm":
-			return "FFA";
+			return "Search & Destroy";
 			break;
 		case "conf":
-			return "K. F.";
+			return "Kill Confirmed";
 			break;
 		case "ctf":
-			return "CTF";
+			return "Capture the Flag";
 			break;
 		case "dom":
 			return "Domination";
@@ -546,22 +563,22 @@ gametypeToName( gametype )
 			return "Demolition";
 			break;
 		case "gun":
-			return "G. G.";
+			return "Gun Game";
 			break;
 		case "hq":
-			return "HQ";
+			return "Headquaters";
 			break;
 		case "koth":
 			return "Hardpoint";
 			break;
 		case "oic":
-			return "OIC";
+			return "One in the chamber";
 			break;
 		case "oneflag":
-			return "CTF One Flag";
+			return "One-Flag CTF";
 			break;
 		case "sas":
-			return "S&S";
+			return "Sticks & Stones";
 			break;
 		case "shrp":
 			return "Sharpshooter";
