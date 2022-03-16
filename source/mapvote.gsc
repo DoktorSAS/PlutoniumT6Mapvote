@@ -81,8 +81,15 @@ mv_Config()
 	SetDvarIfNotInizialized("mv_scrollcolor", "cyan");  
 	SetDvarIfNotInizialized("mv_selectcolor", "lightgreen");  
 	SetDvarIfNotInizialized("mv_backgroundcolor", "grey");
-	SetDvarIfNotInizialized("mv_gametypes", "dm");  
+	SetDvarIfNotInizialized("mv_gametypes", "dm;dm.cfg war;tdm.cfg dm;dm.cfg war;tdm.cfg sd;sd.cfg sd;sd.cfg");  
 	setDvarIfNotInizialized("mv_excludedmaps", "");  
+
+	gametypes = strTok(getDvar("mv_gametypes") + " ", " ");
+	setDvar("mv_gametypes_size",  gametypes.size);
+	
+	setDvar("mv_gametypes_randoms", "["+ g1[0] + "," + g1[1]+"],["+ g2[0] + "," + g2[1] +"],["+ g3[0] + "," + g3[1] +"]" );
+	
+	
 
 	/*if( level.roundlimit == 1)
 		maps\mp\gametypes\_globallogic_utils::registerpostroundevent(::mv_Begin);*/
@@ -147,9 +154,21 @@ mv_Begin()
 		level.__mapvote["map2"] = mapsd[ mapschoosed[1] ];
 		level.__mapvote["map3"] = mapsd[ mapschoosed[2] ];
 		gametypes = strTok(getDvar("mv_gametypes") + " ", " ");
-		level.__mapvote["map1"].gametype = gametypes[randomIntRange(0, gametypes.size)];
-		level.__mapvote["map2"].gametype = gametypes[randomIntRange(0, gametypes.size)];
-		level.__mapvote["map3"].gametype = gametypes[randomIntRange(0, gametypes.size)];
+		g1 = gametypes[randomIntRange(0, gametypes.size)];
+		g2 = gametypes[randomIntRange(0, gametypes.size)];
+		g3 = gametypes[randomIntRange(0, gametypes.size)];
+
+		level.__mapvote["map1"].gametype = g1;
+		level.__mapvote["map2"].gametype = g2;
+		level.__mapvote["map3"].gametype = g3;
+
+
+		array1 = strTok(level.__mapvote["map1"].gametype, ";");
+		array2 = strTok(level.__mapvote["map2"].gametype, ";");
+		array3 = strTok(level.__mapvote["map3"].gametype, ";");
+		logPrint("mapvote//gametype//"+array1[0]+"//executing//"+ array1[1] + "\n" );
+		logPrint("mapvote//gametype//"+array2[0]+"//executing//"+ array2[1] + "\n" );
+		logPrint("mapvote//gametype//"+array3[0]+"//executing//"+ array3[1] + "\n" );
 
 		foreach(player in level.players) {
 			if(!is_bot(player))
@@ -418,7 +437,9 @@ mv_SetRotation( mapid, gametype )
 	{
 		str = "exec " + array[1];
 	}
+	logPrint("mapvote//gametype//"+array[0]+"//executing//"+ str  + "\n");
 	setdvar("g_gametype", array[0]);
+	setdvar( "sv_maprotationcurrent", str  + " map " + mapid );
 	setdvar( "sv_maprotation", str  + " map " + mapid );
 	level notify("mv_ended");
 }
@@ -435,9 +456,9 @@ mv_ServerUI( )
 
     mv_votecolor = getDvar("mv_votecolor");
 
-    mapUI1 = level createString( "^7"+ level.__mapvote["map1"].mapname + "\n" + strTok(gametypeToName(level.__mapvote["map1"].gametype), ";")[0], "objective", 1.2, "CENTER", "CENTER", -220, -325, (1,1,1), 1, (0,0,0), 0.5, 5, 1);		
-	mapUI2 = level createString( "^7"+ level.__mapvote["map2"].mapname + "\n" + strTok(gametypeToName(level.__mapvote["map2"].gametype), ";")[0], "objective", 1.2, "CENTER", "CENTER",    0, -325, (1,1,1), 1, (0,0,0), 0.5, 5, 1);		
-	mapUI3 = level createString( "^7"+ level.__mapvote["map3"].mapname + "\n" + strTok(gametypeToName(level.__mapvote["map3"].gametype), ";")[0], "objective", 1.2, "CENTER", "CENTER",  220, -325, (1,1,1), 1, (0,0,0), 0.5, 5, 1);
+    mapUI1 = level createString( "^7"+ level.__mapvote["map1"].mapname + "\n" + gametypeToName(strTok(level.__mapvote["map1"].gametype, ";")[0]), "objective", 1.2, "CENTER", "CENTER", -220, -325, (1,1,1), 1, (0,0,0), 0.5, 5, 1);		
+	mapUI2 = level createString( "^7"+ level.__mapvote["map2"].mapname + "\n" + gametypeToName(strTok(level.__mapvote["map2"].gametype, ";")[0]), "objective", 1.2, "CENTER", "CENTER",    0, -325, (1,1,1), 1, (0,0,0), 0.5, 5, 1);		
+	mapUI3 = level createString( "^7"+ level.__mapvote["map3"].mapname + "\n" + gametypeToName(strTok(level.__mapvote["map3"].gametype, ";")[0]), "objective", 1.2, "CENTER", "CENTER",  220, -325, (1,1,1), 1, (0,0,0), 0.5, 5, 1);
 
 	mapUIIMG1 = drawshader(level.__mapvote["map1"].image, -220, -310, 200, 129, ( 1, 1, 1 ), 1, 2, "LEFT", "CENTER", 1);
 	mapUIIMG1 fadeovertime( 0.5 );
