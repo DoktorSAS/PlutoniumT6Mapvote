@@ -1,27 +1,45 @@
 # Plutonium: Black ops II Mapvote
-Developed by @DoktorSAS
+Developed by [@DoktorSAS](https://twitter.com/DoktorSAS)
+Special thanks to [@ZECxR3ap3r](https://twitter.com/ZECxR3ap3r) & [@JezuzLizard](https://forum.plutonium.pw/user/jezuzlizard) 
 
-Several Servers Owners require a mapvote for their quality servers. This mapvote is the ideal script considering its ease of use. In fact to use it you just have to modify some dvar in your .cfg file and you will be able to customize the mapvote according to your preferences.
 
-### Installation Guide
+## Multiplayer 
 
-There is no video tutorial on how to install mapvote, it will be done in the future. 
-However, all the necessary information has been written. Reading it is enough to make the script work.
+![Preview](https://pbs.twimg.com/media/FN-E1BcXwAsWQS4?format=jpg&name=large)
 
-1. Download the files from the [github release]()
-2. Copy the file _mapvote.gsc_ in your scripts folder (by default is  _%localappdata%\Plutonium\storage\t6\scripts\mp_)
-3. Open your server config file (The _.cfg_ file) and copy and paste the content of _config.cfg_
-4. Edit your maprotation and set just one map like _`set sv_maprotation "map mp_nuketown_2025"`_
-5. Start the server!
+### Requirements
 
-### Preview (Not available yet!)
+- The script can only run on Server, It will not work in private games.
+- Server must be hosted on Plutonium client, the script works only on Plutonium client.
 
-![](https://images5.alphacoders.com/115/1150108.png)
+#### How to setup the mapvote step by step 
+ 1) Compile the file mapvote.gsc with a GSC Compiler.
+ 2) Copy the Compiled file in your Directory %localappdata%\Plutonium\storage\t6\scripts\zm\
+ 3) Copy the Content of the mapvote.cfg in your .cfg (Exemple: server.cfg, dedicated_zm.cfg, dedicated.cfg, etc ) file that manages the Server.
+ 4) Edit the Dvars to setup the Server, many Dvars are only for Aesthetic Parameters.
+    - set the Dvar mv_maps to decide the maps that will be shown in mapvote, Example:
+        - set mv_maps "zm_tomb zm_buried zm_town zm_busdepot zm_farm zm_transit zm_prison zm_highrises zm_nuked"
+    - set the dvar mv_enable to 1 if you want have it active on your server.
+ 5) Run the Server and have fun. Done!
 
-### Social
+## Zombies
 
-Twitter: https://twitter.com/DoktorSAS & https://twitter.com/SorexProject
+![Preview](https://pbs.twimg.com/media/FPwGOL5VcAIgWvk?format=jpg&name=large)
 
-Discord: https://discord.gg/8HNGUTVvmd
+### Requirements
 
-Github : https://github.com/DoktorSAS
+- The script can only run on Server, It will not work in private games.
+- Server must be hosted on Plutonium client, the script works only on Plutonium client.
+
+#### How to setup the mapvote step by step 
+
+ 1) Compile the file mapvote.gsc with a GSC Compiler.
+ 2) Copy the Compiled file in your Directory %localappdata%\Plutonium\storage\t6\scripts\mp\
+ 3) Copy the Content of the mapvote.cfg in your .cfg (Exemple: server.cfg, dedicated_mp.cfg, dedicated.cfg, etc ) file that manages the Server.
+ 4) Edit the Dvars to setup the Server, many Dvars are only for Aesthetic Parameters.
+    - set the Dvar mv_maps to decide the maps that will be shown in mapvote, Example:
+        - set mv_maps "mp_studio mp_nuketown_2020 mp_carrier mp_drone mp_slums"
+    - set the dvar mv_enable to 1 if you want have it active on your server.
+    - If you want random gametypes you have to set the dvar mp_gametypes specifying the gametype id (dm, war, sd, etc) and the file to run if necessary. Exemple:
+        - set mv_gametypes "dm;freeforall.cfg war;mycustomtdm.cfg"
+ 5) Run the Server and have fun. Done!
