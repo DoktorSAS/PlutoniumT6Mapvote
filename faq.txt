@@ -1,3 +1,22 @@
+----------------------------------------
+
+        BLACK OPS II PLUTONIUM                 
+            MAPVOTE FAQ
+
+        Developed by @DoktorSAS
+        Thanks to 
+            @ZECxR3ap3r
+            &
+            @JezuzLizard 
+        
+----------------------------------------
+
+ × Frequently asked questions
+
+----------------------------------------
+
+ × Frequently asked questions
+
 How to use the script?
     To use the script, just copy the compiled mapvote.gsc 
     file into the folder %localappdata%\Plutonium\storage\t6\scripts\mp\
@@ -18,4 +37,7 @@ Who can I contact for support?
 Does it work on Console and Redacted T6?
     It doesn't work without modifications, to make it work you have to modify 
     the code that handles the pressed buttons.
+
+----------------------------------------
+
 
