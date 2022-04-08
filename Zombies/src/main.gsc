@@ -5,7 +5,7 @@
 /*
 	Mod: Mapvote Menu
 	Developed by DoktorSAS
-	Version: 2.0.0
+	Version: 2.0.1
 
 	2.0.1:
 	- Ported new design
