@@ -4,7 +4,7 @@ Developed by [@DoktorSAS](https://twitter.com/DoktorSAS)
 Special thanks to [@ZECxR3ap3r](https://twitter.com/ZECxR3ap3r) & [@JezuzLizard](https://forum.plutonium.pw/user/jezuzlizard) for the development
 Special thanks to [@John Kramer](https://forum.plutonium.pw/user/john-kramer) for the images photo edit
 
-## Multiplayer 
+## Zombies 
 
 ![Preview](https://pbs.twimg.com/media/FPwGOL5VcAIgWvk?format=jpg&name=large)
 
@@ -23,7 +23,7 @@ Special thanks to [@John Kramer](https://forum.plutonium.pw/user/john-kramer) fo
     - set the dvar mv_enable to 1 if you want have it active on your server.
  5) Run the Server and have fun. Done!
 
-## Zombies
+## Multiplayer
 
 ![Preview](https://pbs.twimg.com/media/FN-E1BcXwAsWQS4?format=jpg&name=large)
 
