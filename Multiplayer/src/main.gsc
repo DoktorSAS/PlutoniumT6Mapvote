@@ -83,11 +83,6 @@ mv_Config()
 	SetDvarIfNotInizialized("mv_gametypes", "dm;dm.cfg war;tdm.cfg dm;dm.cfg war;tdm.cfg sd;sd.cfg sd;sd.cfg");
 	setDvarIfNotInizialized("mv_excludedmaps", "");
 
-	gametypes = strTok(getDvar("mv_gametypes") + " ", " ");
-	setDvar("mv_gametypes_size", gametypes.size);
-
-	setDvar("mv_gametypes_randoms", "[" + g1[0] + "," + g1[1] + "],[" + g2[0] + "," + g2[1] + "],[" + g3[0] + "," + g3[1] + "]");
-
 	/*if( level.roundlimit == 1)
 		maps\mp\gametypes\_globallogic_utils::registerpostroundevent(::mv_Begin);*/
 }
