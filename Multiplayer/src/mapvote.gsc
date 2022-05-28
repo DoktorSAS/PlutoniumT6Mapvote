@@ -21,10 +21,10 @@ mv_Begin()
 		level.__mapvote["map1"] = mapsd[mapschoosed[0]];
 		level.__mapvote["map2"] = mapsd[mapschoosed[1]];
 		level.__mapvote["map3"] = mapsd[mapschoosed[2]];
-		gametypes = strTok(getDvar("mv_gametypes") + " ", " ");
-		g1 = gametypes[randomIntRange(0, gametypes.size)];
-		g2 = gametypes[randomIntRange(0, gametypes.size)];
-		g3 = gametypes[randomIntRange(0, gametypes.size)];
+		gametypes = strTok(getDvar("mv_gametypes"), " ");
+		g1 = gametypes[randomIntRange(0, gametypes.size-1)];
+		g2 = gametypes[randomIntRange(0, gametypes.size-1)];
+		g3 = gametypes[randomIntRange(0, gametypes.size-1)];
 
 		level.__mapvote["map1"].gametype = g1;
 		level.__mapvote["map2"].gametype = g2;
