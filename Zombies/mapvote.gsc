@@ -293,12 +293,12 @@ mv_GetMapsThatCanBeVoted(mapslist)
 	return mapslist;
 }
 
-mv_GetRandomMaps(mapsIDs) // Select random map from the list
+\mv_GetRandomMaps(mapsIDs) // Select random map from the list
 {
 	mapschoosed = [];
 	for (i = 0; i < 3; i++)
 	{
-		index = randomIntRange(0, mapsIDs.size - 1);
+		index = randomIntRange(0, mapsIDs.size);
 		map = mapsIDs[index];
 		// logPrint("map;"+map+";index;"+index+"\n");
 		arrayremovevalue(mapsIDs, map);
