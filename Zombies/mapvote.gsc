@@ -1,4 +1,4 @@
-﻿#include common_scripts\utility;
+#include common_scripts\utility;
 #include maps\mp\_utility;
 #include maps\mp\gametypes_zm\_hud_util;
 
@@ -293,7 +293,7 @@ mv_GetMapsThatCanBeVoted(mapslist)
 	return mapslist;
 }
 
-\mv_GetRandomMaps(mapsIDs) // Select random map from the list
+mv_GetRandomMaps(mapsIDs) // Select random map from the list
 {
 	mapschoosed = [];
 	for (i = 0; i < 3; i++)
