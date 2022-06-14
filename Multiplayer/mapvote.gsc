@@ -531,7 +531,7 @@ SetDvarIfNotInizialized(dvar, value)
 IsInizialized(dvar)
 {
 	result = getDvar(dvar);
-	return !isDefined(result) || result != "";
+	return result != "";
 }
 
 gametypeToName(gametype)

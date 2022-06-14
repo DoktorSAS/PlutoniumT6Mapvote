@@ -639,7 +639,7 @@ SetDvarIfNotInizialized(dvar, value)
 IsInizialized(dvar)
 {
 	result = getDvar(dvar);
-	return result != undefined || result != "";
+	return result != "";
 }
 getMapsData(mapsIDs)
 {
