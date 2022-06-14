@@ -15,6 +15,10 @@
 	- Fixed UI removing screen text
 	- Added animations during vote
 	- Fixed design issues
+	
+	2.0.2:
+	- Fixed missing map
+	- Fixed typo
 */
 
 init()
@@ -40,7 +44,7 @@ mv_Config()
 	level.__mapvote = [];
 	SetDvarIfNotInizialized("mv_time", 20);
 	level.__mapvote["time"] = getDvarInt("mv_time");
-	SetDvarIfNotInizialized("mv_maps", "zm_tomb zm_buried zm_town zm_busdepot zm_farm zm_transit zm_prison zm_highrises zm_nuked");
+	SetDvarIfNotInizialized("mv_maps", "zm_tomb zm_buried zm_town zm_busdepot zm_farm zm_transit zm_prison zm_highrise zm_nuked");
 
 	// PreCache maps images
 	mapsIDs = [];

@@ -1,13 +1,11 @@
 mv_Begin()
 {
-	// logPrint("mapvote//before\n");
 	if (getDvarInt("mv_enable") != 1) // Check if mapvote is enable
 		return;						  // End if the mapvote its not enable
-	// logPrint("mapvote//after\n");
+
 	if (!isDefined(level.mapvote_started))
 	{
 		level.mapvote_started = 1;
-		// level thread mv_OverflowFix(); // Should be not needed anymore, but to be safe i leave it here
 		mapslist = [];
 		mapsIDs = [];
 		mapsIDs = strTok(getDvar("mv_maps"), " ");
@@ -20,10 +18,6 @@ mv_Begin()
 		level.__mapvote["map2"] = mapsd[mapschoosed[1]];
 		level.__mapvote["map3"] = mapsd[mapschoosed[2]];
 
-		// logPrint("mapvote//mapid//"+level.__mapvote["map1"].mapid+"//name//"+ level.__mapvote["map1"].mapname + "\n" );
-		// logPrint("mapvote//mapid//"+level.__mapvote["map2"].mapid+"//name//"+ level.__mapvote["map2"].mapname + "\n" );
-		// logPrint("mapvote//mapid//"+level.__mapvote["map3"].mapid+"//name//"+ level.__mapvote["map3"].mapname + "\n" );
-
 		foreach (player in level.players)
 		{
 			if (!player is_bot())
@@ -35,6 +29,7 @@ mv_Begin()
 		mv_VoteManager();
 	}
 }
+
 
 mv_GetMapsThatCanBeVoted(mapslist)
 {
