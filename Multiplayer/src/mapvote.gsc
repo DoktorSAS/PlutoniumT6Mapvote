@@ -22,20 +22,17 @@ mv_Begin()
 		level.__mapvote["map2"] = mapsd[mapschoosed[1]];
 		level.__mapvote["map3"] = mapsd[mapschoosed[2]];
 		gametypes = strTok(getDvar("mv_gametypes"), " ");
-		g1 = gametypes[randomIntRange(0, gametypes.size-1)];
-		g2 = gametypes[randomIntRange(0, gametypes.size-1)];
-		g3 = gametypes[randomIntRange(0, gametypes.size-1)];
+		g1 = gametypes[randomIntRange(0, gametypes.size)];
+		g2 = gametypes[randomIntRange(0, gametypes.size)];
+		g3 = gametypes[randomIntRange(0, gametypes.size)];
 
 		level.__mapvote["map1"].gametype = g1;
 		level.__mapvote["map2"].gametype = g2;
 		level.__mapvote["map3"].gametype = g3;
 
-		array1 = strTok(level.__mapvote["map1"].gametype, ";");
-		array2 = strTok(level.__mapvote["map2"].gametype, ";");
-		array3 = strTok(level.__mapvote["map3"].gametype, ";");
-		logPrint("mapvote//gametype//" + array1[0] + "//executing//" + array1[1] + "\n");
-		logPrint("mapvote//gametype//" + array2[0] + "//executing//" + array2[1] + "\n");
-		logPrint("mapvote//gametype//" + array3[0] + "//executing//" + array3[1] + "\n");
+		array1 = strTok(level.__mapvote["map1"].gametype, "@");
+		array2 = strTok(level.__mapvote["map2"].gametype, "@");
+		array3 = strTok(level.__mapvote["map3"].gametype, "@");
 
 		foreach (player in level.players)
 		{
@@ -70,7 +67,7 @@ mv_GetRandomMaps(mapsIDs) // Select random map from the list
 	map = "";
 	for (i = 0; i < 3; i++)
 	{
-		index = randomIntRange(0, mapsIDs.size - 1);
+		index = randomIntRange(0, mapsIDs.size);
 		map = mapsIDs[index];
 		// logPrint("map;"+map+";index;"+index+"\n");
 		arrayremovevalue(mapsIDs, map);
@@ -83,7 +80,6 @@ mv_GetRandomMaps(mapsIDs) // Select random map from the list
 is_bot(entity) // Check if a players is a bot
 {
 	return isDefined(entity.pers["isBot"]) && entity.pers["isBot"];
-	// return 0;
 }
 
 mv_PlayerUI()
@@ -157,15 +153,12 @@ mv_PlayerUI()
 				else
 					boxes[i] affectElement("color", 0.2, scroll_color);
 			}
-			// mv_PlayerUIUpdate(boxes, index);
 		}
 	}
-	// mv_PlayerButtonsMonitor( boxes );
 }
 
 destroyBoxes(boxes)
 {
-	// self endon("disconnect");
 	level endon("game_ended");
 	level waittill("mv_destroy_hud");
 	foreach (box in boxes)
@@ -283,7 +276,6 @@ mv_GetMostVotedMap(votes)
 	winner = votes[0];
 	for (i = 1; i < votes.size; i++)
 	{
-		// logPrint("map;"+i+";votes;"+votes[i-1].value+"\n");
 		if (isDefined(votes[i]) && votes[i].value > winner.value)
 		{
 			winner = votes[i];
@@ -294,7 +286,7 @@ mv_GetMostVotedMap(votes)
 }
 mv_SetRotation(mapid, gametype)
 {
-	array = strTok(gametype, ";");
+	array = strTok(gametype, "@");
 	str = "";
 	if (array.size > 1)
 	{

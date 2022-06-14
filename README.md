@@ -42,5 +42,5 @@ Special thanks to [@John Kramer](https://forum.plutonium.pw/user/john-kramer) fo
         - set mv_maps "mp_studio mp_nuketown_2020 mp_carrier mp_drone mp_slums"
     - set the dvar mv_enable to 1 if you want have it active on your server.
     - If you want random gametypes you have to set the dvar mp_gametypes specifying the gametype id (dm, war, sd, etc) and the file to run if necessary. Exemple:
-        - set mv_gametypes "dm;freeforall.cfg war;mycustomtdm.cfg"
+        - set mv_gametypes "dm@freeforall.cfg war@mycustomtdm.cfg"
  5) Run the Server and have fun. Done!

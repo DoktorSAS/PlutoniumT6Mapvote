@@ -18,7 +18,7 @@
 	set mv_selectcolor 		"lighgreen"				// RGB Color when map get voted
 	set mv_backgroundcolor 	"grey"					// RGB Color of map background
 	set mv_blur 			"3"						// Blur effect power
-	set mv_gametypes 		"dm;dm.cfg"					// This dvar can be used to have multiple gametypes with different maps, with this dvar you can load gamemode cfg files
+	set mv_gametypes 		"dm@dm.cfg"				// This dvar can be used to have multiple gametypes with different maps, with this dvar you can load gamemode cfg files
 
 	1.0.0:
 	- 3 maps support
@@ -34,6 +34,9 @@
 
 	1.0.2:
 	- mv_gametypes now support also custom cfg files
+
+	1.0.3:
+	- mv_gametypes now work with @ instead of ;
 */
 
 init()

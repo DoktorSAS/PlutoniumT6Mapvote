@@ -15,6 +15,10 @@
 	- Fixed UI removing screen text
 	- Added animations during vote
 	- Fixed design issues
+	
+	2.0.2:
+	- Fixed missing map
+	- Fixed typo
 */
 
 init()
@@ -40,7 +44,7 @@ mv_Config()
 	level.__mapvote = [];
 	SetDvarIfNotInizialized("mv_time", 20);
 	level.__mapvote["time"] = getDvarInt("mv_time");
-	SetDvarIfNotInizialized("mv_maps", "zm_tomb zm_buried zm_town zm_busdepot zm_farm zm_transit zm_prison zm_highrises zm_nuked");
+	SetDvarIfNotInizialized("mv_maps", "zm_tomb zm_buried zm_town zm_busdepot zm_farm zm_transit zm_prison zm_highrise zm_nuked");
 
 	// PreCache maps images
 	mapsIDs = [];
@@ -239,18 +243,14 @@ FixBlur() // Reset blur effect to 0
 	self waittill("spawned_player");
 	self setblur(0, 0);
 }
-
-
 mv_Begin()
 {
-	// logPrint("mapvote//before\n");
 	if (getDvarInt("mv_enable") != 1) // Check if mapvote is enable
 		return;						  // End if the mapvote its not enable
-	// logPrint("mapvote//after\n");
+
 	if (!isDefined(level.mapvote_started))
 	{
 		level.mapvote_started = 1;
-		// level thread mv_OverflowFix(); // Should be not needed anymore, but to be safe i leave it here
 		mapslist = [];
 		mapsIDs = [];
 		mapsIDs = strTok(getDvar("mv_maps"), " ");
@@ -263,10 +263,6 @@ mv_Begin()
 		level.__mapvote["map2"] = mapsd[mapschoosed[1]];
 		level.__mapvote["map3"] = mapsd[mapschoosed[2]];
 
-		// logPrint("mapvote//mapid//"+level.__mapvote["map1"].mapid+"//name//"+ level.__mapvote["map1"].mapname + "\n" );
-		// logPrint("mapvote//mapid//"+level.__mapvote["map2"].mapid+"//name//"+ level.__mapvote["map2"].mapname + "\n" );
-		// logPrint("mapvote//mapid//"+level.__mapvote["map3"].mapid+"//name//"+ level.__mapvote["map3"].mapname + "\n" );
-
 		foreach (player in level.players)
 		{
 			if (!player is_bot())
@@ -278,6 +274,7 @@ mv_Begin()
 		mv_VoteManager();
 	}
 }
+
 
 mv_GetMapsThatCanBeVoted(mapslist)
 {
@@ -647,12 +644,6 @@ IsInizialized(dvar)
 getMapsData(mapsIDs)
 {
 	mapsdata = [];
-
-	foreach (id in mapsIDs)
-	{
-		mapsdata[id] = spawnStruct();
-	}
-
 	mapsdata["zm_tomb"] = spawnStruct();
 	mapsdata["zm_tomb"].mapname = "Origins";
 	mapsdata["zm_tomb"].mapid = "exec zm_classic_tomb.cfg map zm_tomb";
@@ -688,10 +679,10 @@ getMapsData(mapsIDs)
 	mapsdata["zm_prison"].mapid = "exec zm_classic_prison.cfg map zm_prison";
 	mapsdata["zm_prison"].image = "loadscreen_zm_prison_zclassic_prison";
 
-	mapsdata["zm_highrises"] = spawnStruct();
-	mapsdata["zm_highrises"].mapname = "Die rise";
-	mapsdata["zm_highrises"].mapid = "exec zm_classic_rooftop.cfg map zm_highrise";
-	mapsdata["zm_highrises"].image = "loadscreen_zm_highrise_zclassic_rooftop";
+	mapsdata["zm_highrise"] = spawnStruct();
+	mapsdata["zm_highrise"].mapname = "Die rise";
+	mapsdata["zm_highrise"].mapid = "exec zm_classic_rooftop.cfg map zm_highrise";
+	mapsdata["zm_highrise"].image = "loadscreen_zm_highrise_zclassic_rooftop";
 
 	mapsdata["zm_nuked"] = spawnStruct();
 	mapsdata["zm_nuked"].mapname = "Nuketown";
@@ -738,10 +729,10 @@ getMapsData(mapsIDs)
 	mapsdata["zm_cellblock_grief"].mapid = "exec zm_grief_cellblock.cfg map zm_prison";
 	mapsdata["zm_cellblock_grief"].image = "loadscreen_zm_prison_zgrief_cellblock";
 
-	mapsdata["zm_highrises_grief"] = spawnStruct();
-	mapsdata["zm_highrises_grief"].mapname = "Die rise";
-	mapsdata["zm_highrises_grief"].mapid = "exec zm_grief_rooftop.cfg map zm_highrise";
-	mapsdata["zm_highrises_grief"].image = "loadscreen_zm_highrise_zclassic_rooftop";
+	mapsdata["zm_highrise_grief"] = spawnStruct();
+	mapsdata["zm_highrise_grief"].mapname = "Die rise";
+	mapsdata["zm_highrise_grief"].mapid = "exec zm_grief_rooftop.cfg map zm_highrise";
+	mapsdata["zm_highrise_grief"].image = "loadscreen_zm_highrise_zclassic_rooftop";
 
 	mapsdata["zm_nuked_grief"] = spawnStruct();
 	mapsdata["zm_nuked_grief"].mapname = "Nuketown";
@@ -783,48 +774,48 @@ GetColor(color)
 	{
 	case "red":
 		return (0.960, 0.180, 0.180);
-		break;
+
 	case "black":
 		return (0, 0, 0);
-		break;
+
 	case "grey":
 		return (0.035, 0.059, 0.063);
-		break;
+
 	case "purple":
 		return (1, 0.282, 1);
-		break;
+
 	case "pink":
 		return (1, 0.623, 0.811);
-		break;
+
 	case "green":
 		return (0, 0.69, 0.15);
-		break;
+
 	case "blue":
 		return (0, 0, 1);
-		break;
+
 	case "lightblue":
 	case "light blue":
 		return (0.152, 0329, 0.929);
-		break;
+
 	case "lightgreen":
 	case "light green":
 		return (0.09, 1, 0.09);
-		break;
+
 	case "orange":
 		return (1, 0662, 0.035);
-		break;
+
 	case "yellow":
 		return (0.968, 0.992, 0.043);
-		break;
+
 	case "brown":
 		return (0.501, 0.250, 0);
-		break;
+
 	case "cyan":
 		return (0, 1, 1);
-		break;
+
 	case "white":
 		return (1, 1, 1);
-		break;
+
 	}
 }
 // Drawing

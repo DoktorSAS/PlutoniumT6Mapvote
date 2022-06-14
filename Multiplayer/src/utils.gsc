@@ -15,46 +15,46 @@ gametypeToName(gametype)
 	{
 	case "dm":
 		return "Free for all";
-		break;
+
 	case "war":
 		return "Team Deathmatch";
-		break;
+
 	case "sd":
 		return "Search & Destroy";
-		break;
+
 	case "conf":
 		return "Kill Confirmed";
-		break;
+
 	case "ctf":
 		return "Capture the Flag";
-		break;
+
 	case "dom":
 		return "Domination";
-		break;
+
 	case "dem":
 		return "Demolition";
-		break;
+
 	case "gun":
 		return "Gun Game";
-		break;
+
 	case "hq":
 		return "Headquaters";
-		break;
+
 	case "koth":
 		return "Hardpoint";
-		break;
+
 	case "oic":
 		return "One in the chamber";
-		break;
+
 	case "oneflag":
 		return "One-Flag CTF";
-		break;
+
 	case "sas":
 		return "Sticks & Stones";
-		break;
+
 	case "shrp":
 		return "Sharpshooter";
-		break;
+
 	}
 	return "invalid";
 }
@@ -239,48 +239,48 @@ GetColor(color)
 	{
 	case "red":
 		return (0.960, 0.180, 0.180);
-		break;
+
 	case "black":
 		return (0, 0, 0);
-		break;
+
 	case "grey":
 		return (0.035, 0.059, 0.063);
-		break;
+
 	case "purple":
 		return (1, 0.282, 1);
-		break;
+
 	case "pink":
 		return (1, 0.623, 0.811);
-		break;
+
 	case "green":
 		return (0, 0.69, 0.15);
-		break;
+
 	case "blue":
 		return (0, 0, 1);
-		break;
+
 	case "lightblue":
 	case "light blue":
 		return (0.152, 0329, 0.929);
-		break;
+
 	case "lightgreen":
 	case "light green":
 		return (0.09, 1, 0.09);
-		break;
+
 	case "orange":
 		return (1, 0662, 0.035);
-		break;
+
 	case "yellow":
 		return (0.968, 0.992, 0.043);
-		break;
+
 	case "brown":
 		return (0.501, 0.250, 0);
-		break;
+
 	case "cyan":
 		return (0, 1, 1);
-		break;
+
 	case "white":
 		return (1, 1, 1);
-		break;
+
 	}
 }
 // Drawing
