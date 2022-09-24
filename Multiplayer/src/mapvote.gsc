@@ -30,9 +30,9 @@ mv_Begin()
 		level.__mapvote["map2"].gametype = g2;
 		level.__mapvote["map3"].gametype = g3;
 
-		array1 = strTok(level.__mapvote["map1"].gametype, "@");
-		array2 = strTok(level.__mapvote["map2"].gametype, "@");
-		array3 = strTok(level.__mapvote["map3"].gametype, "@");
+		array1 = strTok(level.__mapvote["map1"].gametype, ";");
+		array2 = strTok(level.__mapvote["map2"].gametype, ";");
+		array3 = strTok(level.__mapvote["map3"].gametype, ";");
 
 		foreach (player in level.players)
 		{
@@ -286,7 +286,7 @@ mv_GetMostVotedMap(votes)
 }
 mv_SetRotation(mapid, gametype)
 {
-	array = strTok(gametype, "@");
+	array = strTok(gametype, ";");
 	str = "";
 	if (array.size > 1)
 	{
@@ -301,7 +301,6 @@ mv_SetRotation(mapid, gametype)
 
 mv_ServerUI()
 {
-
 	level endon("game_ended");
 
 	buttons = level createServerFontString("objective", 2);
