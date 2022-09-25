@@ -16,7 +16,7 @@ gametypeToName(gametype)
 	case "dm":
 		return "Free for all";
 
-	case "war":
+	case "tdm":
 		return "Team Deathmatch";
 
 	case "sd":

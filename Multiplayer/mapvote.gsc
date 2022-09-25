@@ -86,7 +86,7 @@ mv_Config()
 	SetDvarIfNotInizialized("mv_scrollcolor", "cyan");
 	SetDvarIfNotInizialized("mv_selectcolor", "lightgreen");
 	SetDvarIfNotInizialized("mv_backgroundcolor", "grey");
-	SetDvarIfNotInizialized("mv_gametypes", "dm;dm.cfg war;tdm.cfg dm;dm.cfg war;tdm.cfg sd;sd.cfg sd;sd.cfg");
+	SetDvarIfNotInizialized("mv_gametypes", "dm;dm.cfg tdm;tdm.cfg dm;dm.cfg tdm;tdm.cfg sd;sd.cfg sd;sd.cfg");
 	setDvarIfNotInizialized("mv_excludedmaps", "");
 
 	/*if( level.roundlimit == 1)
@@ -543,7 +543,7 @@ gametypeToName(gametype)
 	case "dm":
 		return "Free for all";
 
-	case "war":
+	case "tdm":
 		return "Team Deathmatch";
 
 	case "sd":
