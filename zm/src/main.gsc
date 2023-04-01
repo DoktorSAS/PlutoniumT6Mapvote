@@ -5,7 +5,7 @@
 /*
 	Mod: Mapvote Menu
 	Developed by DoktorSAS
-	Version: 2.0.1
+	Version: 2.1.0
 
 	2.0.1:
 	- Ported new design
@@ -19,6 +19,11 @@
 	2.0.2:
 	- Fixed missing map
 	- Fixed typo
+
+	2.1.0:
+	- Added support for 6 maps, it can be enable by setting the dvar mv_extramaps to 1
+	- Code cleaned
+	- Added easy way to support "custom maps"
 */
 
 init()
@@ -29,6 +34,7 @@ init()
 	precacheshader("ui_scrollbar_arrow_left");
 	precacheshader("ui_scrollbar_arrow_right");
 	precacheshader("menu_zm_popup");
+
 	level thread OnPlayerConnected();
 
 	mv_Config();
@@ -50,7 +56,7 @@ mv_Config()
 	mapsIDs = [];
 	mapsIDs = strTok(getDvar("mv_maps"), " ");
 	mapsd = [];
-	mapsd = getMapsData(mapsIDs);
+	mapsd = buildmapsdata();
 
 	foreach (map in mapsd)
 	{
@@ -60,6 +66,7 @@ mv_Config()
 	// Setting default values if needed
 	SetDvarIfNotInizialized("mv_credits", 1);
 	SetDvarIfNotInizialized("mv_socials", 1);
+	SetDvarIfNotInizialized("mv_extramaps", 1);
 	SetDvarIfNotInizialized("mv_socialname", "Discord");
 	SetDvarIfNotInizialized("mv_sociallink", "Discord.gg/^3Plutonium^7");
 	SetDvarIfNotInizialized("mv_sentence", "Thanks for Playing by @DoktorSAS");
