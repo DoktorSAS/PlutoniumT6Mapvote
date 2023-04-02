@@ -5,7 +5,7 @@
 /*
 	Mod: Mapvote Menu
 	Developed by DoktorSAS
-	Version: v1.0.2
+	Version: v1.1.0
 	Config:
 	set mv_enable			1 						// Enable/Disable the mapvote
 	set mv_maps				""						// Lits of maps that can be voted on the mapvote, leave empty for all maps
@@ -40,6 +40,10 @@
 
 	1.0.4:
 	- mv_gametypes now work with ; instead of @ since the issue was not caused by the symbol
+
+	1.1.0:
+	- Addes support for 5 maps, it can be enable by setting the dvar mv_extramaps to 1
+	- Code cleaned
 */
 
 init()
@@ -67,7 +71,7 @@ mv_Config()
 
 	// PreCache maps images
 	mapsd = [];
-	mapsd = getMapsData();
+	mapsd = buildmapsdata();
 
 	foreach (map in mapsd)
 	{
@@ -77,6 +81,7 @@ mv_Config()
 	// Setting default values if needed
 	SetDvarIfNotInizialized("mv_credits", 1);
 	SetDvarIfNotInizialized("mv_socials", 1);
+	SetDvarIfNotInizialized("mv_extramaps", 1);
 	SetDvarIfNotInizialized("mv_socialname", "Discord");
 	SetDvarIfNotInizialized("mv_sociallink", "Discord.gg/^3Plutonium^7");
 	SetDvarIfNotInizialized("mv_sentence", "Thanks for Playing by @DoktorSAS");
@@ -97,6 +102,7 @@ main()
 {
 	replaceFunc(maps\mp\gametypes\_killcam::finalkillcamwaiter, ::mv_finalkillcamwaiter);
 }
+
 mv_finalkillcamwaiter()
 {
 	if (!isDefined(level.finalkillcam_winner))
@@ -105,7 +111,9 @@ mv_finalkillcamwaiter()
 	}
 	level waittill("final_killcam_done");
 	if (waslastround())
+	{
 		mv_Begin();
+	}
 
 	return 1;
 }

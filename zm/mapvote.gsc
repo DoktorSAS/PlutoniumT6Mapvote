@@ -48,7 +48,7 @@ mv_Config()
 		return;						  // End if the mapvote its not enable
 
 	level.__mapvote = [];
-	SetDvarIfNotInizialized("mv_time", 50);
+	SetDvarIfNotInizialized("mv_time", 20);
 	level.__mapvote["time"] = getDvarInt("mv_time");
 	SetDvarIfNotInizialized("mv_maps", "zm_tomb zm_buried zm_town zm_busdepot zm_farm zm_transit zm_prison zm_highrise zm_nuked");
 
@@ -274,9 +274,12 @@ mv_Begin()
 		level.__mapvote["map1"] = mapsd[mapschoosed[0]];
 		level.__mapvote["map2"] = mapsd[mapschoosed[1]];
 		level.__mapvote["map3"] = mapsd[mapschoosed[2]];
-		level.__mapvote["map4"] = mapsd[mapschoosed[3]];
-		level.__mapvote["map5"] = mapsd[mapschoosed[4]];
-		level.__mapvote["map6"] = mapsd[mapschoosed[5]];
+		if(getDvarInt("mv_extramaps") == 1)
+		{
+			level.__mapvote["map4"] = mapsd[mapschoosed[3]];
+			level.__mapvote["map5"] = mapsd[mapschoosed[4]];
+			level.__mapvote["map6"] = mapsd[mapschoosed[5]];
+		}
 
 		foreach (player in level.players)
 		{
@@ -609,8 +612,6 @@ mv_ServerUI()
 	mv_arrowcolor = GetColor(getDvar("mv_arrowcolor"));
 	mv_votecolor = getDvar("mv_votecolor");
 
-	// logPrint("mapvote//mv_ServerUI " + getTime()/1000 + "\n");
-
 	buttons = level createServerFontString("objective", 2);
 	buttons setText("^7 ^3[{+speed_throw}]              ^7Press ^3[{+gostand}] ^7or ^3[{+activate}] ^7to select              ^3[{+attack}] ^7");
 	buttons.alpha = 0;
@@ -642,8 +643,8 @@ mv_ServerUI()
 	if(getDvarInt("mv_extramaps") == 1)
 	{
 		buttons setPoint("CENTER", "CENTER", 0, 150);
-		arrow_right = DrawShader("ui_scrollbar_arrow_right", 200, 290 + 50, 25, 25, mv_arrowcolor, 100, 2, "CENTER", "CENTER", 1);
-		arrow_left = DrawShader("ui_scrollbar_arrow_left", -200, 290 + 50, 25, 25, mv_arrowcolor, 100, 2, "CENTER", "CENTER", 1);
+		arrow_right = level DrawShader("ui_scrollbar_arrow_right", 200, 290 + 50, 25, 25, mv_arrowcolor, 100, 2, "CENTER", "CENTER", 1);
+		arrow_left = level DrawShader("ui_scrollbar_arrow_left", -200, 290 + 50, 25, 25, mv_arrowcolor, 100, 2, "CENTER", "CENTER", 1);
 		mapsUI[3] = spawnStruct();
 		mapsUI[4] = spawnStruct();
 		mapsUI[5] = spawnStruct();
@@ -923,7 +924,6 @@ CreateString(input, font, fontScale, align, relative, x, y, color, alpha, glowCo
 	{
 		hud = level createServerFontString(font, fontScale);
 	}
-		
 
 	if (!isDefined(isValue))
 	{

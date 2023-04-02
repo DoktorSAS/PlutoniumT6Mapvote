@@ -59,175 +59,175 @@ gametypeToName(gametype)
 	return "invalid";
 }
 
-getMapsData(mapsIDs)
+buildmapsdata()
 {
-	mapsdata = [];
+	level.mapsdata = [];
 
 	/*foreach(id in mapsIDs)
 	{
 		mapsdata[id] = spawnStruct();
 	}*/
 
-	mapsdata["mp_la"] = spawnStruct();
-	mapsdata["mp_la"].mapname = "Aftermath";
-	mapsdata["mp_la"].mapid = "mp_la";
-	mapsdata["mp_la"].image = "loadscreen_mp_la";
+	level.mapsdata["mp_la"] = spawnStruct();
+	level.mapsdata["mp_la"].mapname = "Aftermath";
+	level.mapsdata["mp_la"].mapid = "mp_la";
+	level.mapsdata["mp_la"].image = "loadscreen_mp_la";
 
-	mapsdata["mp_meltdown"] = spawnStruct();
-	mapsdata["mp_meltdown"].mapname = "Meltdown";
-	mapsdata["mp_meltdown"].mapid = "mp_meltdown";
-	mapsdata["mp_meltdown"].image = "loadscreen_mp_meltdown";
+	level.mapsdata["mp_meltdown"] = spawnStruct();
+	level.mapsdata["mp_meltdown"].mapname = "Meltdown";
+	level.mapsdata["mp_meltdown"].mapid = "mp_meltdown";
+	level.mapsdata["mp_meltdown"].image = "loadscreen_mp_meltdown";
 
-	mapsdata["mp_overflow"] = spawnStruct();
-	mapsdata["mp_overflow"].mapname = "Overflow";
-	mapsdata["mp_overflow"].mapid = "mp_overflow";
-	mapsdata["mp_overflow"].image = "loadscreen_mp_overflow";
+	level.mapsdata["mp_overflow"] = spawnStruct();
+	level.mapsdata["mp_overflow"].mapname = "Overflow";
+	level.mapsdata["mp_overflow"].mapid = "mp_overflow";
+	level.mapsdata["mp_overflow"].image = "loadscreen_mp_overflow";
 
-	mapsdata["mp_nightclub"] = spawnStruct();
-	mapsdata["mp_nightclub"].mapname = "Plaza";
-	mapsdata["mp_nightclub"].mapid = "mp_nightclub";
-	mapsdata["mp_nightclub"].image = "loadscreen_mp_nightclub";
+	level.mapsdata["mp_nightclub"] = spawnStruct();
+	level.mapsdata["mp_nightclub"].mapname = "Plaza";
+	level.mapsdata["mp_nightclub"].mapid = "mp_nightclub";
+	level.mapsdata["mp_nightclub"].image = "loadscreen_mp_nightclub";
 
-	mapsdata["mp_dockside"] = spawnStruct();
-	mapsdata["mp_dockside"].mapname = "Cargo";
-	mapsdata["mp_dockside"].mapid = "mp_dockside";
-	mapsdata["mp_dockside"].image = "loadscreen_mp_dockside";
+	level.mapsdata["mp_dockside"] = spawnStruct();
+	level.mapsdata["mp_dockside"].mapname = "Cargo";
+	level.mapsdata["mp_dockside"].mapid = "mp_dockside";
+	level.mapsdata["mp_dockside"].image = "loadscreen_mp_dockside";
 
-	mapsdata["mp_carrier"] = spawnStruct();
-	mapsdata["mp_carrier"].mapname = "Carrier";
-	mapsdata["mp_carrier"].mapid = "mp_carrier";
-	mapsdata["mp_carrier"].image = "loadscreen_mp_carrier";
+	level.mapsdata["mp_carrier"] = spawnStruct();
+	level.mapsdata["mp_carrier"].mapname = "Carrier";
+	level.mapsdata["mp_carrier"].mapid = "mp_carrier";
+	level.mapsdata["mp_carrier"].image = "loadscreen_mp_carrier";
 
-	mapsdata["mp_drone"] = spawnStruct();
-	mapsdata["mp_drone"].mapname = "Drone";
-	mapsdata["mp_drone"].mapid = "mp_drone";
-	mapsdata["mp_drone"].image = "loadscreen_mp_drone";
+	level.mapsdata["mp_drone"] = spawnStruct();
+	level.mapsdata["mp_drone"].mapname = "Drone";
+	level.mapsdata["mp_drone"].mapid = "mp_drone";
+	level.mapsdata["mp_drone"].image = "loadscreen_mp_drone";
 
-	mapsdata["mp_express"] = spawnStruct();
-	mapsdata["mp_express"].mapname = "Express";
-	mapsdata["mp_express"].mapid = "mp_express";
-	mapsdata["mp_express"].image = "loadscreen_mp_express";
+	level.mapsdata["mp_express"] = spawnStruct();
+	level.mapsdata["mp_express"].mapname = "Express";
+	level.mapsdata["mp_express"].mapid = "mp_express";
+	level.mapsdata["mp_express"].image = "loadscreen_mp_express";
 
-	mapsdata["mp_hijacked"] = spawnStruct();
-	mapsdata["mp_hijacked"].mapname = "Hijacked";
-	mapsdata["mp_hijacked"].mapid = "mp_hijacked";
-	mapsdata["mp_hijacked"].image = "loadscreen_mp_hijacked";
+	level.mapsdata["mp_hijacked"] = spawnStruct();
+	level.mapsdata["mp_hijacked"].mapname = "Hijacked";
+	level.mapsdata["mp_hijacked"].mapid = "mp_hijacked";
+	level.mapsdata["mp_hijacked"].image = "loadscreen_mp_hijacked";
 
-	mapsdata["mp_raid"] = spawnStruct();
-	mapsdata["mp_raid"].mapname = "Raid";
-	mapsdata["mp_raid"].mapid = "mp_raid";
-	mapsdata["mp_raid"].image = "loadscreen_mp_raid";
+	level.mapsdata["mp_raid"] = spawnStruct();
+	level.mapsdata["mp_raid"].mapname = "Raid";
+	level.mapsdata["mp_raid"].mapid = "mp_raid";
+	level.mapsdata["mp_raid"].image = "loadscreen_mp_raid";
 
-	mapsdata["mp_slums"] = spawnStruct();
-	mapsdata["mp_slums"].mapname = "Slums";
-	mapsdata["mp_slums"].mapid = "mp_slums";
-	mapsdata["mp_slums"].image = "loadscreen_mp_Slums";
+	level.mapsdata["mp_slums"] = spawnStruct();
+	level.mapsdata["mp_slums"].mapname = "Slums";
+	level.mapsdata["mp_slums"].mapid = "mp_slums";
+	level.mapsdata["mp_slums"].image = "loadscreen_mp_Slums";
 
-	mapsdata["mp_village"] = spawnStruct();
-	mapsdata["mp_village"].mapname = "Standoff";
-	mapsdata["mp_village"].mapid = "mp_village";
-	mapsdata["mp_village"].image = "loadscreen_mp_village";
+	level.mapsdata["mp_village"] = spawnStruct();
+	level.mapsdata["mp_village"].mapname = "Standoff";
+	level.mapsdata["mp_village"].mapid = "mp_village";
+	level.mapsdata["mp_village"].image = "loadscreen_mp_village";
 
-	mapsdata["mp_turbine"] = spawnStruct();
-	mapsdata["mp_turbine"].mapname = "Turbine";
-	mapsdata["mp_turbine"].mapid = "mp_turbine";
-	mapsdata["mp_turbine"].image = "loadscreen_mp_Turbine";
+	level.mapsdata["mp_turbine"] = spawnStruct();
+	level.mapsdata["mp_turbine"].mapname = "Turbine";
+	level.mapsdata["mp_turbine"].mapid = "mp_turbine";
+	level.mapsdata["mp_turbine"].image = "loadscreen_mp_Turbine";
 
-	mapsdata["mp_socotra"] = spawnStruct();
-	mapsdata["mp_socotra"].mapname = "Yemen";
-	mapsdata["mp_socotra"].mapid = "mp_socotra";
-	mapsdata["mp_socotra"].image = "loadscreen_mp_socotra";
+	level.mapsdata["mp_socotra"] = spawnStruct();
+	level.mapsdata["mp_socotra"].mapname = "Yemen";
+	level.mapsdata["mp_socotra"].mapid = "mp_socotra";
+	level.mapsdata["mp_socotra"].image = "loadscreen_mp_socotra";
 
-	mapsdata["mp_nuketown_2020"] = spawnStruct();
-	mapsdata["mp_nuketown_2020"].mapname = "Nuketown 2025";
-	mapsdata["mp_nuketown_2020"].mapid = "mp_nuketown_2020";
-	mapsdata["mp_nuketown_2020"].image = "loadscreen_mp_nuketown_2020";
+	level.mapsdata["mp_nuketown_2020"] = spawnStruct();
+	level.mapsdata["mp_nuketown_2020"].mapname = "Nuketown 2025";
+	level.mapsdata["mp_nuketown_2020"].mapid = "mp_nuketown_2020";
+	level.mapsdata["mp_nuketown_2020"].image = "loadscreen_mp_nuketown_2020";
 
-	mapsdata["mp_downhill"] = spawnStruct();
-	mapsdata["mp_downhill"].mapname = "Downhill";
-	mapsdata["mp_downhill"].mapid = "mp_downhill";
-	mapsdata["mp_downhill"].image = "loadscreen_mp_downhill";
+	level.mapsdata["mp_downhill"] = spawnStruct();
+	level.mapsdata["mp_downhill"].mapname = "Downhill";
+	level.mapsdata["mp_downhill"].mapid = "mp_downhill";
+	level.mapsdata["mp_downhill"].image = "loadscreen_mp_downhill";
 
-	mapsdata["mp_mirage"] = spawnStruct();
-	mapsdata["mp_mirage"].mapname = "Mirage";
-	mapsdata["mp_mirage"].mapid = "mp_mirage";
-	mapsdata["mp_mirage"].image = "loadscreen_mp_Mirage";
+	level.mapsdata["mp_mirage"] = spawnStruct();
+	level.mapsdata["mp_mirage"].mapname = "Mirage";
+	level.mapsdata["mp_mirage"].mapid = "mp_mirage";
+	level.mapsdata["mp_mirage"].image = "loadscreen_mp_Mirage";
 
-	mapsdata["mp_hydro"] = spawnStruct();
-	mapsdata["mp_hydro"].mapname = "Hydro";
-	mapsdata["mp_hydro"].mapid = "mp_hydro";
-	mapsdata["mp_hydro"].image = "loadscreen_mp_Hydro";
+	level.mapsdata["mp_hydro"] = spawnStruct();
+	level.mapsdata["mp_hydro"].mapname = "Hydro";
+	level.mapsdata["mp_hydro"].mapid = "mp_hydro";
+	level.mapsdata["mp_hydro"].image = "loadscreen_mp_Hydro";
 
-	mapsdata["mp_skate"] = spawnStruct();
-	mapsdata["mp_skate"].mapname = "Grind";
-	mapsdata["mp_skate"].mapid = "mp_skate";
-	mapsdata["mp_skate"].image = "loadscreen_mp_skate";
+	level.mapsdata["mp_skate"] = spawnStruct();
+	level.mapsdata["mp_skate"].mapname = "Grind";
+	level.mapsdata["mp_skate"].mapid = "mp_skate";
+	level.mapsdata["mp_skate"].image = "loadscreen_mp_skate";
 
-	mapsdata["mp_concert"] = spawnStruct();
-	mapsdata["mp_concert"].mapname = "Encore";
-	mapsdata["mp_concert"].mapid = "mp_concert";
-	mapsdata["mp_concert"].image = "loadscreen_mp_concert";
+	level.mapsdata["mp_concert"] = spawnStruct();
+	level.mapsdata["mp_concert"].mapname = "Encore";
+	level.mapsdata["mp_concert"].mapid = "mp_concert";
+	level.mapsdata["mp_concert"].image = "loadscreen_mp_concert";
 
-	mapsdata["mp_magma"] = spawnStruct();
-	mapsdata["mp_magma"].mapname = "Magma";
-	mapsdata["mp_magma"].mapid = "mp_magma";
-	mapsdata["mp_magma"].image = "loadscreen_mp_Magma";
+	level.mapsdata["mp_magma"] = spawnStruct();
+	level.mapsdata["mp_magma"].mapname = "Magma";
+	level.mapsdata["mp_magma"].mapid = "mp_magma";
+	level.mapsdata["mp_magma"].image = "loadscreen_mp_Magma";
 
-	mapsdata["mp_vertigo"] = spawnStruct();
-	mapsdata["mp_vertigo"].mapname = "Vertigo";
-	mapsdata["mp_vertigo"].mapid = "mp_vertigo";
-	mapsdata["mp_vertigo"].image = "loadscreen_mp_Vertigo";
+	level.mapsdata["mp_vertigo"] = spawnStruct();
+	level.mapsdata["mp_vertigo"].mapname = "Vertigo";
+	level.mapsdata["mp_vertigo"].mapid = "mp_vertigo";
+	level.mapsdata["mp_vertigo"].image = "loadscreen_mp_Vertigo";
 
-	mapsdata["mp_studio"] = spawnStruct();
-	mapsdata["mp_studio"].mapname = "Studio";
-	mapsdata["mp_studio"].mapid = "mp_studio";
-	mapsdata["mp_studio"].image = "loadscreen_mp_Studio";
+	level.mapsdata["mp_studio"] = spawnStruct();
+	level.mapsdata["mp_studio"].mapname = "Studio";
+	level.mapsdata["mp_studio"].mapid = "mp_studio";
+	level.mapsdata["mp_studio"].image = "loadscreen_mp_Studio";
 
-	mapsdata["mp_uplink"] = spawnStruct();
-	mapsdata["mp_uplink"].mapname = "Uplink";
-	mapsdata["mp_uplink"].mapid = "mp_uplink";
-	mapsdata["mp_uplink"].image = "loadscreen_mp_Uplink";
+	level.mapsdata["mp_uplink"] = spawnStruct();
+	level.mapsdata["mp_uplink"].mapname = "Uplink";
+	level.mapsdata["mp_uplink"].mapid = "mp_uplink";
+	level.mapsdata["mp_uplink"].image = "loadscreen_mp_Uplink";
 
-	mapsdata["mp_bridge"] = spawnStruct();
-	mapsdata["mp_bridge"].mapname = "Detour";
-	mapsdata["mp_bridge"].mapid = "mp_bridge";
-	mapsdata["mp_bridge"].image = "loadscreen_mp_bridge";
+	level.mapsdata["mp_bridge"] = spawnStruct();
+	level.mapsdata["mp_bridge"].mapname = "Detour";
+	level.mapsdata["mp_bridge"].mapid = "mp_bridge";
+	level.mapsdata["mp_bridge"].image = "loadscreen_mp_bridge";
 
-	mapsdata["mp_castaway"] = spawnStruct();
-	mapsdata["mp_castaway"].mapname = "Cove";
-	mapsdata["mp_castaway"].mapid = "mp_castaway";
-	mapsdata["mp_castaway"].image = "loadscreen_mp_castaway";
+	level.mapsdata["mp_castaway"] = spawnStruct();
+	level.mapsdata["mp_castaway"].mapname = "Cove";
+	level.mapsdata["mp_castaway"].mapid = "mp_castaway";
+	level.mapsdata["mp_castaway"].image = "loadscreen_mp_castaway";
 
-	mapsdata["mp_dig"] = spawnStruct();
-	mapsdata["mp_paintball"].mapname = "Rush";
-	mapsdata["mp_paintball"].mapid = "mp_paintball";
-	mapsdata["mp_paintball"].image = "loadscreen_mp_paintball";
+	level.mapsdata["mp_dig"] = spawnStruct();
+	level.mapsdata["mp_paintball"].mapname = "Rush";
+	level.mapsdata["mp_paintball"].mapid = "mp_paintball";
+	level.mapsdata["mp_paintball"].image = "loadscreen_mp_paintball";
 
-	mapsdata["mp_dig"] = spawnStruct();
-	mapsdata["mp_dig"].mapname = "Dig";
-	mapsdata["mp_dig"].mapid = "mp_dig";
-	mapsdata["mp_dig"].image = "loadscreen_mp_Dig";
+	level.mapsdata["mp_dig"] = spawnStruct();
+	level.mapsdata["mp_dig"].mapname = "Dig";
+	level.mapsdata["mp_dig"].mapid = "mp_dig";
+	level.mapsdata["mp_dig"].image = "loadscreen_mp_Dig";
 
-	mapsdata["mp_frostbite"] = spawnStruct();
-	mapsdata["mp_frostbite"].mapname = "Frost";
-	mapsdata["mp_frostbite"].mapid = "mp_frostbite";
-	mapsdata["mp_frostbite"].image = "loadscreen_mp_frostbite";
+	level.mapsdata["mp_frostbite"] = spawnStruct();
+	level.mapsdata["mp_frostbite"].mapname = "Frost";
+	level.mapsdata["mp_frostbite"].mapid = "mp_frostbite";
+	level.mapsdata["mp_frostbite"].image = "loadscreen_mp_frostbite";
 
-	mapsdata["mp_pod"] = spawnStruct();
-	mapsdata["mp_pod"].mapname = "Pod";
-	mapsdata["mp_pod"].mapid = "mp_pod";
-	mapsdata["mp_pod"].image = "loadscreen_mp_Pod";
+	level.mapsdata["mp_pod"] = spawnStruct();
+	level.mapsdata["mp_pod"].mapname = "Pod";
+	level.mapsdata["mp_pod"].mapid = "mp_pod";
+	level.mapsdata["mp_pod"].image = "loadscreen_mp_Pod";
 
-	mapsdata["mp_takeoff"] = spawnStruct();
-	mapsdata["mp_takeoff"].mapname = "Takeoff";
-	mapsdata["mp_takeoff"].mapid = "mp_takeoff";
-	mapsdata["mp_takeoff"].image = "loadscreen_mp_Takeoff";
+	level.mapsdata["mp_takeoff"] = spawnStruct();
+	level.mapsdata["mp_takeoff"].mapname = "Takeoff";
+	level.mapsdata["mp_takeoff"].mapid = "mp_takeoff";
+	level.mapsdata["mp_takeoff"].image = "loadscreen_mp_Takeoff";
 
-	mapsdata["mp_dockside"] = spawnStruct();
-	mapsdata["mp_dockside"].mapname = "Cargo";
-	mapsdata["mp_dockside"].mapid = "mp_dockside";
-	mapsdata["mp_dockside"].image = "loadscreen_mp_dockside";
-	return mapsdata;
+	level.mapsdata["mp_dockside"] = spawnStruct();
+	level.mapsdata["mp_dockside"].mapname = "Cargo";
+	level.mapsdata["mp_dockside"].mapid = "mp_dockside";
+	level.mapsdata["mp_dockside"].image = "loadscreen_mp_dockside";
+	return level.mapsdata;
 }
 isValidColor(value)
 {
@@ -284,16 +284,26 @@ GetColor(color)
 	}
 }
 // Drawing
-CreateString(input, font, fontScale, align, relative, x, y, color, alpha, glowColor, glowAlpha, sort, isLevel, isValue)
+CreateString(input, font, fontScale, align, relative, x, y, color, alpha, glowColor, glowAlpha, sort, isValue)
 {
-	if (!isDefined(isLevel))
+	if (self != level)
+	{
 		hud = self createFontString(font, fontScale);
+	}
 	else
+	{
 		hud = level createServerFontString(font, fontScale);
+	}
+
 	if (!isDefined(isValue))
+	{
 		hud setText(input);
+	}
 	else
-		hud setValue(input);
+	{
+		hud setValue(int(input));
+	}
+
 	hud setPoint(align, relative, x, y);
 	hud.color = color;
 	hud.alpha = alpha;
@@ -308,7 +318,7 @@ CreateString(input, font, fontScale, align, relative, x, y, color, alpha, glowCo
 CreateRectangle(align, relative, x, y, width, height, color, shader, sort, alpha)
 {
 	boxElem = newClientHudElem(self);
-	boxElem.elemType = "bar";
+	boxElem.elemType = "icon";
 	boxElem.width = width;
 	boxElem.height = height;
 	boxElem.align = align;

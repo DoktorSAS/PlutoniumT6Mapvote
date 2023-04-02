@@ -22,9 +22,12 @@ mv_Begin()
 		level.__mapvote["map1"] = mapsd[mapschoosed[0]];
 		level.__mapvote["map2"] = mapsd[mapschoosed[1]];
 		level.__mapvote["map3"] = mapsd[mapschoosed[2]];
-		level.__mapvote["map4"] = mapsd[mapschoosed[3]];
-		level.__mapvote["map5"] = mapsd[mapschoosed[4]];
-		level.__mapvote["map6"] = mapsd[mapschoosed[5]];
+		if(getDvarInt("mv_extramaps") == 1)
+		{
+			level.__mapvote["map4"] = mapsd[mapschoosed[3]];
+			level.__mapvote["map5"] = mapsd[mapschoosed[4]];
+			level.__mapvote["map6"] = mapsd[mapschoosed[5]];
+		}
 
 		foreach (player in level.players)
 		{
@@ -388,8 +391,8 @@ mv_ServerUI()
 	if(getDvarInt("mv_extramaps") == 1)
 	{
 		buttons setPoint("CENTER", "CENTER", 0, 150);
-		arrow_right = DrawShader("ui_scrollbar_arrow_right", 200, 290 + 50, 25, 25, mv_arrowcolor, 100, 2, "CENTER", "CENTER", 1);
-		arrow_left = DrawShader("ui_scrollbar_arrow_left", -200, 290 + 50, 25, 25, mv_arrowcolor, 100, 2, "CENTER", "CENTER", 1);
+		arrow_right = level DrawShader("ui_scrollbar_arrow_right", 200, 290 + 50, 25, 25, mv_arrowcolor, 100, 2, "CENTER", "CENTER", 1);
+		arrow_left = level DrawShader("ui_scrollbar_arrow_left", -200, 290 + 50, 25, 25, mv_arrowcolor, 100, 2, "CENTER", "CENTER", 1);
 		mapsUI[3] = spawnStruct();
 		mapsUI[4] = spawnStruct();
 		mapsUI[5] = spawnStruct();

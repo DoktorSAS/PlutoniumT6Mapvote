@@ -5,7 +5,7 @@
 /*
 	Mod: Mapvote Menu
 	Developed by DoktorSAS
-	Version: v1.0.2
+	Version: v1.1.0
 	Config:
 	set mv_enable			1 						// Enable/Disable the mapvote
 	set mv_maps				""						// Lits of maps that can be voted on the mapvote, leave empty for all maps
@@ -40,6 +40,10 @@
 
 	1.0.4:
 	- mv_gametypes now work with ; instead of @ since the issue was not caused by the symbol
+
+	1.1.0:
+	- Addes support for 5 maps, it can be enable by setting the dvar mv_extramaps to 1
+	- Code cleaned
 */
 
 init()
@@ -67,7 +71,7 @@ mv_Config()
 
 	// PreCache maps images
 	mapsd = [];
-	mapsd = getMapsData();
+	mapsd = buildmapsdata();
 
 	foreach (map in mapsd)
 	{
@@ -77,6 +81,7 @@ mv_Config()
 	// Setting default values if needed
 	SetDvarIfNotInizialized("mv_credits", 1);
 	SetDvarIfNotInizialized("mv_socials", 1);
+	SetDvarIfNotInizialized("mv_extramaps", 1);
 	SetDvarIfNotInizialized("mv_socialname", "Discord");
 	SetDvarIfNotInizialized("mv_sociallink", "Discord.gg/^3Plutonium^7");
 	SetDvarIfNotInizialized("mv_sentence", "Thanks for Playing by @DoktorSAS");
@@ -97,6 +102,7 @@ main()
 {
 	replaceFunc(maps\mp\gametypes\_killcam::finalkillcamwaiter, ::mv_finalkillcamwaiter);
 }
+
 mv_finalkillcamwaiter()
 {
 	if (!isDefined(level.finalkillcam_winner))
@@ -105,7 +111,9 @@ mv_finalkillcamwaiter()
 	}
 	level waittill("final_killcam_done");
 	if (waslastround())
+	{
 		mv_Begin();
+	}
 
 	return 1;
 }
@@ -140,27 +148,38 @@ mv_Begin()
 		mapslist = [];
 		mapsIDs = [];
 		mapsIDs = strTok(getDvar("mv_maps"), " ");
-		mapslist = mv_GetMapsThatCanBeVoted(mapsIDs); // Remove blacklisted maps
+		//mapslist = mv_GetMapsThatCanBeVoted(mapsIDs); // Remove blacklisted maps
 		mapsd = [];
-		mapsd = getMapsData();
-
-		mapschoosed = mv_GetRandomMaps(mapsIDs);
+		mapsd = level.mapsdata;
+		times = 3;
+		if(getDvarInt("mv_extramaps") == 1)
+		{
+			times = 5;
+		}
+			
+		mapschoosed = mv_GetRandomMaps(mapsIDs, times);
+		gametypes = strTok(getDvar("mv_gametypes"), " ");
 
 		level.__mapvote["map1"] = mapsd[mapschoosed[0]];
 		level.__mapvote["map2"] = mapsd[mapschoosed[1]];
 		level.__mapvote["map3"] = mapsd[mapschoosed[2]];
-		gametypes = strTok(getDvar("mv_gametypes"), " ");
-		g1 = gametypes[randomIntRange(0, gametypes.size)];
-		g2 = gametypes[randomIntRange(0, gametypes.size)];
-		g3 = gametypes[randomIntRange(0, gametypes.size)];
+		
+		level.__mapvote["map1"].gametype = gametypes[randomIntRange(0, gametypes.size)];
+		level.__mapvote["map2"].gametype = gametypes[randomIntRange(0, gametypes.size)];
+		level.__mapvote["map3"].gametype = gametypes[randomIntRange(0, gametypes.size)];
 
-		level.__mapvote["map1"].gametype = g1;
-		level.__mapvote["map2"].gametype = g2;
-		level.__mapvote["map3"].gametype = g3;
+		if(getDvarInt("mv_extramaps") == 1)
+		{
+			level.__mapvote["map4"] = mapsd[mapschoosed[3]];
+			level.__mapvote["map5"] = mapsd[mapschoosed[4]];
+			level.__mapvote["map4"].gametype = gametypes[randomIntRange(0, gametypes.size)];
+			level.__mapvote["map5"].gametype = gametypes[randomIntRange(0, gametypes.size)];
+		}
+		
 
-		array1 = strTok(level.__mapvote["map1"].gametype, ";");
-		array2 = strTok(level.__mapvote["map2"].gametype, ";");
-		array3 = strTok(level.__mapvote["map3"].gametype, ";");
+		//array1 = strTok(level.__mapvote["map1"].gametype, ";");
+		//array2 = strTok(level.__mapvote["map2"].gametype, ";");
+		//array3 = strTok(level.__mapvote["map3"].gametype, ";");
 
 		foreach (player in level.players)
 		{
@@ -188,18 +207,29 @@ mv_GetMapsThatCanBeVoted(mapslist)
 	return mapslist;
 }
 
-mv_GetRandomMaps(mapsIDs) // Select random map from the list
+ArrayRemoveElement(array, todelete)
+{
+	newarray = [];
+	foreach(element in array) 
+	{
+		if(element != todelete)
+		{
+			newarray[newarray.size] = element;
+		}
+	}
+	return newarray;
+}
+mv_GetRandomMaps(mapsIDs, times) // Select random map from the list
 {
 	mapschoosed = [];
-	index = 0;
-	map = "";
-	for (i = 0; i < 3; i++)
+	for (i = 0; i < times; i++)
 	{
 		index = randomIntRange(0, mapsIDs.size);
 		map = mapsIDs[index];
-		// logPrint("map;"+map+";index;"+index+"\n");
-		arrayremovevalue(mapsIDs, map);
 		mapschoosed[i] = map;
+		logPrint("map;"+map+";index;"+index+"\n");
+		mapsIDs = ArrayRemoveElement(mapsIDs, map);
+		//arrayremovevalue(mapsIDs, map);
 	}
 
 	return mapschoosed;
@@ -221,17 +251,34 @@ mv_PlayerUI()
 	bg_color = getColor(getDvar("mv_backgroundcolor"));
 	self FreezeControlsAllowLook(0);
 	boxes = [];
-	boxes[0] = self createRectangle("CENTER", "CENTER", -220, -452, 205, 133, scroll_color, "white", 1, .7);
-	boxes[1] = self createRectangle("CENTER", "CENTER", 0, -452, 205, 133, bg_color, "white", 1, .7);
-	boxes[2] = self createRectangle("CENTER", "CENTER", 220, -452, 205, 133, bg_color, "white", 1, .7);
+	boxes[0] = self CreateRectangle("CENTER", "CENTER", -220, -452, 205, 133, scroll_color, "white", 1, 0);
+	boxes[1] = self CreateRectangle("CENTER", "CENTER", 0, -452, 205, 133, bg_color, "white", 1, 0);
+	boxes[2] = self CreateRectangle("CENTER", "CENTER", 220, -452, 205, 133, bg_color, "white", 1, 0);
 
 	self thread mv_PlayerFixAngle();
 
 	level waittill("mv_start_animation");
 
-	boxes[0] affectElement("y", 1.2, -50);
-	boxes[1] affectElement("y", 1.2, -50);
-	boxes[2] affectElement("y", 1.2, -50);
+	if(getDvarInt("mv_extramaps") == 1)
+	{
+		dynamic_position = 100;
+		boxes[3] = self CreateRectangle("CENTER", "CENTER", -120, -452, 205, 133, bg_color, "white", 2, 0);
+		boxes[4] = self CreateRectangle("CENTER", "CENTER", 120, -452, 205, 133, bg_color, "white", 2, 0);
+		//boxes[5] = self CreateRectangle("CENTER", "CENTER", 220, -452, 205, 133, bg_color, "white", 2, 0);
+		boxes[3] affectElement("y", 1.2, -50 + dynamic_position);
+		boxes[4] affectElement("y", 1.2, -50 + dynamic_position);
+		//boxes[5] affectElement("y", 1.2, -50 + dynamic_position);
+		boxes[0] affectElement("y", 1.2, -100);
+		boxes[1] affectElement("y", 1.2, -100);
+		boxes[2] affectElement("y", 1.2, -100);
+	}
+	else
+	{
+		boxes[0] affectElement("y", 1.2, -50);
+		boxes[1] affectElement("y", 1.2, -50);
+		boxes[2] affectElement("y", 1.2, -50);
+	}
+	
 	self thread destroyBoxes(boxes);
 
 	self notifyonplayercommand("left", "+attack");
@@ -244,6 +291,11 @@ mv_PlayerUI()
 
 	self.statusicon = "compassping_enemy"; // Red dot
 	level waittill("mv_start_vote");
+
+	foreach(box in boxes) 
+	{
+		box affectElement("alpha", 0.2, 1);
+	}
 
 	index = 0;
 	isVoting = 1;
@@ -293,11 +345,11 @@ destroyBoxes(boxes)
 	{
 		box affectElement("alpha", 0.5, 0);
 	}
-	/*wait 1.2;
+	wait 0.5;
 	foreach(box in boxes)
 	{
 		box destroyElem();
-	}*/
+	}
 }
 
 mv_PlayerFixAngle()
@@ -317,50 +369,60 @@ mv_VoteManager()
 	level endon("game_ended");
 	votes = [];
 	votes[0] = spawnStruct();
-	votes[0].votes = level createServerFontString("objective", 2);
-	votes[0].votes setPoint("CENTER", "CENTER", -165, -325);
-	votes[0].votes.label = &"^" + getDvar("mv_votecolor");
-	votes[0].votes.sort = 4;
-	votes[0].value = 0;
+	votes[1] = spawnStruct();
+	votes[2] = spawnStruct();
+	votes[0].votes = level CreateString(0, "objective", 1.5, "LEFT", "CENTER", -150, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5, 0);
+	votes[0].votes.label = "^" + getDvarInt("mv_votecolor");
 	votes[0].map = level.__mapvote["map1"];
 
-	votes[1] = spawnStruct();
-	votes[1].votes = level createServerFontString("objective", 2);
-	votes[1].votes setPoint("CENTER", "CENTER", 55, -325);
-	votes[1].votes.label = &"^" + getDvar("mv_votecolor");
-	votes[1].votes.sort = 4;
-	votes[1].value = 0;
+	votes[1].votes = level CreateString(0, "objective", 1.5, "CENTER", "CENTER", 75, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5, 0);
+	votes[1].votes.label = "^" + getDvarInt("mv_votecolor");
 	votes[1].map = level.__mapvote["map2"];
 
-	votes[2] = spawnStruct();
-	votes[2].votes = level createServerFontString("objective", 2);
-	votes[2].votes setPoint("CENTER", "CENTER", 165 + 55 + 55, -325);
-	votes[2].votes.label = &"^" + getDvar("mv_votecolor");
-	votes[2].votes.sort = 4;
-	votes[2].value = 0;
+	votes[2].votes = level CreateString(0, "objective", 1.5, "RIGHT", "CENTER", 290, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5, 0);
+	votes[2].votes.label = "^" + getDvarInt("mv_votecolor");
 	votes[2].map = level.__mapvote["map3"];
+	if(getDvarInt("mv_extramaps") == 1)
+	{
+		votes[3] = spawnStruct();
+		votes[4] = spawnStruct();
+		votes[5] = spawnStruct();
+		votes[3].votes = level CreateString(0, "objective", 1.5, "LEFT", "CENTER", -50, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5, 0);
+		votes[3].votes.label = "^" + getDvarInt("mv_votecolor");
+		votes[3].map = level.__mapvote["map4"];
 
-	votes[0].votes setValue(0);
-	votes[1].votes setValue(0);
-	votes[2].votes setValue(0);
+		votes[4].votes = level CreateString(0, "objective", 1.5, "RIGHT", "CENTER", 190, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5, 0);
+		votes[4].votes.label = "^" + getDvarInt("mv_votecolor");
+		votes[4].map = level.__mapvote["map5"];
+	}
 
-	votes[0].votes affectElement("y", 1, 0);
-	votes[1].votes affectElement("y", 1, 0);
-	votes[2].votes affectElement("y", 1, 0);
+	for(i = 0; i < votes.size; i++) 
+	{
+		vote = votes[i];
+		dynamic_position = 0;
+		if(votes.size > 3 && i < 3)
+		{
+			dynamic_position = -50;	
+		}
+		else if(votes.size > 3 && i > 2)
+		{
+			dynamic_position = 100;
+		}
+		vote.value = 0;
+		vote.votes.alpha = 0;
+		vote.votes.y = 1 + dynamic_position;
+		vote.votes affectElement("alpha", 1.6, 1);
+	}
 
-	votes[0].hideWhenInMenu = 1;
-	votes[1].hideWhenInMenu = 1;
-	votes[2].hideWhenInMenu = 1;
 
 	isInVote = 1;
 	index = 0;
 	while (isInVote)
 	{
-		notify_value = level waittill_any_return("vote1", "vote2", "vote3", "mv_destroy_hud");
+		notify_value = level waittill_any_return("vote1", "vote2", "vote3", "vote4", "vote5", "mv_destroy_hud");
 
 		if (notify_value == "mv_destroy_hud")
 		{
-			isInVote = 0;
 			break;
 		}
 		else
@@ -376,6 +438,12 @@ mv_VoteManager()
 			case "vote3":
 				index = 2;
 				break;
+			case "vote4":
+				index = 3;
+				break;
+			case "vote5":
+				index = 4;
+				break;
 			}
 			votes[index].value++;
 			votes[index].votes setValue(votes[index].value);
@@ -384,13 +452,20 @@ mv_VoteManager()
 
 	winner = mv_GetMostVotedMap(votes);
 	map = winner.map;
+
+	foreach(vote in votes) 
+	{
+		votes.votes affectElement("alpha", 0.5, 0);
+	}
+
 	mv_SetRotation(map.mapid, map.gametype);
 
-	votes[0].votes affectElement("alpha", 0.5, 0);
-	votes[1].votes affectElement("alpha", 0.5, 0);
-	votes[2].votes affectElement("alpha", 0.5, 0);
+	wait 0.5;
 
-	wait 1.2;
+	foreach(vote in votes) 
+	{
+		votes.votes destroyElem();
+	}
 
 	/*votes[0].votes destroyElem();
 	votes[1].votes destroyElem();
@@ -412,6 +487,7 @@ mv_GetMostVotedMap(votes)
 
 	return winner;
 }
+
 mv_SetRotation(mapid, gametype)
 {
 	array = strTok(gametype, ";");
@@ -431,46 +507,84 @@ mv_ServerUI()
 {
 	level endon("game_ended");
 
-	buttons = level createServerFontString("objective", 2);
-	buttons setText("^3[{+speed_throw}]              ^7Press ^3[{+gostand}] ^7or ^3[{+activate}] ^7to select              ^3[{+attack}]");
-	buttons setPoint("CENTER", "CENTER", 0, 100);
-	buttons.hideWhenInMenu = 0;
-
+	mv_arrowcolor = GetColor(getDvar("mv_arrowcolor"));
 	mv_votecolor = getDvar("mv_votecolor");
 
-	mapUI1 = level createString("^7" + level.__mapvote["map1"].mapname + "\n" + gametypeToName(strTok(level.__mapvote["map1"].gametype, ";")[0]), "objective", 1.2, "CENTER", "CENTER", -220, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5, 1);
-	mapUI2 = level createString("^7" + level.__mapvote["map2"].mapname + "\n" + gametypeToName(strTok(level.__mapvote["map2"].gametype, ";")[0]), "objective", 1.2, "CENTER", "CENTER", 0, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5, 1);
-	mapUI3 = level createString("^7" + level.__mapvote["map3"].mapname + "\n" + gametypeToName(strTok(level.__mapvote["map3"].gametype, ";")[0]), "objective", 1.2, "CENTER", "CENTER", 220, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5, 1);
+	buttons = level createServerFontString("objective", 2);
+	buttons setText("^3[{+speed_throw}]              ^7Press ^3[{+gostand}] ^7or ^3[{+activate}] ^7to select              ^3[{+attack}]");
+	buttons.hideWhenInMenu = 0;
 
-	mapUIIMG1 = drawshader(level.__mapvote["map1"].image, -220, -310, 200, 129, (1, 1, 1), 1, 2, "LEFT", "CENTER", 1);
-	mapUIIMG1 fadeovertime(0.5);
-	mapUIIMG2 = drawshader(level.__mapvote["map2"].image, 0, -310, 200, 129, (1, 1, 1), 1, 2, "CENTER", "CENTER", 1);
-	mapUIIMG2 fadeovertime(0.5);
-	mapUIIMG3 = drawshader(level.__mapvote["map3"].image, 220, -310, 200, 129, (1, 1, 1), 1, 2, "RIGHT", "CENTER", 1);
-	mapUIIMG3 fadeovertime(0.5);
+	mapsUI = [];
+	mapsUI[0] = spawnStruct();
+	mapsUI[1] = spawnStruct();
+	mapsUI[2] = spawnStruct();
 
-	mapUIBTXT1 = drawshader("black", -220, 186, 200, 32, (1, 1, 1), 1, 3, "LEFT", "CENTER", 1);
-	mapUIBTXT2 = drawshader("black", 0, 186, 200, 32, (1, 1, 1), 1, 3, "CENTER", "CENTER", 1);
-	mapUIBTXT3 = drawshader("black", 220, 186, 200, 32, (1, 1, 1), 1, 3, "RIGHT", "CENTER", 1);
-	mapUIBTXT1.alpha = 0;
-	mapUIBTXT2.alpha = 0;
-	mapUIBTXT3.alpha = 0;
+	mapsUI[0].mapname = level CreateString("^7" + level.__mapvote["map1"].mapname + "\n" + gametypeToName(strTok(level.__mapvote["map1"].gametype, ";")[0]), "objective", 1.2, "CENTER", "CENTER", -220, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5);
+	mapsUI[1].mapname = level CreateString("^7" + level.__mapvote["map2"].mapname + "\n" + gametypeToName(strTok(level.__mapvote["map2"].gametype, ";")[0]), "objective", 1.2, "CENTER", "CENTER", 0, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5);
+	mapsUI[2].mapname = level CreateString("^7" + level.__mapvote["map3"].mapname + "\n" + gametypeToName(strTok(level.__mapvote["map3"].gametype, ";")[0]), "objective", 1.2, "CENTER", "CENTER", 220, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5);
+	
+	mapsUI[0].image = level DrawShader(level.__mapvote["map1"].image, -220, -310, 200, 129, (1, 1, 1), 1, 2, "LEFT", "CENTER", 1);
+	mapsUI[0].image fadeovertime(0.5);
+	mapsUI[1].image = level DrawShader(level.__mapvote["map2"].image, 0, -310, 200, 129, (1, 1, 1), 1, 2, "CENTER", "CENTER", 1);
+	mapsUI[1].image fadeovertime(0.5);
+	mapsUI[2].image = level DrawShader(level.__mapvote["map3"].image, 220, -310, 200, 129, (1, 1, 1), 1, 2, "RIGHT", "CENTER", 1);
+	mapsUI[2].image fadeovertime(0.5);
+
+	if(getDvarInt("mv_extramaps") == 1)
+	{
+		buttons setPoint("CENTER", "CENTER", 0, 150);
+		arrow_right = level DrawShader("ui_scrollbar_arrow_right", 200, 290 + 50, 25, 25, mv_arrowcolor, 100, 2, "CENTER", "CENTER", 1);
+		arrow_left = level DrawShader("ui_scrollbar_arrow_left", -200, 290 + 50, 25, 25, mv_arrowcolor, 100, 2, "CENTER", "CENTER", 1);
+		mapsUI[3] = spawnStruct();
+		mapsUI[4] = spawnStruct();
+
+		mapsUI[3].mapname = level CreateString("^7" + level.__mapvote["map4"].mapname + "\n" + gametypeToName(strTok(level.__mapvote["map4"].gametype, ";")[0]), "objective", 1.2, "CENTER", "CENTER", -120, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5);
+		mapsUI[4].mapname = level CreateString("^7" + level.__mapvote["map5"].mapname + "\n" + gametypeToName(strTok(level.__mapvote["map5"].gametype, ";")[0]), "objective", 1.2, "CENTER", "CENTER", 120, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5);
+
+		mapsUI[3].image = level DrawShader(level.__mapvote["map4"].image, -120, -310, 200, 129, (1, 1, 1), 1, 2, "LEFT", "CENTER", 1);
+		mapsUI[3].image fadeovertime(0.5);
+		mapsUI[4].image = level DrawShader(level.__mapvote["map5"].image, 120, -310, 200, 129, (1, 1, 1), 1, 2, "RIGHT", "CENTER", 1);
+		mapsUI[4].image fadeovertime(0.5);
+
+		// map name background - NOT WORKING BECAUSE OF HUD LIMITS
+		//mapsUI[3].textbg = level DrawShader("black", -220, 186, 200, 32, (1, 1, 1), 1, 3, "LEFT", "CENTER", 1);
+		//mapsUI[4].textbg = level DrawShader("black", 0, 186, 200, 32, (1, 1, 1), 1, 3, "CENTER", "CENTER", 1);
+		//mapsUI[5].textbg = level DrawShader("black", 220, 186, 200, 32, (1, 1, 1), 1, 3, "RIGHT", "CENTER", 1);
+	}
+	else
+	{
+		buttons setPoint("CENTER", "CENTER", 0, 100);
+		arrow_right = level DrawShader("ui_scrollbar_arrow_right", 200, 290, 25, 25, mv_arrowcolor, 100, 2, "CENTER", "CENTER", 1);
+		arrow_left = level DrawShader("ui_scrollbar_arrow_left", -200, 290, 25, 25, mv_arrowcolor, 100, 2, "CENTER", "CENTER", 1);
+
+		mapsUI[0].textbg = level DrawShader("black", -220, 186, 200, 32, (1, 1, 1), 1, 3, "LEFT", "CENTER", 1);
+		mapsUI[1].textbg = level DrawShader("black", 0, 186, 200, 32, (1, 1, 1), 1, 3, "CENTER", "CENTER", 1);
+		mapsUI[2].textbg = level DrawShader("black", 220, 186, 200, 32, (1, 1, 1), 1, 3, "RIGHT", "CENTER", 1);
+	}
 
 	level notify("mv_start_animation");
-	mapUI1 affectElement("y", 1.2, -9);
-	mapUI2 affectElement("y", 1.2, -9);
-	mapUI3 affectElement("y", 1.2, -9);
-	mapUIIMG1 affectElement("y", 1.2, 89);
-	mapUIIMG2 affectElement("y", 1.2, 89);
-	mapUIIMG3 affectElement("y", 1.2, 89);
-	mapUIBTXT1 affectElement("alpha", 1.5, 0.8);
-	mapUIBTXT2 affectElement("alpha", 1.5, 0.8);
-	mapUIBTXT3 affectElement("alpha", 1.5, 0.8);
 
-	mv_arrowcolor = GetColor(getDvar("mv_arrowcolor"));
-
-	arrow_right = drawshader("ui_scrollbar_arrow_right", 200, 290, 25, 25, mv_arrowcolor, 100, 2, "CENTER", "CENTER", 1);
-	arrow_left = drawshader("ui_scrollbar_arrow_left", -200, 290, 25, 25, mv_arrowcolor, 100, 2, "CENTER", "CENTER", 1);
+	for(i = 0; i < mapsUI.size; i++) 
+	{
+		map = mapsUI[i];
+		dynamic_position = 0;
+		if(mapsUI.size > 3 && i < 3)
+		{
+			dynamic_position = -50;	
+		}
+		else if(mapsUI.size > 3 && i > 2)
+		{
+			dynamic_position = 100;
+		}
+		map.mapname.alpha = 0;
+		map.mapname affectElement("alpha", 1.6, 1);
+		map.mapname.y = -9 + dynamic_position;
+		if(isDefined(map.textbg))
+		{
+			map.textbg.y = 186 + dynamic_position;
+		}
+		map.image affectElement("y", 1.2, 89 + dynamic_position);
+	}
 
 	wait 1;
 	level notify("mv_start_vote");
@@ -488,7 +602,7 @@ mv_ServerUI()
 	wait level.__mapvote["time"];
 	level notify("mv_destroy_hud");
 
-	credits affectElement("alpha", 0.5, 0);
+	/*credits affectElement("alpha", 0.5, 0);
 	buttons affectElement("alpha", 0.5, 0);
 	mapUI1 affectElement("alpha", 0.5, 0);
 	mapUI2 affectElement("alpha", 0.5, 0);
@@ -500,8 +614,24 @@ mv_ServerUI()
 	mapUIBTXT2 affectElement("alpha", 0.5, 0);
 	mapUIBTXT3 affectElement("alpha", 0.5, 0);
 	arrow_right affectElement("alpha", 0.5, 0);
-	arrow_left affectElement("alpha", 0.5, 0);
+	arrow_left affectElement("alpha", 0.5, 0);*/
+
+	foreach(map in mapsUI) 
+	{
+		map.mapname affectElement("alpha", 0.4, 0);
+		if(isDefined(map.textbg))
+		{
+			map.textbg affectElement("alpha", 0.4, 0);
+		}
+		map.image affectElement("alpha", 0.4, 0);
+	}
+
+	credits affectElement("alpha", 0.5, 0);
 	timer affectElement("alpha", 0.5, 0);
+
+	buttons affectElement("alpha", 0.4, 0);
+	arrow_right affectElement("alpha", 0.4, 0);
+	arrow_left affectElement("alpha", 0.4, 0);
 	// timer destroyElem();
 
 	foreach (player in level.players)
@@ -586,175 +716,175 @@ gametypeToName(gametype)
 	return "invalid";
 }
 
-getMapsData(mapsIDs)
+buildmapsdata()
 {
-	mapsdata = [];
+	level.mapsdata = [];
 
 	/*foreach(id in mapsIDs)
 	{
 		mapsdata[id] = spawnStruct();
 	}*/
 
-	mapsdata["mp_la"] = spawnStruct();
-	mapsdata["mp_la"].mapname = "Aftermath";
-	mapsdata["mp_la"].mapid = "mp_la";
-	mapsdata["mp_la"].image = "loadscreen_mp_la";
+	level.mapsdata["mp_la"] = spawnStruct();
+	level.mapsdata["mp_la"].mapname = "Aftermath";
+	level.mapsdata["mp_la"].mapid = "mp_la";
+	level.mapsdata["mp_la"].image = "loadscreen_mp_la";
 
-	mapsdata["mp_meltdown"] = spawnStruct();
-	mapsdata["mp_meltdown"].mapname = "Meltdown";
-	mapsdata["mp_meltdown"].mapid = "mp_meltdown";
-	mapsdata["mp_meltdown"].image = "loadscreen_mp_meltdown";
+	level.mapsdata["mp_meltdown"] = spawnStruct();
+	level.mapsdata["mp_meltdown"].mapname = "Meltdown";
+	level.mapsdata["mp_meltdown"].mapid = "mp_meltdown";
+	level.mapsdata["mp_meltdown"].image = "loadscreen_mp_meltdown";
 
-	mapsdata["mp_overflow"] = spawnStruct();
-	mapsdata["mp_overflow"].mapname = "Overflow";
-	mapsdata["mp_overflow"].mapid = "mp_overflow";
-	mapsdata["mp_overflow"].image = "loadscreen_mp_overflow";
+	level.mapsdata["mp_overflow"] = spawnStruct();
+	level.mapsdata["mp_overflow"].mapname = "Overflow";
+	level.mapsdata["mp_overflow"].mapid = "mp_overflow";
+	level.mapsdata["mp_overflow"].image = "loadscreen_mp_overflow";
 
-	mapsdata["mp_nightclub"] = spawnStruct();
-	mapsdata["mp_nightclub"].mapname = "Plaza";
-	mapsdata["mp_nightclub"].mapid = "mp_nightclub";
-	mapsdata["mp_nightclub"].image = "loadscreen_mp_nightclub";
+	level.mapsdata["mp_nightclub"] = spawnStruct();
+	level.mapsdata["mp_nightclub"].mapname = "Plaza";
+	level.mapsdata["mp_nightclub"].mapid = "mp_nightclub";
+	level.mapsdata["mp_nightclub"].image = "loadscreen_mp_nightclub";
 
-	mapsdata["mp_dockside"] = spawnStruct();
-	mapsdata["mp_dockside"].mapname = "Cargo";
-	mapsdata["mp_dockside"].mapid = "mp_dockside";
-	mapsdata["mp_dockside"].image = "loadscreen_mp_dockside";
+	level.mapsdata["mp_dockside"] = spawnStruct();
+	level.mapsdata["mp_dockside"].mapname = "Cargo";
+	level.mapsdata["mp_dockside"].mapid = "mp_dockside";
+	level.mapsdata["mp_dockside"].image = "loadscreen_mp_dockside";
 
-	mapsdata["mp_carrier"] = spawnStruct();
-	mapsdata["mp_carrier"].mapname = "Carrier";
-	mapsdata["mp_carrier"].mapid = "mp_carrier";
-	mapsdata["mp_carrier"].image = "loadscreen_mp_carrier";
+	level.mapsdata["mp_carrier"] = spawnStruct();
+	level.mapsdata["mp_carrier"].mapname = "Carrier";
+	level.mapsdata["mp_carrier"].mapid = "mp_carrier";
+	level.mapsdata["mp_carrier"].image = "loadscreen_mp_carrier";
 
-	mapsdata["mp_drone"] = spawnStruct();
-	mapsdata["mp_drone"].mapname = "Drone";
-	mapsdata["mp_drone"].mapid = "mp_drone";
-	mapsdata["mp_drone"].image = "loadscreen_mp_drone";
+	level.mapsdata["mp_drone"] = spawnStruct();
+	level.mapsdata["mp_drone"].mapname = "Drone";
+	level.mapsdata["mp_drone"].mapid = "mp_drone";
+	level.mapsdata["mp_drone"].image = "loadscreen_mp_drone";
 
-	mapsdata["mp_express"] = spawnStruct();
-	mapsdata["mp_express"].mapname = "Express";
-	mapsdata["mp_express"].mapid = "mp_express";
-	mapsdata["mp_express"].image = "loadscreen_mp_express";
+	level.mapsdata["mp_express"] = spawnStruct();
+	level.mapsdata["mp_express"].mapname = "Express";
+	level.mapsdata["mp_express"].mapid = "mp_express";
+	level.mapsdata["mp_express"].image = "loadscreen_mp_express";
 
-	mapsdata["mp_hijacked"] = spawnStruct();
-	mapsdata["mp_hijacked"].mapname = "Hijacked";
-	mapsdata["mp_hijacked"].mapid = "mp_hijacked";
-	mapsdata["mp_hijacked"].image = "loadscreen_mp_hijacked";
+	level.mapsdata["mp_hijacked"] = spawnStruct();
+	level.mapsdata["mp_hijacked"].mapname = "Hijacked";
+	level.mapsdata["mp_hijacked"].mapid = "mp_hijacked";
+	level.mapsdata["mp_hijacked"].image = "loadscreen_mp_hijacked";
 
-	mapsdata["mp_raid"] = spawnStruct();
-	mapsdata["mp_raid"].mapname = "Raid";
-	mapsdata["mp_raid"].mapid = "mp_raid";
-	mapsdata["mp_raid"].image = "loadscreen_mp_raid";
+	level.mapsdata["mp_raid"] = spawnStruct();
+	level.mapsdata["mp_raid"].mapname = "Raid";
+	level.mapsdata["mp_raid"].mapid = "mp_raid";
+	level.mapsdata["mp_raid"].image = "loadscreen_mp_raid";
 
-	mapsdata["mp_slums"] = spawnStruct();
-	mapsdata["mp_slums"].mapname = "Slums";
-	mapsdata["mp_slums"].mapid = "mp_slums";
-	mapsdata["mp_slums"].image = "loadscreen_mp_Slums";
+	level.mapsdata["mp_slums"] = spawnStruct();
+	level.mapsdata["mp_slums"].mapname = "Slums";
+	level.mapsdata["mp_slums"].mapid = "mp_slums";
+	level.mapsdata["mp_slums"].image = "loadscreen_mp_Slums";
 
-	mapsdata["mp_village"] = spawnStruct();
-	mapsdata["mp_village"].mapname = "Standoff";
-	mapsdata["mp_village"].mapid = "mp_village";
-	mapsdata["mp_village"].image = "loadscreen_mp_village";
+	level.mapsdata["mp_village"] = spawnStruct();
+	level.mapsdata["mp_village"].mapname = "Standoff";
+	level.mapsdata["mp_village"].mapid = "mp_village";
+	level.mapsdata["mp_village"].image = "loadscreen_mp_village";
 
-	mapsdata["mp_turbine"] = spawnStruct();
-	mapsdata["mp_turbine"].mapname = "Turbine";
-	mapsdata["mp_turbine"].mapid = "mp_turbine";
-	mapsdata["mp_turbine"].image = "loadscreen_mp_Turbine";
+	level.mapsdata["mp_turbine"] = spawnStruct();
+	level.mapsdata["mp_turbine"].mapname = "Turbine";
+	level.mapsdata["mp_turbine"].mapid = "mp_turbine";
+	level.mapsdata["mp_turbine"].image = "loadscreen_mp_Turbine";
 
-	mapsdata["mp_socotra"] = spawnStruct();
-	mapsdata["mp_socotra"].mapname = "Yemen";
-	mapsdata["mp_socotra"].mapid = "mp_socotra";
-	mapsdata["mp_socotra"].image = "loadscreen_mp_socotra";
+	level.mapsdata["mp_socotra"] = spawnStruct();
+	level.mapsdata["mp_socotra"].mapname = "Yemen";
+	level.mapsdata["mp_socotra"].mapid = "mp_socotra";
+	level.mapsdata["mp_socotra"].image = "loadscreen_mp_socotra";
 
-	mapsdata["mp_nuketown_2020"] = spawnStruct();
-	mapsdata["mp_nuketown_2020"].mapname = "Nuketown 2025";
-	mapsdata["mp_nuketown_2020"].mapid = "mp_nuketown_2020";
-	mapsdata["mp_nuketown_2020"].image = "loadscreen_mp_nuketown_2020";
+	level.mapsdata["mp_nuketown_2020"] = spawnStruct();
+	level.mapsdata["mp_nuketown_2020"].mapname = "Nuketown 2025";
+	level.mapsdata["mp_nuketown_2020"].mapid = "mp_nuketown_2020";
+	level.mapsdata["mp_nuketown_2020"].image = "loadscreen_mp_nuketown_2020";
 
-	mapsdata["mp_downhill"] = spawnStruct();
-	mapsdata["mp_downhill"].mapname = "Downhill";
-	mapsdata["mp_downhill"].mapid = "mp_downhill";
-	mapsdata["mp_downhill"].image = "loadscreen_mp_downhill";
+	level.mapsdata["mp_downhill"] = spawnStruct();
+	level.mapsdata["mp_downhill"].mapname = "Downhill";
+	level.mapsdata["mp_downhill"].mapid = "mp_downhill";
+	level.mapsdata["mp_downhill"].image = "loadscreen_mp_downhill";
 
-	mapsdata["mp_mirage"] = spawnStruct();
-	mapsdata["mp_mirage"].mapname = "Mirage";
-	mapsdata["mp_mirage"].mapid = "mp_mirage";
-	mapsdata["mp_mirage"].image = "loadscreen_mp_Mirage";
+	level.mapsdata["mp_mirage"] = spawnStruct();
+	level.mapsdata["mp_mirage"].mapname = "Mirage";
+	level.mapsdata["mp_mirage"].mapid = "mp_mirage";
+	level.mapsdata["mp_mirage"].image = "loadscreen_mp_Mirage";
 
-	mapsdata["mp_hydro"] = spawnStruct();
-	mapsdata["mp_hydro"].mapname = "Hydro";
-	mapsdata["mp_hydro"].mapid = "mp_hydro";
-	mapsdata["mp_hydro"].image = "loadscreen_mp_Hydro";
+	level.mapsdata["mp_hydro"] = spawnStruct();
+	level.mapsdata["mp_hydro"].mapname = "Hydro";
+	level.mapsdata["mp_hydro"].mapid = "mp_hydro";
+	level.mapsdata["mp_hydro"].image = "loadscreen_mp_Hydro";
 
-	mapsdata["mp_skate"] = spawnStruct();
-	mapsdata["mp_skate"].mapname = "Grind";
-	mapsdata["mp_skate"].mapid = "mp_skate";
-	mapsdata["mp_skate"].image = "loadscreen_mp_skate";
+	level.mapsdata["mp_skate"] = spawnStruct();
+	level.mapsdata["mp_skate"].mapname = "Grind";
+	level.mapsdata["mp_skate"].mapid = "mp_skate";
+	level.mapsdata["mp_skate"].image = "loadscreen_mp_skate";
 
-	mapsdata["mp_concert"] = spawnStruct();
-	mapsdata["mp_concert"].mapname = "Encore";
-	mapsdata["mp_concert"].mapid = "mp_concert";
-	mapsdata["mp_concert"].image = "loadscreen_mp_concert";
+	level.mapsdata["mp_concert"] = spawnStruct();
+	level.mapsdata["mp_concert"].mapname = "Encore";
+	level.mapsdata["mp_concert"].mapid = "mp_concert";
+	level.mapsdata["mp_concert"].image = "loadscreen_mp_concert";
 
-	mapsdata["mp_magma"] = spawnStruct();
-	mapsdata["mp_magma"].mapname = "Magma";
-	mapsdata["mp_magma"].mapid = "mp_magma";
-	mapsdata["mp_magma"].image = "loadscreen_mp_Magma";
+	level.mapsdata["mp_magma"] = spawnStruct();
+	level.mapsdata["mp_magma"].mapname = "Magma";
+	level.mapsdata["mp_magma"].mapid = "mp_magma";
+	level.mapsdata["mp_magma"].image = "loadscreen_mp_Magma";
 
-	mapsdata["mp_vertigo"] = spawnStruct();
-	mapsdata["mp_vertigo"].mapname = "Vertigo";
-	mapsdata["mp_vertigo"].mapid = "mp_vertigo";
-	mapsdata["mp_vertigo"].image = "loadscreen_mp_Vertigo";
+	level.mapsdata["mp_vertigo"] = spawnStruct();
+	level.mapsdata["mp_vertigo"].mapname = "Vertigo";
+	level.mapsdata["mp_vertigo"].mapid = "mp_vertigo";
+	level.mapsdata["mp_vertigo"].image = "loadscreen_mp_Vertigo";
 
-	mapsdata["mp_studio"] = spawnStruct();
-	mapsdata["mp_studio"].mapname = "Studio";
-	mapsdata["mp_studio"].mapid = "mp_studio";
-	mapsdata["mp_studio"].image = "loadscreen_mp_Studio";
+	level.mapsdata["mp_studio"] = spawnStruct();
+	level.mapsdata["mp_studio"].mapname = "Studio";
+	level.mapsdata["mp_studio"].mapid = "mp_studio";
+	level.mapsdata["mp_studio"].image = "loadscreen_mp_Studio";
 
-	mapsdata["mp_uplink"] = spawnStruct();
-	mapsdata["mp_uplink"].mapname = "Uplink";
-	mapsdata["mp_uplink"].mapid = "mp_uplink";
-	mapsdata["mp_uplink"].image = "loadscreen_mp_Uplink";
+	level.mapsdata["mp_uplink"] = spawnStruct();
+	level.mapsdata["mp_uplink"].mapname = "Uplink";
+	level.mapsdata["mp_uplink"].mapid = "mp_uplink";
+	level.mapsdata["mp_uplink"].image = "loadscreen_mp_Uplink";
 
-	mapsdata["mp_bridge"] = spawnStruct();
-	mapsdata["mp_bridge"].mapname = "Detour";
-	mapsdata["mp_bridge"].mapid = "mp_bridge";
-	mapsdata["mp_bridge"].image = "loadscreen_mp_bridge";
+	level.mapsdata["mp_bridge"] = spawnStruct();
+	level.mapsdata["mp_bridge"].mapname = "Detour";
+	level.mapsdata["mp_bridge"].mapid = "mp_bridge";
+	level.mapsdata["mp_bridge"].image = "loadscreen_mp_bridge";
 
-	mapsdata["mp_castaway"] = spawnStruct();
-	mapsdata["mp_castaway"].mapname = "Cove";
-	mapsdata["mp_castaway"].mapid = "mp_castaway";
-	mapsdata["mp_castaway"].image = "loadscreen_mp_castaway";
+	level.mapsdata["mp_castaway"] = spawnStruct();
+	level.mapsdata["mp_castaway"].mapname = "Cove";
+	level.mapsdata["mp_castaway"].mapid = "mp_castaway";
+	level.mapsdata["mp_castaway"].image = "loadscreen_mp_castaway";
 
-	mapsdata["mp_dig"] = spawnStruct();
-	mapsdata["mp_paintball"].mapname = "Rush";
-	mapsdata["mp_paintball"].mapid = "mp_paintball";
-	mapsdata["mp_paintball"].image = "loadscreen_mp_paintball";
+	level.mapsdata["mp_dig"] = spawnStruct();
+	level.mapsdata["mp_paintball"].mapname = "Rush";
+	level.mapsdata["mp_paintball"].mapid = "mp_paintball";
+	level.mapsdata["mp_paintball"].image = "loadscreen_mp_paintball";
 
-	mapsdata["mp_dig"] = spawnStruct();
-	mapsdata["mp_dig"].mapname = "Dig";
-	mapsdata["mp_dig"].mapid = "mp_dig";
-	mapsdata["mp_dig"].image = "loadscreen_mp_Dig";
+	level.mapsdata["mp_dig"] = spawnStruct();
+	level.mapsdata["mp_dig"].mapname = "Dig";
+	level.mapsdata["mp_dig"].mapid = "mp_dig";
+	level.mapsdata["mp_dig"].image = "loadscreen_mp_Dig";
 
-	mapsdata["mp_frostbite"] = spawnStruct();
-	mapsdata["mp_frostbite"].mapname = "Frost";
-	mapsdata["mp_frostbite"].mapid = "mp_frostbite";
-	mapsdata["mp_frostbite"].image = "loadscreen_mp_frostbite";
+	level.mapsdata["mp_frostbite"] = spawnStruct();
+	level.mapsdata["mp_frostbite"].mapname = "Frost";
+	level.mapsdata["mp_frostbite"].mapid = "mp_frostbite";
+	level.mapsdata["mp_frostbite"].image = "loadscreen_mp_frostbite";
 
-	mapsdata["mp_pod"] = spawnStruct();
-	mapsdata["mp_pod"].mapname = "Pod";
-	mapsdata["mp_pod"].mapid = "mp_pod";
-	mapsdata["mp_pod"].image = "loadscreen_mp_Pod";
+	level.mapsdata["mp_pod"] = spawnStruct();
+	level.mapsdata["mp_pod"].mapname = "Pod";
+	level.mapsdata["mp_pod"].mapid = "mp_pod";
+	level.mapsdata["mp_pod"].image = "loadscreen_mp_Pod";
 
-	mapsdata["mp_takeoff"] = spawnStruct();
-	mapsdata["mp_takeoff"].mapname = "Takeoff";
-	mapsdata["mp_takeoff"].mapid = "mp_takeoff";
-	mapsdata["mp_takeoff"].image = "loadscreen_mp_Takeoff";
+	level.mapsdata["mp_takeoff"] = spawnStruct();
+	level.mapsdata["mp_takeoff"].mapname = "Takeoff";
+	level.mapsdata["mp_takeoff"].mapid = "mp_takeoff";
+	level.mapsdata["mp_takeoff"].image = "loadscreen_mp_Takeoff";
 
-	mapsdata["mp_dockside"] = spawnStruct();
-	mapsdata["mp_dockside"].mapname = "Cargo";
-	mapsdata["mp_dockside"].mapid = "mp_dockside";
-	mapsdata["mp_dockside"].image = "loadscreen_mp_dockside";
-	return mapsdata;
+	level.mapsdata["mp_dockside"] = spawnStruct();
+	level.mapsdata["mp_dockside"].mapname = "Cargo";
+	level.mapsdata["mp_dockside"].mapid = "mp_dockside";
+	level.mapsdata["mp_dockside"].image = "loadscreen_mp_dockside";
+	return level.mapsdata;
 }
 isValidColor(value)
 {
@@ -811,16 +941,26 @@ GetColor(color)
 	}
 }
 // Drawing
-CreateString(input, font, fontScale, align, relative, x, y, color, alpha, glowColor, glowAlpha, sort, isLevel, isValue)
+CreateString(input, font, fontScale, align, relative, x, y, color, alpha, glowColor, glowAlpha, sort, isValue)
 {
-	if (!isDefined(isLevel))
+	if (self != level)
+	{
 		hud = self createFontString(font, fontScale);
+	}
 	else
+	{
 		hud = level createServerFontString(font, fontScale);
+	}
+
 	if (!isDefined(isValue))
+	{
 		hud setText(input);
+	}
 	else
-		hud setValue(input);
+	{
+		hud setValue(int(input));
+	}
+
 	hud setPoint(align, relative, x, y);
 	hud.color = color;
 	hud.alpha = alpha;
@@ -835,7 +975,7 @@ CreateString(input, font, fontScale, align, relative, x, y, color, alpha, glowCo
 CreateRectangle(align, relative, x, y, width, height, color, shader, sort, alpha)
 {
 	boxElem = newClientHudElem(self);
-	boxElem.elemType = "bar";
+	boxElem.elemType = "icon";
 	boxElem.width = width;
 	boxElem.height = height;
 	boxElem.align = align;
