@@ -7,8 +7,8 @@ Special thanks to [@John Kramer](https://forum.plutonium.pw/user/john-kramer) fo
 This project is a project that started in March 2020. The script allows players to vote for the next map or/and mode to be played in the next game. The project will not provide compiled files so you will have to compile the file if required using the [gsc-tool](https://github.com/xensik/gsc-tool).
 
 ## Support
-- **multiplayer** *(Call of Duty: World at War)* `PC`, `XBOX`, `PS3`
-- **zombies** *(Call of Duty: Black Ops)* `PC`
+- **multiplayer** *(Call of Duty: Black Ops II Multiplayer )* `PC`, `XBOX`, `PS3`
+- **zombies** *(Call of Duty: Black Ops II Zombies)* `PC`
 
 ## Usage
 Configuration guides are written within the appropriate folders. 
