@@ -126,8 +126,8 @@ mv_PlayerUI()
 	if(getDvarInt("mv_extramaps") == 1)
 	{
 		dynamic_position = 100;
-		boxes[3] = self CreateRectangle("CENTER", "CENTER", -120, -452, 205, 133, bg_color, "white", 2, 0);
-		boxes[4] = self CreateRectangle("CENTER", "CENTER", 120, -452, 205, 133, bg_color, "white", 2, 0);
+		boxes[3] = self CreateRectangle("CENTER", "CENTER", -120, -452, 205, 133, bg_color, "white", 1, 0);
+		boxes[4] = self CreateRectangle("CENTER", "CENTER", 120, -452, 205, 133, bg_color, "white", 1, 0);
 		//boxes[5] = self CreateRectangle("CENTER", "CENTER", 220, -452, 205, 133, bg_color, "white", 2, 0);
 		boxes[3] affectElement("y", 1.2, -50 + dynamic_position);
 		boxes[4] affectElement("y", 1.2, -50 + dynamic_position);
