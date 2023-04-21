@@ -307,7 +307,7 @@ mv_VoteManager()
 
 	foreach(vote in votes) 
 	{
-		votes.votes affectElement("alpha", 0.5, 0);
+		vote.votes affectElement("alpha", 0.5, 0);
 	}
 
 	mv_SetRotation(map.mapid);
