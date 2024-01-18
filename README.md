@@ -6,9 +6,6 @@
   [![License](https://img.shields.io/badge/LICENSE-GPL--3.0-blue?style=for-the-badge&logo=appveyor)](LICENSE)
 
 
-
-
-
 Special thanks to [@ZECxR3ap3r](https://twitter.com/ZECxR3ap3r) & [@JezuzLizard](https://forum.plutonium.pw/user/jezuzlizard) for their contributions to the development. Additional thanks to [@John Kramer](https://forum.plutonium.pw/user/john-kramer) for image editing.
 
 </div>
@@ -32,7 +29,7 @@ This project, initiated in March 2020, enables players to vote for the next map 
 3. **Configure Server File:**
    Copy the content of `mapvote.cfg` into your server configuration file (e.g., `server.cfg`, `dedicated_zm.cfg`, `dedicated.cfg`, etc.) that manages the Zombies server.
 
-4. **Edit Dvars for Aesthetic Parameters:**
+4. **Edit Dvars on your configuration file:**
    - Set the Dvar `mv_maps` to specify the maps shown in the mapvote. For example:
      ```
      set mv_maps "zm_tomb zm_buried zm_town zm_busdepot zm_farm zm_transit zm_prison zm_highrise zm_nuked"

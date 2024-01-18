@@ -15,7 +15,7 @@ The mapvote will work as intended only on server side or where is implemented ma
 3. **Configure Server File:**
    Copy the content of `mapvote.cfg` into your server configuration file (e.g., `server.cfg`, `dedicated_zm.cfg`, `dedicated.cfg`, etc.) that manages the Zombies server.
 
-4. **Edit Dvars for Aesthetic Parameters:**
+4. **Edit Dvars on your configuration file:**
    - Set the Dvar `mv_maps` to specify the maps shown in the mapvote. For example:
      ```
      set mv_maps "zm_tomb zm_buried zm_town zm_busdepot zm_farm zm_transit zm_prison zm_highrise zm_nuked"
