@@ -5,7 +5,7 @@
 /*
 	Mod: Mapvote Menu
 	Developed by DoktorSAS
-	Version: v1.1.0
+	Version: v1.1.1
 	Config:
 	set mv_enable			1 						// Enable/Disable the mapvote
 	set mv_maps				""						// Lits of maps that can be voted on the mapvote, leave empty for all maps
@@ -49,6 +49,7 @@
 	- Implemented mv_allowchangevote dvar to allow or not the player to change his vote when time is still running
 	- Massive code reorganization for better readability
 	- Optimized of resources
+	- Implemented mv_minplayerstovote dvar to set the minimum number of players required to start the mapvote
 */
 
 init()
@@ -175,8 +176,8 @@ MapvoteConfig()
 	SetDvarIfNotInizialized("mv_gametypes", "dm;dm.cfg tdm;tdm.cfg dm;dm.cfg tdm;tdm.cfg sd;sd.cfg sd;sd.cfg");
 	setDvarIfNotInizialized("mv_excludedmaps", "");
 	setDvarIfNotInizialized("mv_allowchangevote", 1);
+	setDvarIfNotInizialized("mv_minplayerstovote", 1);
 	
-
 	/*if( level.roundlimit == 1)
 		maps\mp\gametypes\_globallogic_utils::registerpostroundevent(::ExecuteMapvote);*/
 }
@@ -210,17 +211,19 @@ ExecuteMapvote()
 	if (getDvarInt("mv_enable") != 1) // Check if mapvote is enable
 		return;						  // End if the mapvote its not enable
 
-	foreach (player in level.players)
+	if(_countPlayers() >= getDvarInt("mv_minplayerstovote"))
 	{
-		if (!is_bot(player))
-			player thread MapvotePlayerUI();
+		foreach (player in level.players)
+		{
+			if (!is_bot(player))
+				player thread MapvotePlayerUI();
+		}
+
+		waittillframeend;
+
+		level thread MapvoteServerUI();
+		MapvoteHandler();
 	}
-
-	waittillframeend;
-
-	level thread MapvoteServerUI();
-	MapvoteHandler();
-	
 }
 
 /**
@@ -272,7 +275,6 @@ MapvoteChooseRandomMapsSelection(mapsIDsList , times) // Select random map from 
  * @param entity The entity to check.
  * @return true if the entity is a bot, false otherwise.
  */
-is_bot(entity)
 is_bot(entity) // Check if a players is a bot
 {
 	return isDefined(entity.pers["isBot"]) && entity.pers["isBot"];
@@ -833,6 +835,17 @@ mapToLoadscreen(mapid) {
 		default:
 			return "Unknown Image";
 	}
+}
+
+
+_countPlayers() {
+	count = 0;
+	foreach (player in level.players) {
+		if (!is_bot(player)) {
+			count++;
+		}
+	}
+	return count;
 }
 
 /**
