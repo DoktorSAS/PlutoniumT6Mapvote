@@ -5,20 +5,24 @@
 /*
 	Mod: Mapvote Menu
 	Developed by DoktorSAS
-	Version: v1.1.1
+	Version: v1.1.2
 	Config:
 	set mv_enable			1 						// Enable/Disable the mapvote
 	set mv_maps				""						// Lits of maps that can be voted on the mapvote, leave empty for all maps
-	set mv_excludedmaps		""						// Lis of maps you don't want to show in the mapvote
-	set mv_time 			1 						// Time to vote
+	set mv_time 			20 						// Time to vote
 	set mv_socialname 		"SocialName" 			// Name of the server social such as Discord, Twitter, Website, etc
 	set mv_sentence 		"Thanks for playing" 	// Thankfull sentence
 	set mv_votecolor		"5" 					// Color of the Vote Number
 	set mv_arrowcolor		"white"					// RGB Color of the arrows
 	set mv_selectcolor 		"lighgreen"				// RGB Color when map get voted
-	set mv_backgroundcolor 	"grey"					// RGB Color of map background
+	set mv_backgroundcolor 	"orange"				// RGB Color of map background
 	set mv_blur 			"3"						// Blur effect power
 	set mv_gametypes 		"dm;dm.cfg"				// This dvar can be used to have multiple gametypes with different maps, with this dvar you can load gamemode cfg files
+	set mv_extramaps        0                     // Enable 6 maps mapvote when set to 1 
+	set mv_allowchangevote  1                     // If set to 0 it will disable the possibility to change vote when the time is still running
+	set mv_randomoption     1                     // If set to 1 it will not display which map and which gametype the last option will be (Random)
+	set mv_minplayerstovote 1                     // Set the minimum number of players required to start the mapvote 
+	set mv_lui              0                     // If set to 1 it will use the LUA/LUI ui interface (It required the mod support and the lua files)
 
 	1.0.0:
 	- 3 maps support
@@ -50,18 +54,41 @@
 	- Massive code reorganization for better readability
 	- Optimized of resources
 	- Implemented mv_minplayerstovote dvar to set the minimum number of players required to start the mapvote
+	
+	1.1.2:
+	- Implemented LUA/LUI UI support for mod support with controller support
+	- Implemented mv_randomoption dvar that will not display which map and which gametype the last option will be (Random)
+	- Implemented mv_minplayerstovote dvar to set the minimum number of players required to start the mapvote 
 */
 
 init()
 {
-	precacheStatusIcon("compassping_friendlyfiring_mp");
-	precacheStatusIcon("compassping_enemy");
+	
+	precachestatusicon("compassping_friendlyfiring_mp");
+	precachestatusicon("compassping_enemy");
 	precacheshader("white");
 	precacheshader("ui_scrollbar_arrow_left");
 	precacheshader("ui_scrollbar_arrow_right");
-
+	precacheshader("gradient");
+	
 	level thread OnPlayerConnected();
 	MapvoteConfig();
+	
+	if(GetDvarInt("mv_lui") == 1)
+	{
+		precachemenu("mapvote");
+		precachestring(&"update_votes");
+		precachestring(&"mapvote_close");
+
+		setDvar("lui_mv_maps", "ERROR;ERROER;ERROR");
+		setDvar("lui_mv_gametypes", "ERROR;ERROER;ERROR");
+		setDvar("lui_mv_loadscreens", "ERROR;ERROER;ERROR");
+		setDvar("lui_mv_time", getDvarInt("mv_time")*1000);
+
+		mv_backgroundcolor = getColor(getDvar("mv_backgroundcolor"));
+		lui_mv_hovercolor = mv_backgroundcolor[0] + ";" + mv_backgroundcolor[1] + ";" + mv_backgroundcolor[2];
+		setDvar("lui_mv_hovercolor", lui_mv_hovercolor);
+	}
 	
 	if (!isDefined(level.mapvote_started))
 	{
@@ -73,7 +100,11 @@ init()
 		times = 3;
 		if(getDvarInt("mv_extramaps") == 1)
 		{
-			times = 5;
+			times = 6; // Because of the HUD limits, the maximum number of maps that can be displayed is 5 with the GSC mapvote design
+			if(GetDvarInt("mv_lui") == 1)
+			{
+				times = 6; // With LUI the limit can be more then 5, i choosed 6 but could be more if the code support it
+			}
 		}
 			
 		mapschoosed = MapvoteChooseRandomMapsSelection(mapsIDsList , times);
@@ -90,14 +121,22 @@ init()
 		level.mapvotedata["firstmap"].mapname = mapToDisplayName(mapschoosed[0]);
 		level.mapvotedata["secondmap"].mapname = mapToDisplayName(mapschoosed[1]);
 		level.mapvotedata["thirdmap"].mapname = mapToDisplayName(mapschoosed[2]);
-		
+
 		level.mapvotedata["firstmap"].gametype = gametypes[randomIntRange(0, gametypes.size)];
 		level.mapvotedata["secondmap"].gametype = gametypes[randomIntRange(0, gametypes.size)];
 		level.mapvotedata["thirdmap"].gametype = gametypes[randomIntRange(0, gametypes.size)];
 
+		level.mapvotedata["firstmap"].gametypename = gametypeToName(strTok(level.mapvotedata["firstmap"].gametype, ";")[0]);
+		level.mapvotedata["secondmap"].gametypename = gametypeToName(strTok(level.mapvotedata["secondmap"].gametype, ";")[0]);
+		level.mapvotedata["thirdmap"].gametypename = gametypeToName(strTok(level.mapvotedata["thirdmap"].gametype, ";")[0]);
+
 		level.mapvotedata["firstmap"].loadscreen = mapToLoadscreen(mapschoosed[0]);
 		level.mapvotedata["secondmap"].loadscreen = mapToLoadscreen(mapschoosed[1]);
 		level.mapvotedata["thirdmap"].loadscreen = mapToLoadscreen(mapschoosed[2]);
+
+		precacheShader(level.mapvotedata["firstmap"].loadscreen);
+		precacheShader(level.mapvotedata["secondmap"].loadscreen);
+		precacheShader(level.mapvotedata["thirdmap"].loadscreen);
 
 		if(getDvarInt("mv_extramaps") == 1)
 		{
@@ -113,16 +152,67 @@ init()
 			level.mapvotedata["fourthmap"].gametype = gametypes[randomIntRange(0, gametypes.size)];
 			level.mapvotedata["fifthmap"].gametype = gametypes[randomIntRange(0, gametypes.size)];
 
+			level.mapvotedata["fourthmap"].gametypename = gametypeToName(strTok(level.mapvotedata["fourthmap"].gametype, ";")[0]);
+			level.mapvotedata["fifthmap"].gametypename = gametypeToName(strTok(level.mapvotedata["fifthmap"].gametype, ";")[0]);
+
 			level.mapvotedata["fourthmap"].loadscreen = mapToLoadscreen(mapschoosed[3]);
 			level.mapvotedata["fifthmap"].loadscreen = mapToLoadscreen(mapschoosed[4]);
 
 			precacheShader(level.mapvotedata["fourthmap"].loadscreen);
 			precacheShader(level.mapvotedata["fifthmap"].loadscreen);
+
+			if(getDvarInt("mv_lui") == 1)
+			{
+				level.mapvotedata["sixthmap"] = spawnStruct();
+
+				level.mapvotedata["sixthmap"].mapid = mapschoosed[5];
+				
+				level.mapvotedata["sixthmap"].mapname = mapToDisplayName(mapschoosed[5]);
+
+				level.mapvotedata["sixthmap"].gametype = gametypes[randomIntRange(0, gametypes.size)];
+
+				level.mapvotedata["sixthmap"].gametypename = gametypeToName(strTok(level.mapvotedata["sixthmap"].gametype, ";")[0]);
+
+				level.mapvotedata["sixthmap"].loadscreen = mapToLoadscreen(mapschoosed[5]);
+
+				precacheShader(level.mapvotedata["sixthmap"].loadscreen);
+			}
 		}
 
-		precacheShader(level.mapvotedata["firstmap"].loadscreen);
-		precacheShader(level.mapvotedata["secondmap"].loadscreen);
-		precacheShader(level.mapvotedata["thirdmap"].loadscreen);
+		if(GetDvarInt("mv_randomoption") == 1)
+		{
+			if(GetDvarInt("mv_extramaps") == 1)
+			{
+				level.mapvotedata["sixthmap"].mapname = "Random";
+				level.mapvotedata["sixthmap"].gametypename = "Random";
+				level.mapvotedata["sixthmap"].loadscreen = "gradient";
+			}
+			else
+			{
+				level.mapvotedata["thirdmap"].mapname = "Random";
+				level.mapvotedata["thirdmap"].gametypename = "Random";
+				level.mapvotedata["thirdmap"].loadscreen = "gradient";
+			}
+		}
+
+		if(getDvar("mv_lui") == 1)
+		{
+			lui_mv_maps = level.mapvotedata["firstmap"].mapname + ";" + level.mapvotedata["secondmap"].mapname + ";" + level.mapvotedata["thirdmap"].mapname;
+			lui_mv_gametypes = level.mapvotedata["firstmap"].gametypename + ";" + level.mapvotedata["secondmap"].gametypename + ";" + level.mapvotedata["thirdmap"].gametypename;
+			lui_mv_loadscreens = level.mapvotedata["firstmap"].loadscreen + ";" + level.mapvotedata["secondmap"].loadscreen + ";" + level.mapvotedata["thirdmap"].loadscreen;
+			
+			if(getDvarInt("mv_extramaps") == 1) 
+			{	
+				lui_mv_maps = lui_mv_maps + ";" + level.mapvotedata["fourthmap"].mapname + ";" + level.mapvotedata["fifthmap"].mapname + ";" + level.mapvotedata["sixthmap"].mapname; 
+				lui_mv_gametypes = lui_mv_gametypes + ";" + level.mapvotedata["fourthmap"].gametypename + ";" + level.mapvotedata["fifthmap"].gametypename + ";" + level.mapvotedata["sixthmap"].gametypename;
+				lui_mv_loadscreens = lui_mv_loadscreens + ";" + level.mapvotedata["fourthmap"].loadscreen + ";" + level.mapvotedata["fifthmap"].loadscreen + ";" + level.mapvotedata["sixthmap"].loadscreen;
+				setDvar("lui_mv_maps", lui_mv_maps);
+			setDvar("lui_mv_gametypes", lui_mv_gametypes);
+			setDvar("lui_mv_loadscreens", lui_mv_loadscreens);
+			}
+
+			
+		}
 	}
 }
 
@@ -154,6 +244,7 @@ MapvoteConfig()
 	SetDvarIfNotInizialized("mv_enable", 1);
 	if (getDvarInt("mv_enable") != 1) // Check if mapvote is enable
 		return;						  // End if the mapvote its not enable
+	setDvarIfNotInizialized("mv_lui", 1);
 
 	level.mapvotedata = [];
 	SetDvarIfNotInizialized("mv_time", 20);
@@ -172,11 +263,21 @@ MapvoteConfig()
 	SetDvarIfNotInizialized("mv_blur", "3");
 	SetDvarIfNotInizialized("mv_scrollcolor", "cyan");
 	SetDvarIfNotInizialized("mv_selectcolor", "lightgreen");
-	SetDvarIfNotInizialized("mv_backgroundcolor", "grey");
+	if(GetDvarInt("mv_lui") == 1)
+	{
+		SetDvarIfNotInizialized("mv_backgroundcolor", "orange");
+	}
+	else
+	{
+		SetDvarIfNotInizialized("mv_backgroundcolor", "grey");
+	}
+	
 	SetDvarIfNotInizialized("mv_gametypes", "dm;dm.cfg tdm;tdm.cfg dm;dm.cfg tdm;tdm.cfg sd;sd.cfg sd;sd.cfg");
 	setDvarIfNotInizialized("mv_excludedmaps", "");
 	setDvarIfNotInizialized("mv_allowchangevote", 1);
 	setDvarIfNotInizialized("mv_minplayerstovote", 1);
+	setDvarIfNotInizialized("mv_randomoption", 1);
+	
 	
 	/*if( level.roundlimit == 1)
 		maps\mp\gametypes\_globallogic_utils::registerpostroundevent(::ExecuteMapvote);*/
@@ -200,6 +301,46 @@ FixBlur() // Reset blur effect to 0
 	level endon("game_ended");
 	self waittill("spawned_player");
 	self setblur(0, 0);
+	//wait 1;
+	//self LUIPlayerMapvote();
+}
+
+
+LUIPlayerMapvote()
+{
+	//self endon("disconnect");
+	//level endon("game_ended");
+
+	self closemenu();
+    self closeingamemenu();
+
+	self setClientDvar("lui_mv_time", getDvarInt("lui_mv_time"));
+	self setClientDvar("lui_mv_hovercolor", getDvar("lui_mv_hovercolor"));
+	waittillframeend;
+
+	print("level.mapvotedata[firstmap].mapname = " +  level.mapvotedata["firstmap"].mapname + ";" + level.mapvotedata["secondmap"].mapname + ";" + level.mapvotedata["thirdmap"].mapname);
+	
+	waittillframeend;
+
+	self setClientDvar("lui_mv_maps", getDvar("lui_mv_maps"));
+	self setClientDvar("lui_mv_gametypes", getDvar("lui_mv_gametypes"));
+	self setClientDvar("lui_mv_loadscreens", getDvar("lui_mv_loadscreens"));
+	
+	level waittill("mapvote_start");
+	self openMenu("mapvote");
+
+	while(true)
+	{
+		self waittill("menuresponse", menu, response);
+		//print("menu: " + menu + " response: " + response);
+        if (menu == "mapvote" && isDefined(response)) 
+		{
+			data = strTok(response, ",");
+			luiindex = int(data[0]);
+			arrayindex = luiindex-1;
+			level notify("vote", arrayindex, luiindex,  int(data[1]));
+		}
+	}
 }
 
 /**
@@ -213,16 +354,49 @@ ExecuteMapvote()
 
 	if(_countPlayers() >= getDvarInt("mv_minplayerstovote"))
 	{
-		foreach (player in level.players)
+		if(getDvarInt("mv_lui") == 1)
 		{
-			if (!is_bot(player))
-				player thread MapvotePlayerUI();
+			level thread MapvoteHandler();
+			foreach(player in level.players)
+			{
+				if (!is_bot(player))
+				{
+					player thread LUIPlayerMapvote();
+				}
+			}
+
+			wait 2;
+
+			level notify("mapvote_start");
+			wait getDvarInt("mv_time");
+			//print("wait getDvarInt(mv_time);");
+			foreach(player in level.players)
+			{
+				if(!is_bot(player))
+				{
+					//print("player thread LUICloseMapvoteMenu();");
+					player thread LUICloseMapvoteMenu();
+					//player closemenu();
+            		//player closeingamemenu();
+				}
+			}
+
+			level notify("vote", -1);
 		}
+		else
+		{
+			foreach (player in level.players)
+			{
+				if (!is_bot(player))
+				{
+					player thread MapvotePlayerUI();
+				}
+			}
 
-		waittillframeend;
-
-		level thread MapvoteServerUI();
-		MapvoteHandler();
+			level thread MapvoteServerUI();
+			MapvoteHandler();
+		}
+		
 	}
 }
 
@@ -287,7 +461,6 @@ MapvotePlayerUI()
 {
 	self endon("disconnect");
 	//level endon("game_ended");
-
 	self setblur(getDvarFloat("mv_blur"), 1.5);
 
 	scrollcolor = getColor(getDvar("mv_scrollcolor"));
@@ -368,7 +541,7 @@ MapvotePlayerUI()
 				boxes[previuesindex] affectElement("color", 0.2, bgcolor);
 				level notify("vote", previuesindex, -1);
 			}
-			waittillframeend; // DO NOT REMOVE THIS LINE: IF REMOVED IT WILL CAUSE THE SECOND NOTIFY TO FAIL
+			wait 0.05; // DO NOT REMOVE THIS LINE: IF REMOVED IT WILL CAUSE THE SECOND NOTIFY TO FAIL
 			level notify("vote", index, 1);
 			previuesindex = index;
 
@@ -445,84 +618,151 @@ CreateVoteDisplay(x, y)
  * @param map The map associated with the display object.
  * @return The created vote display object.
  */
-CreateVoteDisplayObject(x, y, map)
+CreateVoteDisplayObject(map, x, y)
 {
 	displayobject = spawnStruct();
-	displayobject.displayarea = CreateVoteDisplay(x, y);
+	if(isDefined(x))
+	{
+		displayobject.displayarea = CreateVoteDisplay(x, y);
+	}
 	displayobject.value = 0;
 	displayobject.map = map;
 	return displayobject;
 }
 
+/**
+ * Updates the votes for a specific LUI index.
+ *
+ * @param {int} luiindex - The index of the LUI mapvote option.
+ * @param {int} value - The new value of the votes.
+ */
+LUIUpdateVotes(luiindex, value)
+{
+	self luiNotifyEvent(&"update_votes", 2, luiindex, value);
+}
+
+/**
+ * Closes the map vote menu.
+ */
+LUICloseMapvoteMenu()
+{
+	//print("LUICloseMapvoteMenu()");
+	self luiNotifyEvent(&"mapvote_close");
+}
+
 MapvoteHandler()
 {
-	level endon("game_ended");
+	//level endon("game_ended");
 	votes = [];
 
-	votes[0] = level CreateVoteDisplayObject(-150, -325, level.mapvotedata["firstmap"]);
-	votes[1] = level CreateVoteDisplayObject(75, -325, level.mapvotedata["secondmap"]);
-	votes[2] = level CreateVoteDisplayObject(290, -325, level.mapvotedata["thirdmap"]);
-
-	if(getDvarInt("mv_extramaps") == 1)
+	if(getDvarInt("mv_lui") == 1)
 	{
-		votes[3] = level CreateVoteDisplayObject(-50, -325, level.mapvotedata["fourthmap"]);
-		votes[4] = level CreateVoteDisplayObject(190, -325, level.mapvotedata["fifthmap"]);
-	}
+		votes = [];
+		votes[0] = level CreateVoteDisplayObject(level.mapvotedata["firstmap"]);
+		votes[1] = level CreateVoteDisplayObject(level.mapvotedata["secondmap"]);
+		votes[2] = level CreateVoteDisplayObject(level.mapvotedata["thirdmap"]);
 
-	for(i = 0; i < votes.size; i++) 
-	{
-		vote = votes[i];
-		dynamic_position = 0;
-		if(votes.size > 3 && i < 3)
+		if(getDvarInt("mv_extramaps") == 1)
 		{
-			dynamic_position = -50;	
+			votes[3] = level CreateVoteDisplayObject(level.mapvotedata["fourthmap"]);
+			votes[4] = level CreateVoteDisplayObject(level.mapvotedata["fifthmap"]);
+			votes[5] = level CreateVoteDisplayObject(level.mapvotedata["sixthmap"]);
 		}
-		else if(votes.size > 3 && i > 2)
+
+		voting = true;
+		index = 0;
+		while (voting)
 		{
-			dynamic_position = 100;
-		}
-		vote.value = 0;
-		vote.displayarea.alpha = 0;
-		vote.displayarea.y = 1 + dynamic_position;
-		vote.displayarea affectElement("alpha", 1.6, 1);
-	}
-
-	voting = true;
-	index = 0;
-	while (voting)
-	{
-		level waittill("vote", index, value);
-
-		if(index == -1) 
-		{
-			voting = false;
-
-			foreach(vote in votes) 
+			level waittill("vote", arrayindex, luiindex, value);
+			//print("vote//" + arrayindex + "//" + value);
+			if(arrayindex == -1) 
 			{
-				vote.votes affectElement("alpha", 0.5, 0);
+				voting = false;
+				break;
 			}
-			break;
-		}
-		else
-		{
-			votes[index].value += value;
-			votes[index].displayarea setValue(votes[index].value);
+			else
+			{
+				votes[arrayindex].value += value;
+				foreach(player in level.players)
+				{
+					if(!is_bot(player))
+					{
+						player thread LUIUpdateVotes(luiindex, votes[arrayindex].value);
+					}
+				}
+			}
 		}
 
+		winner = MapvoteGetMostVotedMap(votes);
+		map = winner.map;
+
+		MapvoteSetRotation(map.mapid, map.gametype);
 	}
-
-	winner = MapvoteGetMostVotedMap(votes);
-	map = winner.map;
-
-	MapvoteSetRotation(map.mapid, map.gametype);
-
-	wait 0.5;
-
-	foreach(vote in votes) 
+	else
 	{
-		vote.displayarea destroyElem();
-	}
+		votes[0] = level CreateVoteDisplayObject(level.mapvotedata["firstmap"], -150, -325);
+		votes[1] = level CreateVoteDisplayObject(level.mapvotedata["secondmap"], 75, -325);
+		votes[2] = level CreateVoteDisplayObject(level.mapvotedata["thirdmap"], 290, -325);
 
+		if(getDvarInt("mv_extramaps") == 1)
+		{
+			votes[3] = level CreateVoteDisplayObject(level.mapvotedata["fourthmap"], -50, -325);
+			votes[4] = level CreateVoteDisplayObject(level.mapvotedata["fifthmap"], 190, -325);
+		}
+
+		for(i = 0; i < votes.size; i++) 
+		{
+			vote = votes[i];
+			dynamic_position = 0;
+			if(votes.size > 3 && i < 3)
+			{
+				dynamic_position = -50;	
+			}
+			else if(votes.size > 3 && i > 2)
+			{
+				dynamic_position = 100;
+			}
+			vote.value = 0;
+			vote.displayarea.alpha = 0;
+			vote.displayarea.y = 1 + dynamic_position;
+			vote.displayarea affectElement("alpha", 1.6, 1);
+		}
+
+		voting = true;
+		index = 0;
+		while (voting)
+		{
+			level waittill("vote", index, value);
+
+			if(index == -1) 
+			{
+				voting = false;
+
+				foreach(vote in votes) 
+				{
+					vote.votes affectElement("alpha", 0.5, 0);
+				}
+				break;
+			}
+			else
+			{
+				votes[index].value += value;
+				votes[index].displayarea setValue(votes[index].value);
+			}
+		}
+
+		winner = MapvoteGetMostVotedMap(votes);
+		map = winner.map;
+
+		MapvoteSetRotation(map.mapid, map.gametype);
+
+		wait 0.5;
+
+		foreach(vote in votes) 
+		{
+			vote.displayarea destroyElem();
+		}
+	}
 }
 
 /**
@@ -585,9 +825,9 @@ MapvoteServerUI()
 	mapsHUDComponents[1] = spawnStruct();
 	mapsHUDComponents[2] = spawnStruct();
 
-	mapsHUDComponents[0].textline = level CreateString("^7" + level.mapvotedata["firstmap"].mapname + "\n" + gametypeToName(strTok(level.mapvotedata["firstmap"].gametype, ";")[0]), "objective", 1.2, "CENTER", "CENTER", -220, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5);
-	mapsHUDComponents[1].textline = level CreateString("^7" + level.mapvotedata["secondmap"].mapname + "\n" + gametypeToName(strTok(level.mapvotedata["secondmap"].gametype, ";")[0]), "objective", 1.2, "CENTER", "CENTER", 0, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5);
-	mapsHUDComponents[2].textline = level CreateString("^7" + level.mapvotedata["thirdmap"].mapname + "\n" + gametypeToName(strTok(level.mapvotedata["thirdmap"].gametype, ";")[0]), "objective", 1.2, "CENTER", "CENTER", 220, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5);
+	mapsHUDComponents[0].textline = level CreateString("^7" + level.mapvotedata["firstmap"].mapname + "\n" + level.mapvotedata["firstmap"].gametypename, "objective", 1.2, "CENTER", "CENTER", -220, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5);
+	mapsHUDComponents[1].textline = level CreateString("^7" + level.mapvotedata["secondmap"].mapname + "\n" + level.mapvotedata["secondmap"].gametypename, "objective", 1.2, "CENTER", "CENTER", 0, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5);
+	mapsHUDComponents[2].textline = level CreateString("^7" + level.mapvotedata["thirdmap"].mapname + "\n" + level.mapvotedata["thirdmap"].gametypename, "objective", 1.2, "CENTER", "CENTER", 220, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5);
 	
 	mapsHUDComponents[0].image = level DrawShader(level.mapvotedata["firstmap"].loadscreen, -220, -310, 200, 129, (1, 1, 1), 1, 2, "LEFT", "CENTER", 1);
 	mapsHUDComponents[0].image fadeovertime(0.5);
@@ -607,8 +847,8 @@ MapvoteServerUI()
 		mapsHUDComponents[3] = spawnStruct();
 		mapsHUDComponents[4] = spawnStruct();
 
-		mapsHUDComponents[3].textline = level CreateString("^7" + level.mapvotedata["fourthmap"].mapname + "\n" + gametypeToName(strTok(level.mapvotedata["fourthmap"].gametype, ";")[0]), "objective", 1.2, "CENTER", "CENTER", -120, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5);
-		mapsHUDComponents[4].textline = level CreateString("^7" + level.mapvotedata["fifthmap"].mapname + "\n" + gametypeToName(strTok(level.mapvotedata["fifthmap"].gametype, ";")[0]), "objective", 1.2, "CENTER", "CENTER", 120, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5);
+		mapsHUDComponents[3].textline = level CreateString("^7" + level.mapvotedata["fourthmap"].mapname + "\n" + level.mapvotedata["fourthmap"].gametypename, "objective", 1.2, "CENTER", "CENTER", -120, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5);
+		mapsHUDComponents[4].textline = level CreateString("^7" + level.mapvotedata["fifthmap"].mapname + "\n" + level.mapvotedata["fifthmap"].gametypename, "objective", 1.2, "CENTER", "CENTER", 120, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5);
 
 		mapsHUDComponents[3].image = level DrawShader(level.mapvotedata["fourthmap"].loadscreen, -120, -310, 200, 129, (1, 1, 1), 1, 2, "LEFT", "CENTER", 1);
 		mapsHUDComponents[3].image fadeovertime(0.5);
@@ -632,7 +872,7 @@ MapvoteServerUI()
 	}
 
 	level notify("mapvote_animate");
-
+	
 	mv_sentence = getDvar("mv_sentence");
 	mv_socialname = getDvar("mv_socialname");
 	mv_sociallink = getDvar("mv_sociallink");
@@ -661,7 +901,7 @@ MapvoteServerUI()
 		}
 		map.image affectElement("y", 1.2, 89 + dynamic_position);
 	}
-
+	print("after animation");
 	wait 1;
 	level notify("mapvote_start");
 
@@ -743,9 +983,9 @@ gametypeToName(gametype)
 		case "sas": return "Sticks & Stones";
 		case "shrp": return "Sharpshooter";
 		default:
-			return "Unknown Gametype";
+			return gametypeToName(getDvar("g_gametype"));
 	}
-	return "Unknown Gametype";
+	return gametypeToName(getDvar("g_gametype"));
 }
 
 /**
@@ -811,27 +1051,27 @@ mapToLoadscreen(mapid) {
 		case "mp_express": return "loadscreen_mp_express";
 		case "mp_hijacked": return "loadscreen_mp_hijacked";
 		case "mp_raid": return "loadscreen_mp_raid";
-		case "mp_slums": return "loadscreen_mp_Slums";
+		case "mp_slums": return "loadscreen_mp_slums";
 		case "mp_village":  return "loadscreen_mp_village";
-		case "mp_turbine": return "loadscreen_mp_Turbine";
+		case "mp_turbine": return "loadscreen_mp_turbine";
 		case "mp_socotra": return "loadscreen_mp_socotra";
 		case "mp_nuketown_2020":  return "loadscreen_mp_nuketown_2020";
 		case "mp_downhill":  return "loadscreen_mp_downhill";
-		case "mp_mirage": return "loadscreen_mp_Mirage";
-		case "mp_hydro": return "loadscreen_mp_Hydro";
+		case "mp_mirage": return "loadscreen_mp_mirage";
+		case "mp_hydro": return "loadscreen_mp_hydro";
 		case "mp_skate": return "loadscreen_mp_skate";
 		case "mp_concert":  return "loadscreen_mp_concert";
-		case "mp_magma": return "loadscreen_mp_Magma";
-		case "mp_vertigo": return "loadscreen_mp_Vertigo";
-		case "mp_studio": return "loadscreen_mp_Studio";
-		case "mp_uplink": return "loadscreen_mp_Uplink";
+		case "mp_magma": return "loadscreen_mp_magma";
+		case "mp_vertigo": return "loadscreen_mp_vertigo";
+		case "mp_studio": return "loadscreen_mp_studio";
+		case "mp_uplink": return "loadscreen_mp_uplink";
 		case "mp_bridge":  return "loadscreen_mp_bridge";
 		case "mp_castaway": return "loadscreen_mp_castaway";
 		case "mp_paintball": return "loadscreen_mp_paintball";
-		case "mp_dig": return "loadscreen_mp_Dig";
+		case "mp_dig": return "loadscreen_mp_dig";
 		case "mp_frostbite": return "loadscreen_mp_frostbite";
-		case "mp_pod": return "loadscreen_mp_Pod";
-		case "mp_takeoff": return "loadscreen_mp_Takeoff";
+		case "mp_pod": return "loadscreen_mp_pod";
+		case "mp_takeoff": return "loadscreen_mp_takeoff";
 		default:
 			return "Unknown Image";
 	}
@@ -893,14 +1133,14 @@ GetColor(color)
 
 		case "lightblue":
 		case "light blue":
-			return (0.152, 0329, 0.929);
+			return (0.152, 0.329, 0.929);
 
 		case "lightgreen":
 		case "light green":
 			return (0.09, 1, 0.09);
 
 		case "orange":
-			return (1, 0662, 0.035);
+			return (1, 0.662, 0.035);
 
 		case "yellow":
 			return (0.968, 0.992, 0.043);

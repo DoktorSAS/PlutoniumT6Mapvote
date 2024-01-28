@@ -6,7 +6,7 @@
   [![License](https://img.shields.io/badge/LICENSE-GPL--3.0-blue?style=for-the-badge&logo=appveyor)](LICENSE)
 
 
-Special thanks to [@ZECxR3ap3r](https://twitter.com/ZECxR3ap3r) & [@JezuzLizard](https://forum.plutonium.pw/user/jezuzlizard) for their contributions to the development. Additional thanks to [@John Kramer](https://forum.plutonium.pw/user/john-kramer) for image editing.
+Special thanks to [@ZECxR3ap3r](https://twitter.com/ZECxR3ap3r) & [@JezuzLizard](https://forum.plutonium.pw/user/jezuzlizard) for their contributions to the development. Additional thanks to [@John Kramer](https://forum.plutonium.pw/user/john-kramer) for image editing and [birchy](https://github.com/callanb) for the [LUI starting point](https://github.com/callanb/t6-mapvote).
 
 </div>
 
@@ -60,8 +60,12 @@ This project, initiated in March 2020, enables players to vote for the next map 
      ```
      set mv_gametypes "dm@freeforall.cfg war@mycustomtdm.cfg"
      ```
+5. (Plutonium ONLY) LUI UI with mod support:
+   - Take the content of the folder `T6Mapvote` and place it in your folder `%localappdata%\Plutonium\storage\t6\mods\`
+   - Set the dvar `fs_game` in your server configuration file (e.g., `server.cfg`, `dedicated_zm.cfg`, `dedicated.cfg`, etc.)
+   - Set the dvar `mv_lui` to in your server configuration file (e.g., `server.cfg`, `dedicated_zm.cfg`, `dedicated.cfg`, etc.)  
 
-5. **Run the Server:**
+6. **Run the Server:**
    Start the server and immerse yourself in the map voting experience. You're done!
 
 

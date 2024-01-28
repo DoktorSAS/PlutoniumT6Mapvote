@@ -27,6 +27,10 @@ The mapvote will work as intended only on server side or where is implemented ma
      ```
      set mv_gametypes "dm@freeforall.cfg war@mycustomtdm.cfg"
      ```
+5. (Plutonium ONLY) LUI UI with mod support:
+   - Take the content of the folder `T6Mapvote` and place it in your folder `%localappdata%\Plutonium\storage\t6\mods\`
+   - Set the dvar `fs_game` in your server configuration file (e.g., `server.cfg`, `dedicated_zm.cfg`, `dedicated.cfg`, etc.)
+   - Set the dvar `mv_lui` to in your server configuration file (e.g., `server.cfg`, `dedicated_zm.cfg`, `dedicated.cfg`, etc.)
 
 5. **Run the Server:**
    Start the server and immerse yourself in the map voting experience. You're done!
@@ -49,3 +53,6 @@ The mapvote will work as intended only on server side or where is implemented ma
 | `mv_gametypes`       | ""            | Dvar to have multiple gametypes with different maps. Specify gametype IDs and associated files. |
 | `mv_extramaps`       | 0             | Enable 6 maps mapvote when set to 1.                        |
 | `mv_allowchangevote` | 1             | Enable/Disable the possibility to change vote while the time is still running (1 for enable, 0 for disable). |
+| `mv_randomoption`    | 1             | If set to 1 it will not display which map and which gametype the last option will be (Random) |
+| `mv_minplayerstovote`| 1             | Set the minimum number of players required to start the mapvote  |
+| `mv_lui`             | 1             |  If set to 1 it will use the LUA/LUI ui interface (It required the mod support and the lua files) |
