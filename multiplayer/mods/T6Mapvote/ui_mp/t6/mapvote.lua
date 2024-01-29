@@ -21,7 +21,7 @@ local hovercolor = {
     [3] = lui_mv_hovercolor[3],
 }
 
-local allowchangevote = UIExpression.DvarBool(nil, "mv_allowchangevote")
+local allowchangevote = UIExpression.DvarInt(nil, "mv_allowchangevote")
 
 local focusIndex = 1
 local votedIndex = nil
@@ -252,7 +252,10 @@ function OptionSelect(button, _)
             --button.luiMapvote.buttons[i].processEvent({name = "disable"})
             button.luiMapvote.buttons[i].m_focusable = nil
         end
-        Engine.SendMenuResponse(0, "mapvote", votefor)
+        if votedIndex == nil then
+            votedIndex = votefor
+            Engine.SendMenuResponse(0, "mapvote", votefor)
+        end
     else
         if votedIndex == nil then
             votedIndex = focusIndex
