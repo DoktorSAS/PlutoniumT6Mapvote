@@ -1,11 +1,13 @@
 Engine.SetDvar("lui_mv_time", 20000)
 Engine.SetDvar("lui_mv_maps", "Unknonw Map;Unknonw Map;Unknonw Map")
 Engine.SetDvar("lui_mv_gametypes", ";;")
-Engine.SetDvar("lui_mv_loadscreens", "")
+Engine.SetDvar("lui_mv_loadscreens", "white;white;white")
+Engine.SetDvar("lui_mv_hovercolor", "1;1;1")
+Engine.SetDvar("mv_allowchangevote", 1)
 
 function strsplit(inputstr, sep)
     if sep == nil then
-            sep = "%s"
+        sep = "%s"
     end
     local t={}
     for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
@@ -13,21 +15,25 @@ function strsplit(inputstr, sep)
     end
     return t
 end
-
-local lui_mv_hovercolor = strsplit( UIExpression.DvarString(nil, "lui_mv_hovercolor") , ";")
-local hovercolor = {
-    [1] = lui_mv_hovercolor[1],
-    [2] = lui_mv_hovercolor[2],
-    [3] = lui_mv_hovercolor[3],
+local hovercolor =  {
+    [1] = "1",
+    [2] = "1",
+    [3] = "1"
 }
-
-local allowchangevote = UIExpression.DvarInt(nil, "mv_allowchangevote")
-
 local focusIndex = 1
 local votedIndex = nil
 local maxOptions = 3
 
 LUI.createMenu.mapvote = function (_) 
+    local lui_mv_hovercolor = strsplit( UIExpression.DvarString(nil, "lui_mv_hovercolor") , ";")
+    hovercolor = {
+        [1] = lui_mv_hovercolor[1],
+        [2] = lui_mv_hovercolor[2],
+        [3] = lui_mv_hovercolor[3]
+    }
+
+    local allowchangevote = UIExpression.DvarInt(nil, "mv_allowchangevote")
+
     local maps = strsplit( UIExpression.DvarString(nil, "lui_mv_maps") , ";")
     local gametypes = strsplit( UIExpression.DvarString(nil, "lui_mv_gametypes") , ";" )
     local loadscreens = strsplit( UIExpression.DvarString(nil, "lui_mv_loadscreens") , ";" )
