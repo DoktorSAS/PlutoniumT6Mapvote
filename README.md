@@ -58,7 +58,7 @@ This project, initiated in March 2020, enables players to vote for the next map 
    - Set the Dvar `mv_enable` to 1 to activate the mapvote on your Multiplayer server.
    - For random gametypes, set the Dvar `mv_gametypes` specifying the gametype ID (dm, war, sd, etc.) and the file to run if necessary. For example:
      ```
-     set mv_gametypes "dm@freeforall.cfg war@mycustomtdm.cfg"
+     set mv_gametypes "dm;freeforall.cfg war;mycustomtdm.cfg"
      ```
 5. (Plutonium ONLY) LUI UI with mod support:
    - Take the content of the folder `T6Mapvote` and place it in your folder `%localappdata%\Plutonium\storage\t6\mods\`
