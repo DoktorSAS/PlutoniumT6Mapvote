@@ -436,11 +436,11 @@ destroyBoxes(boxes)
 	{
 		box affectElement("alpha", 0.5, 0);
 	}
-	/*wait 1.2;
+	wait 1.2;
 	foreach(box in boxes)
 	{
-		box destroyElem();
-	}*/
+		box destroy();
+	}
 }
 
 mv_PlayerFixAngle()
@@ -566,11 +566,11 @@ mv_VoteManager()
 
 	wait 1.2;
 
-	/*votes[0].votes destroyElem();
-	votes[1].votes destroyElem();
-	votes[2].votes destroyElem();
+	votes[0].votes destroy();
+	votes[1].votes destroy();
+	votes[2].votes destroy();
 
-	wait 5;*/
+	wait 5;
 }
 
 mv_GetMostVotedMap(votes)
@@ -755,22 +755,22 @@ mv_ServerUI()
 		player setblur(0, 0);
 	}
 
-	/*if(mv_credits)
-		credits destroyElem();
-	timer destroyElem();
+	if(mv_credits)
+		credits destroy();
+	timer destroy();
 
-	buttons destroyElem();
-	mapUI1 destroyElem();
-	mapUI2 destroyElem();
-	mapUI3 destroyElem();
-	mapUIIMG1 destroyElem();
-	mapUIIMG2 destroyElem();
-	mapUIIMG3 destroyElem();
-	mapUIBTXT1 destroyElem();
-	mapUIBTXT2 destroyElem();
-	mapUIBTXT3 destroyElem();
-	arrow_right destroyElem();
-	arrow_left destroyElem();*/
+	buttons destroy();
+	mapUI1 destroy();
+	mapUI2 destroy();
+	mapUI3 destroy();
+	mapUIIMG1 destroy();
+	mapUIIMG2 destroy();
+	mapUIIMG3 destroy();
+	mapUIBTXT1 destroy();
+	mapUIBTXT2 destroy();
+	mapUIBTXT3 destroy();
+	arrow_right destroy();
+	arrow_left destroy();
 }
 SetDvarIfNotInizialized(dvar, value)
 {
