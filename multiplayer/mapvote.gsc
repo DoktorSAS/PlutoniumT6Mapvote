@@ -576,7 +576,7 @@ destroyBoxes(boxes)
 	wait 0.5;
 	foreach(box in boxes)
 	{
-		box destroyElem();
+		box destroy();
 	}
 }
 
