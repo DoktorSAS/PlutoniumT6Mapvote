@@ -1,15 +1,16 @@
 #include common_scripts\utility;
 #include maps\mp\_utility;
-#include maps\mp\gametypes\_hud_util;
+#include maps\mp\gametypes_zm\_hud_util;
 
 /*
 	Mod: Mapvote Menu
 	Developed by DoktorSAS
-	Version: v1.1.2
+	Version: v1.1.1
 	Config:
 	set mv_enable			1 						// Enable/Disable the mapvote
 	set mv_maps				""						// Lits of maps that can be voted on the mapvote, leave empty for all maps
-	set mv_time 			20 						// Time to vote
+	set mv_excludedmaps		""						// Lis of maps you don't want to show in the mapvote
+	set mv_time 			1 						// Time to vote
 	set mv_socialname 		"SocialName" 			// Name of the server social such as Discord, Twitter, Website, etc
 	set mv_sentence 		"Thanks for playing" 	// Thankfull sentence
 	set mv_votecolor		"5" 					// Color of the Vote Number
@@ -18,11 +19,6 @@
 	set mv_backgroundcolor 	"orange"				// RGB Color of map background
 	set mv_blur 			"3"						// Blur effect power
 	set mv_gametypes 		"dm;dm.cfg"				// This dvar can be used to have multiple gametypes with different maps, with this dvar you can load gamemode cfg files
-	set mv_extramaps        0                     	// Enable 6 maps mapvote when set to 1
-	set mv_allowchangevote  1                     	// If set to 0 it will disable the possibility to change vote when the time is still running
-	set mv_randomoption     1                     	// If set to 1 it will not display which map and which gametype the last option will be (Random)
-	set mv_minplayerstovote 1                     	// Set the minimum number of players required to start the mapvote
-	set mv_lui              0                     	// If set to 1 it will use the LUA/LUI ui interface (It required the mod support and the lua files)
 
 	1.0.0:
 	- 3 maps support
@@ -114,21 +110,17 @@ init()
 		level.mapvotedata["secondmap"] = spawnStruct();
 		level.mapvotedata["thirdmap"] = spawnStruct();
 
-		level.mapvotedata["firstmap"].mapid = mapschoosed[0];
-		level.mapvotedata["secondmap"].mapid = mapschoosed[1];
-		level.mapvotedata["thirdmap"].mapid = mapschoosed[2];
+		level.mapvotedata["firstmap"].mapid = mapCustomIDtoExecuteString(mapschoosed[0]);
+		level.mapvotedata["secondmap"].mapid = mapCustomIDtoExecuteString(mapschoosed[1]);
+		level.mapvotedata["thirdmap"].mapid = mapCustomIDtoExecuteString(mapschoosed[2]);
 
 		level.mapvotedata["firstmap"].mapname = mapToDisplayName(mapschoosed[0]);
 		level.mapvotedata["secondmap"].mapname = mapToDisplayName(mapschoosed[1]);
 		level.mapvotedata["thirdmap"].mapname = mapToDisplayName(mapschoosed[2]);
 
-		level.mapvotedata["firstmap"].gametype = gametypes[randomIntRange(0, gametypes.size)];
-		level.mapvotedata["secondmap"].gametype = gametypes[randomIntRange(0, gametypes.size)];
-		level.mapvotedata["thirdmap"].gametype = gametypes[randomIntRange(0, gametypes.size)];
-
-		level.mapvotedata["firstmap"].gametypename = gametypeToName(strTok(level.mapvotedata["firstmap"].gametype, ";")[0]);
-		level.mapvotedata["secondmap"].gametypename = gametypeToName(strTok(level.mapvotedata["secondmap"].gametype, ";")[0]);
-		level.mapvotedata["thirdmap"].gametypename = gametypeToName(strTok(level.mapvotedata["thirdmap"].gametype, ";")[0]);
+		level.mapvotedata["firstmap"].gametypename = issubstr("grief", mapschoosed[0]) ? "" : "Grief";
+		level.mapvotedata["secondmap"].gametypename = issubstr("grief", mapschoosed[1]) ? "" : "Grief";
+		level.mapvotedata["thirdmap"].gametypename = issubstr("grief", mapschoosed[2]) ? "" : "Grief";
 
 		level.mapvotedata["firstmap"].loadscreen = mapToLoadscreen(mapschoosed[0]);
 		level.mapvotedata["secondmap"].loadscreen = mapToLoadscreen(mapschoosed[1]);
@@ -143,17 +135,14 @@ init()
 			level.mapvotedata["fourthmap"] = spawnStruct();
 			level.mapvotedata["fifthmap"] = spawnStruct();
 
-			level.mapvotedata["fourthmap"].mapid = mapschoosed[3];
-			level.mapvotedata["fifthmap"].mapid = mapschoosed[4];
+			level.mapvotedata["fourthmap"].mapid = mapCustomIDtoExecuteString(mapschoosed[3]);
+			level.mapvotedata["fifthmap"].mapid = mapCustomIDtoExecuteString(mapschoosed[4]);
 
 			level.mapvotedata["fourthmap"].mapname = mapToDisplayName(mapschoosed[3]);
 			level.mapvotedata["fifthmap"].mapname = mapToDisplayName(mapschoosed[4]);
 
-			level.mapvotedata["fourthmap"].gametype = gametypes[randomIntRange(0, gametypes.size)];
-			level.mapvotedata["fifthmap"].gametype = gametypes[randomIntRange(0, gametypes.size)];
-
-			level.mapvotedata["fourthmap"].gametypename = gametypeToName(strTok(level.mapvotedata["fourthmap"].gametype, ";")[0]);
-			level.mapvotedata["fifthmap"].gametypename = gametypeToName(strTok(level.mapvotedata["fifthmap"].gametype, ";")[0]);
+			level.mapvotedata["fourthmap"].gametypename = issubstr("grief", mapschoosed[3]) ? "Grief" : "";
+			level.mapvotedata["fifthmap"].gametypename = issubstr("grief", mapschoosed[4]) ? "Grief" : "";
 
 			level.mapvotedata["fourthmap"].loadscreen = mapToLoadscreen(mapschoosed[3]);
 			level.mapvotedata["fifthmap"].loadscreen = mapToLoadscreen(mapschoosed[4]);
@@ -165,13 +154,11 @@ init()
 			{
 				level.mapvotedata["sixthmap"] = spawnStruct();
 
-				level.mapvotedata["sixthmap"].mapid = mapschoosed[5];
+				level.mapvotedata["sixthmap"].mapid = mapCustomIDtoExecuteString(mapschoosed[5]);
 
 				level.mapvotedata["sixthmap"].mapname = mapToDisplayName(mapschoosed[5]);
 
-				level.mapvotedata["sixthmap"].gametype = gametypes[randomIntRange(0, gametypes.size)];
-
-				level.mapvotedata["sixthmap"].gametypename = gametypeToName(strTok(level.mapvotedata["sixthmap"].gametype, ";")[0]);
+				level.mapvotedata["sixthmap"].gametypename = issubstr("grief", mapschoosed[5]) ? "Grief" : "";
 
 				level.mapvotedata["sixthmap"].loadscreen = mapToLoadscreen(mapschoosed[5]);
 
@@ -216,22 +203,149 @@ init()
 
 main()
 {
-	replaceFunc(maps\mp\gametypes\_killcam::finalkillcamwaiter, ::finalkillcamwaiter);
+	replaceFunc(maps\mp\zombies\_zm::intermission, ::_intermission);
 }
 
-finalkillcamwaiter()
+player_intermission()
 {
-	if (!isDefined(level.finalkillcam_winner))
+	self closemenu();
+	self closeingamemenu();
+
+	level endon("stop_intermission");
+	self endon("disconnect");
+	self endon("death");
+
+	self.score = self.score_total;
+
+	self.spectatorclient = -1;
+	self.killcamentity = -1;
+	self.archivetime = 0;
+	self.psoffsettime = 0;
+	self.friendlydamage = undefined;
+	points = getstructarray("intermission", "targetname");
+	if (!isDefined(points) || points.size == 0)
 	{
-		return 0;
+		points = getentarray("info_intermission", "classname");
+
+		location = getDvar("ui_zm_mapstartlocation");
+		for (i = 0; i < points.size; i++)
+		{
+			if (points[i].script_string == location)
+			{
+				points = points[i];
+			}
+		}
+
+		if (points.size < 1)
+		{
+			return;
+		}
 	}
-	level waittill("final_killcam_done");
-	if (waslastround())
+	if (isdefined(self.game_over_bg))
+		self.game_over_bg destroy();
+	org = undefined;
+	while (1)
 	{
-		ExecuteMapvote();
+		points = array_randomize(points);
+		i = 0;
+		while (i < points.size)
+		{
+			point = points[i];
+			if (!isDefined(org))
+			{
+				self spawn(point.origin, point.angles);
+			}
+			if (isDefined(points[i].target))
+			{
+				if (!isDefined(org))
+				{
+					org = spawn("script_model", self.origin + vectorScale((0, 0, -1), 60));
+					org setmodel("tag_origin");
+				}
+				org.origin = points[i].origin;
+				org.angles = points[i].angles;
+				j = 0;
+				while (j < get_players().size)
+				{
+					player = get_players()[j];
+					player camerasetposition(org);
+					player camerasetlookat();
+					player cameraactivate(1);
+					j++;
+				}
+				speed = 20;
+				if (isDefined(points[i].speed))
+				{
+					speed = points[i].speed;
+				}
+				target_point = getstruct(points[i].target, "targetname");
+				dist = distance(points[i].origin, target_point.origin);
+				time = dist / speed;
+				q_time = time * 0.25;
+				if (q_time > 1)
+				{
+					q_time = 1;
+				}
+				org moveto(target_point.origin, time, q_time, q_time);
+				org rotateto(target_point.angles, time, q_time, q_time);
+				wait(time - q_time);
+				wait q_time;
+				i++;
+				continue;
+			}
+			i++;
+		}
+	}
+}
+
+_intermission()
+{
+
+	level.intermission = 1;
+	level notify("intermission");
+
+	for (i = 0; i < level.players.size; i++)
+	{
+		level.players[i] thread player_intermission();
+		level.players[i] hide();
+		level.players[i] setclientuivisibilityflag("hud_visible", 0);
+
+		level.players[i] setclientthirdperson(0);
+		level.players[i] resetfov();
+		level.players[i].health = 100;
+		level.players[i] stopsounds();
+		level.players[i] stopsounds();
 	}
 
-	return 1;
+	ExecuteMapvote(); // Wait until mapvote is done
+
+	for (i = 0; i < level.players.size; i++)
+	{
+		level.players[i] notify("_zombie_game_over");
+		level.players[i].sessionstate = "intermission";
+	}
+
+	players = get_players();
+	i = 0;
+	while (i < players.size)
+	{
+		setclientsysstate("levelNotify", "zi", players[i]);
+		// players[ i ] setclientthirdperson( 0 );
+		// players[ i ] resetfov();
+		// players[ i ].health = 100;
+		// players[ i ] thread [[ level.custom_intermission ]]();
+		// players[ i ] stopsounds();
+		i++;
+	}
+	wait 0.25;
+	players = get_players();
+	i = 0;
+	while (i < players.size)
+	{
+		setclientsysstate("lsm", "0", players[i]);
+		i++;
+	}
+	level thread maps\mp\zombies\_zm::zombie_game_over_death();
 }
 
 /**
@@ -242,12 +356,12 @@ MapvoteConfig()
 	SetDvarIfNotInizialized("mv_enable", 1);
 	if (getDvarInt("mv_enable") != 1) // Check if mapvote is enable
 		return;						  // End if the mapvote its not enable
-	setDvarIfNotInizialized("mv_lui", 1);
+	setDvarIfNotInizialized("mv_lui", 0);
 
 	level.mapvotedata = [];
 	SetDvarIfNotInizialized("mv_time", 20);
 	level.mapvotedata["time"] = getDvarInt("mv_time");
-	SetDvarIfNotInizialized("mv_maps", "mp_la mp_dockside mp_carrier mp_drone mp_express mp_hijacked mp_meltdown mp_overflow mp_nightclub mp_raid mp_slums mp_village mp_turbine mp_socotra mp_nuketown_2020 mp_downhill mp_mirage mp_hydro mp_skate mp_concert mp_magma mp_vertigo mp_studio mp_uplink mp_bridge mp_castaway mp_paintball mp_dig mp_frostbite mp_pod mp_takeoff");
+	SetDvarIfNotInizialized("mv_maps", "zm_tomb_grief zm_town_grief zm_farm_grief");
 
 	// Setting default values if needed
 	SetDvarIfNotInizialized("mv_credits", 1);
@@ -298,8 +412,8 @@ FixBlur() // Reset blur effect to 0
 	level endon("game_ended");
 	self waittill("spawned_player");
 	self setblur(0, 0);
-	// wait 1;
-	// self LUIPlayerMapvote();
+	wait 1;
+	self LUIPlayerMapvote();
 }
 
 LUIPlayerMapvote()
@@ -314,7 +428,7 @@ LUIPlayerMapvote()
 	self setClientDvar("lui_mv_hovercolor", getDvar("lui_mv_hovercolor"));
 	waittillframeend;
 
-	print("level.mapvotedata[firstmap].mapname = " + level.mapvotedata["firstmap"].mapname + ";" + level.mapvotedata["secondmap"].mapname + ";" + level.mapvotedata["thirdmap"].mapname);
+	print("mapnames: " + level.mapvotedata["firstmap"].mapname + ";" + level.mapvotedata["secondmap"].mapname + ";" + level.mapvotedata["thirdmap"].mapname);
 
 	waittillframeend;
 
@@ -571,7 +685,7 @@ destroyBoxes(boxes)
 	wait 0.5;
 	foreach (box in boxes)
 	{
-		box destroy();
+		box destroyElem();
 	}
 }
 
@@ -691,7 +805,7 @@ MapvoteHandler()
 		winner = MapvoteGetMostVotedMap(votes);
 		map = winner.map;
 
-		MapvoteSetRotation(map.mapid, map.gametype);
+		MapvoteSetRotation(map.mapid);
 	}
 	else
 	{
@@ -720,7 +834,7 @@ MapvoteHandler()
 			vote.value = 0;
 			vote.displayarea.alpha = 0;
 			vote.displayarea.y = 1 + dynamic_position;
-			vote.displayarea affectElement("alpha", 1.6, 1);
+			vote.displayarea affectElement("alpha", 1.32, 1);
 		}
 
 		voting = true;
@@ -788,20 +902,10 @@ MapvoteGetMostVotedMap(votes)
  */
 MapvoteSetRotation(mapid, gametype)
 {
-	gametype_data = strTok(gametype, ";");
-	/* gametype_data:
-	 * 1: g_gametype value
-	 * 2: cfg file to execue
-	*/
-	str = "";
-	if (gametype_data.size > 1)
-	{
-		str = "exec " + gametype_data[1] + " map " + mapid;
-	}
-	logPrint("mapvote//gametype//" + gametype_data[0] + "//executing//" + str + "\n");
-	setdvar("g_gametype", gametype_data[0]);
-	setdvar("sv_maprotationcurrent", str);
-	setdvar("sv_maprotation", str);
+	logPrint("mapvote//gametype//" + mapid);
+	setdvar("g_gametype", mapid);
+	setdvar("sv_maprotationcurrent", mapid);
+	setdvar("sv_maprotation", mapid);
 	level notify("mv_ended");
 }
 
@@ -824,9 +928,9 @@ MapvoteServerUI()
 	mapsHUDComponents[1] = spawnStruct();
 	mapsHUDComponents[2] = spawnStruct();
 
-	mapsHUDComponents[0].textline = level CreateString("^7" + level.mapvotedata["firstmap"].mapname + "\n" + level.mapvotedata["firstmap"].gametypename, "objective", 1.2, "CENTER", "CENTER", -220, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5);
-	mapsHUDComponents[1].textline = level CreateString("^7" + level.mapvotedata["secondmap"].mapname + "\n" + level.mapvotedata["secondmap"].gametypename, "objective", 1.2, "CENTER", "CENTER", 0, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5);
-	mapsHUDComponents[2].textline = level CreateString("^7" + level.mapvotedata["thirdmap"].mapname + "\n" + level.mapvotedata["thirdmap"].gametypename, "objective", 1.2, "CENTER", "CENTER", 220, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5);
+	mapsHUDComponents[0].textline = level CreateString("^7" + level.mapvotedata["firstmap"].mapname + "\n" + level.mapvotedata["firstmap"].gametypename, "objective", 1.32, "CENTER", "CENTER", -220, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5);
+	mapsHUDComponents[1].textline = level CreateString("^7" + level.mapvotedata["secondmap"].mapname + "\n" + level.mapvotedata["secondmap"].gametypename, "objective", 1.32, "CENTER", "CENTER", 0, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5);
+	mapsHUDComponents[2].textline = level CreateString("^7" + level.mapvotedata["thirdmap"].mapname + "\n" + level.mapvotedata["thirdmap"].gametypename, "objective", 1.32, "CENTER", "CENTER", 220, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5);
 
 	mapsHUDComponents[0].image = level DrawShader(level.mapvotedata["firstmap"].loadscreen, -220, -310, 200, 129, (1, 1, 1), 1, 2, "LEFT", "CENTER", 1);
 	mapsHUDComponents[0].image fadeovertime(0.5);
@@ -834,6 +938,8 @@ MapvoteServerUI()
 	mapsHUDComponents[1].image fadeovertime(0.5);
 	mapsHUDComponents[2].image = level DrawShader(level.mapvotedata["thirdmap"].loadscreen, 220, -310, 200, 129, (1, 1, 1), 1, 2, "RIGHT", "CENTER", 1);
 	mapsHUDComponents[2].image fadeovertime(0.5);
+
+	print("mapnames: " + level.mapvotedata["firstmap"].mapname + ";" + level.mapvotedata["secondmap"].mapname + ";" + level.mapvotedata["thirdmap"].mapname);
 
 	arrow_right = undefined;
 	arrow_left = undefined;
@@ -846,8 +952,8 @@ MapvoteServerUI()
 		mapsHUDComponents[3] = spawnStruct();
 		mapsHUDComponents[4] = spawnStruct();
 
-		mapsHUDComponents[3].textline = level CreateString("^7" + level.mapvotedata["fourthmap"].mapname + "\n" + level.mapvotedata["fourthmap"].gametypename, "objective", 1.2, "CENTER", "CENTER", -120, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5);
-		mapsHUDComponents[4].textline = level CreateString("^7" + level.mapvotedata["fifthmap"].mapname + "\n" + level.mapvotedata["fifthmap"].gametypename, "objective", 1.2, "CENTER", "CENTER", 120, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5);
+		mapsHUDComponents[3].textline = level CreateString("^7" + level.mapvotedata["fourthmap"].mapname + "\n" + level.mapvotedata["fourthmap"].gametypename, "objective", 1.32, "CENTER", "CENTER", -120, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5);
+		mapsHUDComponents[4].textline = level CreateString("^7" + level.mapvotedata["fifthmap"].mapname + "\n" + level.mapvotedata["fifthmap"].gametypename, "objective", 1.32, "CENTER", "CENTER", 120, -325, (1, 1, 1), 1, (0, 0, 0), 0.5, 5);
 
 		mapsHUDComponents[3].image = level DrawShader(level.mapvotedata["fourthmap"].loadscreen, -120, -310, 200, 129, (1, 1, 1), 1, 2, "LEFT", "CENTER", 1);
 		mapsHUDComponents[3].image fadeovertime(0.5);
@@ -892,7 +998,7 @@ MapvoteServerUI()
 			dynamic_position = 100;
 		}
 		map.textline.alpha = 0;
-		map.textline affectElement("alpha", 1.6, 1);
+		map.textline affectElement("alpha", 1.32, 1);
 		map.textline.y = -9 + dynamic_position;
 		if (isDefined(map.textbg))
 		{
@@ -1010,68 +1116,41 @@ mapToDisplayName(mapid)
 	mapid = tolower(mapid);
 	switch (mapid)
 	{
-	case "mp_la":
-		return "Aftermath";
-	case "mp_meltdown":
-		return "Meltdown";
-	case "mp_overflow":
-		return "Overflow";
-	case "mp_nightclub":
-		return "Plaza";
-	case "mp_dockside":
-		return "Cargo";
-	case "mp_carrier":
-		return "Carrier";
-	case "mp_drone":
-		return "Drone";
-	case "mp_express":
-		return "Express";
-	case "mp_hijacked":
-		return "Hijacked";
-	case "mp_raid":
-		return "Raid";
-	case "mp_slums":
-		return "Slums";
-	case "mp_village":
-		return "Standoff";
-	case "mp_turbine":
-		return "Turbine";
-	case "mp_socotra":
-		return "Yemen";
-	case "mp_nuketown_2020":
-		return "Nuketown 2025";
-	case "mp_downhill":
-		return "Downhill";
-	case "mp_mirage":
-		return "Mirage";
-	case "mp_hydro":
-		return "Hydro";
-	case "mp_skate":
-		return "Grind";
-	case "mp_concert":
-		return "Encore";
-	case "mp_magma":
-		return "Magma";
-	case "mp_vertigo":
-		return "Vertigo";
-	case "mp_studio":
-		return "Studio";
-	case "mp_uplink":
-		return "Uplink";
-	case "mp_bridge":
-		return "Detour";
-	case "mp_castaway":
-		return "Cove";
-	case "mp_paintball":
-		return "Rush";
-	case "mp_dig":
-		return "Dig";
-	case "mp_frostbite":
-		return "Frost";
-	case "mp_pod":
-		return "Pod";
-	case "mp_takeoff":
-		return "Takeoff";
+	case "zm_tomb":
+	case "zm_tomb_grief":
+		return "Origins";
+	case "zm_buried":
+	case "zm_buried_grief":
+		return "Buried";
+	case "zm_town":
+	case "zm_town_grief":
+		return "Town";
+	case "zm_busdepot":
+	case "zm_busdepot_grief":
+		return "Bus Depot";
+	case "zm_farm":
+	case "zm_farm_grief":
+		return "Farm";
+	case "zm_transit":
+	case "zm_transit_grief":
+		return "Transit";
+	case "zm_prison":
+	case "zm_prison_grief":
+		return "Mob of the dead";
+	case "zm_highrise":
+	case "zm_highrise_grief":
+		return "Die rise";
+	case "zm_nuked":
+	case "zm_nuked_grief":
+		return "Nuketown";
+	case "zm_cellblock_grief":
+		return "Cell Block";
+	case "zm_diner_borough":
+		return "Borough Diner";
+	/*
+		Insert a new case to add the translation from mapid to map display name.
+		Exemple: case "zm_minecraft": return "Minecraft";
+	*/
 	default:
 		return "Unknown Map";
 	}
@@ -1088,68 +1167,97 @@ mapToLoadscreen(mapid)
 	switch (mapid)
 	{
 	// List of map IDs and their corresponding loadscreen image names
-	case "mp_la":
-		return "loadscreen_mp_la";
-	case "mp_meltdown":
-		return "loadscreen_mp_meltdown";
-	case "mp_overflow":
-		return "loadscreen_mp_overflow";
-	case "mp_nightclub":
-		return "loadscreen_mp_nightclub";
-	case "mp_dockside":
-		return "loadscreen_mp_dockside";
-	case "mp_carrier":
-		return "loadscreen_mp_carrier";
-	case "mp_drone":
-		return "loadscreen_mp_drone";
-	case "mp_express":
-		return "loadscreen_mp_express";
-	case "mp_hijacked":
-		return "loadscreen_mp_hijacked";
-	case "mp_raid":
-		return "loadscreen_mp_raid";
-	case "mp_slums":
-		return "loadscreen_mp_slums";
-	case "mp_village":
-		return "loadscreen_mp_village";
-	case "mp_turbine":
-		return "loadscreen_mp_turbine";
-	case "mp_socotra":
-		return "loadscreen_mp_socotra";
-	case "mp_nuketown_2020":
-		return "loadscreen_mp_nuketown_2020";
-	case "mp_downhill":
-		return "loadscreen_mp_downhill";
-	case "mp_mirage":
-		return "loadscreen_mp_mirage";
-	case "mp_hydro":
-		return "loadscreen_mp_hydro";
-	case "mp_skate":
-		return "loadscreen_mp_skate";
-	case "mp_concert":
-		return "loadscreen_mp_concert";
-	case "mp_magma":
-		return "loadscreen_mp_magma";
-	case "mp_vertigo":
-		return "loadscreen_mp_vertigo";
-	case "mp_studio":
-		return "loadscreen_mp_studio";
-	case "mp_uplink":
-		return "loadscreen_mp_uplink";
-	case "mp_bridge":
-		return "loadscreen_mp_bridge";
-	case "mp_castaway":
-		return "loadscreen_mp_castaway";
-	case "mp_paintball":
-		return "loadscreen_mp_paintball";
-	case "mp_dig":
-		return "loadscreen_mp_dig";
-	case "mp_frostbite":
-		return "loadscreen_mp_frostbite";
-	case "mp_pod":
-		return "loadscreen_mp_pod";
-	case "mp_takeoff":
-		return "loadscreen_mp_takeoff";
+	case "zm_tomb":
+	case "zm_tomb_grief":
+		return "loadscreen_zm_tomb_zclassic_tomb";
+	case "zm_buried":
+	case "zm_buried_grief":
+		return "loadscreen_zm_buried_zclassic_processing";
+	case "zm_town":
+	case "zm_town_grief":
+		return "loadscreen_zm_transit_zstandard_transit";
+	case "zm_busdepot":
+		return "loadscreen_zm_transit_zclassic_transit";
+	case "zm_busdepot_grief":
+		return "loadscreen_zm_transit_zclassic_transit";
+	case "zm_farm":
+	case "zm_farm_grief":
+		return "loadscreen_zm_transit_zstandard_farm";
+	case "zm_transit":
+	case "zm_transit_grief":
+		return "loadscreen_zm_transit_zclassic_transit";
+	case "zm_prison":
+	case "zm_prison_grief":
+		return "loadscreen_zm_prison_zclassic_prison";
+	case "zm_highrise":
+	case "zm_highrise_grief":
+		return "loadscreen_zm_highrise_zclassic_rooftop";
+	case "zm_nuked":
+	case "zm_nuked_grief":
+		return "loadscreen_zm_nuked_zstandard_nuked";
+	case "zm_cellblock_grief":
+		return "loadscreen_zm_prison_zgrief_cellblock";
+	case "zm_diner_borough":
+		return "loadscreen_zm_transit_dr_zcleansed_diner";
+	/*
+		Insert a new case to add the loadscreen from mapid.
+		Exemple: case "zm_minecraft": return "loadscreen_zm_minecraft";
+	*/
+	default:
+		return "Unknown Image";
+	}
+}
+
+mapCustomIDtoExecuteString(mapid)
+{
+	mapid = tolower(mapid);
+	switch (mapid)
+	{
+	// List of map IDs and their corresponding loadscreen image names
+	case "zm_tomb":
+		return "exec zm_classic_tomb.cfg map zm_tom";
+	case "zm_tomb_grief":
+		return "";
+	case "zm_buried":
+		return "exec zm_classic_processing.cfg map zm_buried";
+	case "zm_buried_grief":
+		return "";
+	case "zm_town":
+		return "exec zm_standard_town.cfg map zm_transit";
+	case "zm_town_grief":
+		return "";
+	case "zm_busdepot":
+		return "exec zm_standard_transit.cfg map zm_transit";
+	case "zm_busdepot_grief":
+		return "";
+	case "zm_farm":
+		return "exec zm_standard_farm.cfg map zm_transit";
+	case "zm_farm_grief":
+		return "";
+	case "zm_transit":
+		return "exec zm_classic_transit.cfg map zm_transit";
+	case "zm_transit_grief":
+		return "";
+	case "zm_prison":
+		return "exec zm_classic_prison.cfg map zm_prison";
+	case "zm_prison_grief":
+		return "";
+	case "zm_highrise":
+		return "exec zm_classic_rooftop.cfg map zm_highrise";
+	case "zm_highrise_grief":
+		return "";
+	case "zm_nuked":
+		return "exec zm_standard_nuked.cfg map zm_nuked";
+	case "zm_nuked_grief":
+		return "";
+	case "zm_cellblock_grief":
+		return "";
+	case "zm_diner_borough":
+		return "";
+	/*
+		Insert a new case to add the execution string from the custom map id
+		Exemple: case "zm_minecraft": return "exec zm_minecraft.cfg map zm_minecraft";
+	*/
 	default:
 		return "Unknown Image";
 	}
