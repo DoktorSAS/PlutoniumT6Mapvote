@@ -7,6 +7,38 @@
 	Developed by DoktorSAS
 	Version: v1.1.1
 	Config:
+	//////////////////////////////////////////////////////////////////
+	// Black ops II Zombies mapvote                                 //
+	//                                      Developed by @DoktorSAS //
+	//////////////////////////////////////////////////////////////////
+	// Valid Maps:                                                  //
+	// Zombies use same maps with different rules to decide the     //
+	// playing area. To make this work in the dvar mv_maps you      //
+	// have to write the map listed in this list                    //
+	//////////////////////////////////////////////////////////////////
+	// Standard:                                                    //
+	// zm_tomb     - Origins                                        //
+	// zm_buried   - Buried                                         //
+	// zm_nuked    - Nuketown                                       //
+	// zm_prison   - Mob of the dead                                //
+	// zm_highrise - Die Rise                                       //
+	// zm_transit  - Transit                                        //
+	// zm_town     - Town                                           //
+	// zm_farm     - Farm                                           //
+	// zm_busdepot - Bus Depot                                      //
+	// Grief:                                                       //
+	// zm_tomb_grief      - Origins                                 //
+	// zm_buried_grief    - Buried                                  //
+	// zm_nuked_grief     - Nuketown                                //
+	// zm_prison_grief    - Mob of the dead  #1                     //
+	// zm_cellblock_grief - Mob of the dead  #2                     //
+	// zm_highrise_grief  - Die Rise                                //
+	// zm_transit_grief   - Transit                                 //
+	// zm_town_grief      - Town                                    //
+	// zm_farm_grief      - Farm                                    //
+	// zm_busdepot_grief  - Bus Depot                               //
+	//////////////////////////////////////////////////////////////////
+
 	set mv_enable			1 						// Enable/Disable the mapvote
 	set mv_maps				""						// Lits of maps that can be voted on the mapvote, leave empty for all maps
 	set mv_excludedmaps		""						// Lis of maps you don't want to show in the mapvote
@@ -30,29 +62,17 @@
 
 	1.0.1:
 	- Fixed client crash issue
-	- mv_gametypes added to set g_gametype before map change
-
-	1.0.2:
-	- mv_gametypes now support also custom cfg files
-
-	1.0.3:
-	- mv_gametypes now work with @ instead of ;
-
-	1.0.4:
-	- mv_gametypes now work with ; instead of @ since the issue was not caused by the symbol
-
+	
 	1.1.0:
 	- Addes support for 5 maps, it can be enable by setting the dvar mv_extramaps to 1
-	- Code cleaned
 
 	1.1.1:
 	- Implemented mv_allowchangevote dvar to allow or not the player to change his vote when time is still running
 	- Massive code reorganization for better readability
 	- Optimized of resources
-	- Implemented mv_minplayerstovote dvar to set the minimum number of players required to start the mapvote
 
 	1.1.2:
-	- Implemented LUA/LUI UI support for mod support with controller support
+	- WIP LUA/LUI UI support for mod support with controller support
 	- Implemented mv_randomoption dvar that will not display which map and which gametype the last option will be (Random)
 	- Implemented mv_minplayerstovote dvar to set the minimum number of players required to start the mapvote
 */
@@ -361,7 +381,7 @@ MapvoteConfig()
 	level.mapvotedata = [];
 	SetDvarIfNotInizialized("mv_time", 20);
 	level.mapvotedata["time"] = getDvarInt("mv_time");
-	SetDvarIfNotInizialized("mv_maps", "zm_tomb_grief zm_town_grief zm_farm_grief");
+	SetDvarIfNotInizialized("mv_maps", "zm_tomb_grief zm_town_grief zm_farm_grief zm_tomb zm_buried");
 
 	// Setting default values if needed
 	SetDvarIfNotInizialized("mv_credits", 1);
@@ -1215,45 +1235,45 @@ mapCustomIDtoExecuteString(mapid)
 	{
 	// List of map IDs and their corresponding loadscreen image names
 	case "zm_tomb":
-		return "exec zm_classic_tomb.cfg map zm_tom";
+		return "exec zm_classic_tomb.cfg map zm_tomb";
 	case "zm_tomb_grief":
-		return "";
+		return "exec zm_grief_tomb.cfg map zm_tomb";
 	case "zm_buried":
 		return "exec zm_classic_processing.cfg map zm_buried";
 	case "zm_buried_grief":
-		return "";
+		return "exec zm_grief_processing.cfg map zm_buried";
 	case "zm_town":
 		return "exec zm_standard_town.cfg map zm_transit";
 	case "zm_town_grief":
-		return "";
+		return "exec zm_grief_town.cfg map zm_transit";
 	case "zm_busdepot":
 		return "exec zm_standard_transit.cfg map zm_transit";
 	case "zm_busdepot_grief":
-		return "";
+		return "exec zm_grief_transit.cfg map zm_transit";
 	case "zm_farm":
 		return "exec zm_standard_farm.cfg map zm_transit";
 	case "zm_farm_grief":
-		return "";
+		return "exec zm_grief_farm.cfg map zm_transit";
 	case "zm_transit":
 		return "exec zm_classic_transit.cfg map zm_transit";
 	case "zm_transit_grief":
-		return "";
+		return "exec zm_grief_transit.cfg map zm_transit";
 	case "zm_prison":
 		return "exec zm_classic_prison.cfg map zm_prison";
 	case "zm_prison_grief":
-		return "";
+		return "exec zm_grief_prison.cfg map zm_prison";
 	case "zm_highrise":
 		return "exec zm_classic_rooftop.cfg map zm_highrise";
 	case "zm_highrise_grief":
-		return "";
+		return "exec zm_grief_rooftop.cfg map zm_highrise";
 	case "zm_nuked":
 		return "exec zm_standard_nuked.cfg map zm_nuked";
 	case "zm_nuked_grief":
-		return "";
+		return "exec zm_cleansed_street.cfg map zm_buried";
 	case "zm_cellblock_grief":
-		return "";
+		return "zm_grief_cellblock.cfg map zm_prison";
 	case "zm_diner_borough":
-		return "";
+		return "exec zm_cleansed_street.cfg map zm_buried";
 	/*
 		Insert a new case to add the execution string from the custom map id
 		Exemple: case "zm_minecraft": return "exec zm_minecraft.cfg map zm_minecraft";
