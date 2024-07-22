@@ -7,22 +7,24 @@
 	Developed by DoktorSAS
 	Version: v1.1.2
 	Config:
-	set mv_enable			1 						// Enable/Disable the mapvote
-	set mv_maps				""						// Lits of maps that can be voted on the mapvote, leave empty for all maps
-	set mv_time 			20 						// Time to vote
-	set mv_socialname 		"SocialName" 			// Name of the server social such as Discord, Twitter, Website, etc
-	set mv_sentence 		"Thanks for playing" 	// Thankfull sentence
-	set mv_votecolor		"5" 					// Color of the Vote Number
-	set mv_arrowcolor		"white"					// RGB Color of the arrows
-	set mv_selectcolor 		"lighgreen"				// RGB Color when map get voted
-	set mv_backgroundcolor 	"orange"				// RGB Color of map background
-	set mv_blur 			"3"						// Blur effect power
-	set mv_gametypes 		"dm;dm.cfg"				// This dvar can be used to have multiple gametypes with different maps, with this dvar you can load gamemode cfg files
-	set mv_extramaps        0                     	// Enable 6 maps mapvote when set to 1
-	set mv_allowchangevote  1                     	// If set to 0 it will disable the possibility to change vote when the time is still running
-	set mv_randomoption     1                     	// If set to 1 it will not display which map and which gametype the last option will be (Random)
-	set mv_minplayerstovote 1                     	// Set the minimum number of players required to start the mapvote
-	set mv_lui              0                     	// If set to 1 it will use the LUA/LUI ui interface (It required the mod support and the lua files)
+	set mv_enable				1 						// Enable/Disable the mapvote
+	set mv_maps					""						// Lits of maps that can be voted on the mapvote, leave empty for all maps
+	set mv_maps_norepeat    	0                       // If set to 1 it will disable duped maps
+	set mv_time 				20 						// Time to vote
+	set mv_socialname 			"SocialName" 			// Name of the server social such as Discord, Twitter, Website, etc
+	set mv_sentence 			"Thanks for playing" 	// Thankfull sentence
+	set mv_votecolor			"5" 					// Color of the Vote Number
+	set mv_arrowcolor			"white"					// RGB Color of the arrows
+	set mv_selectcolor 			"lighgreen"				// RGB Color when map get voted
+	set mv_backgroundcolor 		"orange"				// RGB Color of map background
+	set mv_blur 				"3"						// Blur effect power
+	set mv_gametypes 			"dm;dm.cfg"				// This dvar can be used to have multiple gametypes with different maps, with this dvar you can load gamemode cfg files
+	set mv_gametypes_norepeat   0                   // If set to 1 it will disable duped gametype
+	set mv_extramaps        	0                     	// Enable 6 maps mapvote when set to 1
+	set mv_allowchangevote  	1                     	// If set to 0 it will disable the possibility to change vote when the time is still running
+	set mv_randomoption     	1                     	// If set to 1 it will not display which map and which gametype the last option will be (Random)
+	set mv_minplayerstovote 	1                     	// Set the minimum number of players required to start the mapvote
+	set mv_lui              	0                     	// If set to 1 it will use the LUA/LUI ui interface (It required the mod support and the lua files)
 
 	1.0.0:
 	- 3 maps support
@@ -59,6 +61,8 @@
 	- Implemented LUA/LUI UI support for mod support with controller support
 	- Implemented mv_randomoption dvar that will not display which map and which gametype the last option will be (Random)
 	- Implemented mv_minplayerstovote dvar to set the minimum number of players required to start the mapvote
+	- Implemented mv_gametypes_norepeat that will enable or disable gametypes duplicate
+    - Implemented mv_maps_norepeat that will enable or disable maps duplicate
 */
 
 init()
@@ -108,7 +112,10 @@ init()
 		}
 
 		mapschoosed = MapvoteChooseRandomMapsSelection(mapsIDsList, times);
-		gametypes = strTok(getDvar("mv_gametypes"), " ");
+
+		mapsIDsList = [];
+		mapsIDsList = strTok(getDvar("mv_gametypes"), " ");
+		gametypes = MapvoteChooseRandomGametypesSelection(mapsIDsList, times);
 
 		level.mapvotedata["firstmap"] = spawnStruct();
 		level.mapvotedata["secondmap"] = spawnStruct();
@@ -122,9 +129,9 @@ init()
 		level.mapvotedata["secondmap"].mapname = mapToDisplayName(mapschoosed[1]);
 		level.mapvotedata["thirdmap"].mapname = mapToDisplayName(mapschoosed[2]);
 
-		level.mapvotedata["firstmap"].gametype = gametypes[randomIntRange(0, gametypes.size)];
-		level.mapvotedata["secondmap"].gametype = gametypes[randomIntRange(0, gametypes.size)];
-		level.mapvotedata["thirdmap"].gametype = gametypes[randomIntRange(0, gametypes.size)];
+		level.mapvotedata["firstmap"].gametype = gametypes[0];
+		level.mapvotedata["secondmap"].gametype = gametypes[1];
+		level.mapvotedata["thirdmap"].gametype = gametypes[2];
 
 		level.mapvotedata["firstmap"].gametypename = gametypeToName(strTok(level.mapvotedata["firstmap"].gametype, ";")[0]);
 		level.mapvotedata["secondmap"].gametypename = gametypeToName(strTok(level.mapvotedata["secondmap"].gametype, ";")[0]);
@@ -149,8 +156,8 @@ init()
 			level.mapvotedata["fourthmap"].mapname = mapToDisplayName(mapschoosed[3]);
 			level.mapvotedata["fifthmap"].mapname = mapToDisplayName(mapschoosed[4]);
 
-			level.mapvotedata["fourthmap"].gametype = gametypes[randomIntRange(0, gametypes.size)];
-			level.mapvotedata["fifthmap"].gametype = gametypes[randomIntRange(0, gametypes.size)];
+			level.mapvotedata["fourthmap"].gametype = gametypes[3];
+			level.mapvotedata["fifthmap"].gametype = gametypes[4];
 
 			level.mapvotedata["fourthmap"].gametypename = gametypeToName(strTok(level.mapvotedata["fourthmap"].gametype, ";")[0]);
 			level.mapvotedata["fifthmap"].gametypename = gametypeToName(strTok(level.mapvotedata["fifthmap"].gametype, ";")[0]);
@@ -169,7 +176,7 @@ init()
 
 				level.mapvotedata["sixthmap"].mapname = mapToDisplayName(mapschoosed[5]);
 
-				level.mapvotedata["sixthmap"].gametype = gametypes[randomIntRange(0, gametypes.size)];
+				level.mapvotedata["sixthmap"].gametype = gametypes[5];
 
 				level.mapvotedata["sixthmap"].gametypename = gametypeToName(strTok(level.mapvotedata["sixthmap"].gametype, ";")[0]);
 
@@ -270,11 +277,14 @@ MapvoteConfig()
 		SetDvarIfNotInizialized("mv_backgroundcolor", "grey");
 	}
 
-	SetDvarIfNotInizialized("mv_gametypes", "dm;dm.cfg tdm;tdm.cfg sd;sd.cfg");
+	SetDvarIfNotInizialized("mv_gametypes", "dm;dm.cfg tdm;tdm.cfg sd;sd.cfg ctf;ctf.cfg dom;dom.cfg");
 	setDvarIfNotInizialized("mv_excludedmaps", "");
 	setDvarIfNotInizialized("mv_allowchangevote", 1);
 	setDvarIfNotInizialized("mv_minplayerstovote", 1);
 	setDvarIfNotInizialized("mv_randomoption", 1);
+
+	setDvarIfNotInizialized("mv_maps_norepeat", 0);
+	setDvarIfNotInizialized("mv_gametypes_norepeat", 0);
 
 	/*if( level.roundlimit == 1)
 		maps\mp\gametypes\_globallogic_utils::registerpostroundevent(::ExecuteMapvote);*/
@@ -405,10 +415,17 @@ ExecuteMapvote()
 ArrayRemoveElement(array, todelete)
 {
 	newarray = [];
-	foreach (element in array)
+	once = 0;
+	for (i = 0; i < array.size; i++)
 	{
-		if (element != todelete)
+		element = array[i];
+		if (element == todelete && !once)
 		{
+			once = 1;
+		}
+		else
+		{
+			printf(element);
 			newarray[newarray.size] = element;
 		}
 	}
@@ -431,11 +448,41 @@ MapvoteChooseRandomMapsSelection(mapsIDsList, times) // Select random map from t
 		map = mapsIDsList[index];
 		mapschoosed[i] = map;
 		logPrint("map;" + map + ";index;" + index + "\n");
-		mapsIDsList = ArrayRemoveElement(mapsIDsList, map);
+		if (GetDvarInt("mv_maps_norepeat"))
+		{
+			printf("mv_maps");
+			mapsIDsList = ArrayRemoveElement(mapsIDsList, map);
+		}
 		// arrayremovevalue(mapsIDsList , map);
 	}
 
 	return mapschoosed;
+}
+
+/**
+ * Selects random gametypes from the given list.
+ *
+ * @param gametypesIDsList - The list of gametypes IDs to choose from.
+ * @param times - The number of maps to select.
+ * @return An array containing the randomly selected maps.
+ */
+MapvoteChooseRandomGametypesSelection(gametypesIDsList, times) // Select random map from the list
+{
+	gametypeschoosed = [];
+	for (i = 0; i < times; i++)
+	{
+		index = randomIntRange(0, gametypesIDsList.size);
+		gametype = gametypesIDsList[index];
+		gametypeschoosed[i] = gametype;
+		if (GetDvarInt("mv_gametypes_norepeat"))
+		{
+			printf("mv_gametypes");
+			gametypesIDsList = ArrayRemoveElement(gametypesIDsList, gametype);
+		}
+		// arrayremovevalue(mapsIDsList , map);
+	}
+
+	return gametypeschoosed;
 }
 
 /**
@@ -792,7 +839,7 @@ MapvoteSetRotation(mapid, gametype)
 	/* gametype_data:
 	 * 1: g_gametype value
 	 * 2: cfg file to execue
-	*/
+	 */
 	str = "";
 	if (gametype_data.size > 1)
 	{
