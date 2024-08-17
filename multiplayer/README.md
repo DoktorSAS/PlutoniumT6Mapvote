@@ -55,4 +55,6 @@ The mapvote will work as intended only on server side or where is implemented ma
 | `mv_allowchangevote` | 1             | Enable/Disable the possibility to change vote while the time is still running (1 for enable, 0 for disable). |
 | `mv_randomoption`    | 1             | If set to 1 it will not display which map and which gametype the last option will be (Random) |
 | `mv_minplayerstovote`| 1             | Set the minimum number of players required to start the mapvote  |
-| `mv_lui`             | 1             |  If set to 1 it will use the LUA/LUI ui interface (It required the mod support and the lua files) |
+| `mv_gametypes_norepeat`| 1             |  If set to 0 all options will have a different gametype  |
+| `mv_maps_norepeat`   | 1             | If set to 0 it will not display the same maps  |
+| `mv_lui`             | 1             | If set to 1 it will use the LUA/LUI ui interface (It required the mod support and the lua files) |
