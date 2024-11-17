@@ -821,7 +821,7 @@ MapvoteSetRotation(mapid, gametype)
 	 * 1: g_gametype value
 	 * 2: cfg file to execue
 	 */
-	str = "";
+	str = "map " + mapid;
 	if (gametype_data.size > 1)
 	{
 		str = "exec " + gametype_data[1] + " map " + mapid;
