@@ -923,7 +923,7 @@ MapvoteGetMostVotedMap(votes)
 MapvoteSetRotation(mapid, gametype)
 {
 	logPrint("mapvote//gametype//" + mapid);
-	setdvar("g_gametype", mapid);
+	//setdvar("g_gametype", mapid);
 	setdvar("sv_maprotationcurrent", mapid);
 	setdvar("sv_maprotation", mapid);
 	level notify("mv_ended");
@@ -1271,7 +1271,7 @@ mapCustomIDtoExecuteString(mapid)
 	case "zm_nuked_grief":
 		return "exec zm_cleansed_street.cfg map zm_buried";
 	case "zm_cellblock_grief":
-		return "zm_grief_cellblock.cfg map zm_prison";
+		return "exec zm_grief_cellblock.cfg map zm_prison";
 	case "zm_diner_borough":
 		return "exec zm_cleansed_street.cfg map zm_buried";
 	/*
@@ -1279,7 +1279,7 @@ mapCustomIDtoExecuteString(mapid)
 		Exemple: case "zm_minecraft": return "exec zm_minecraft.cfg map zm_minecraft";
 	*/
 	default:
-		return "Unknown Image";
+		return "Unknown Map";
 	}
 }
 
