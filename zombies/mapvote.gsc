@@ -1235,48 +1235,48 @@ mapCustomIDtoExecuteString(mapid)
 	{
 	// List of map IDs and their corresponding loadscreen image names
 	case "zm_tomb":
-		return "exec zm_classic_tomb.cfg map zm_tomb";
+		return "execgts zm_classic_tomb.cfg map zm_tomb";
 	case "zm_tomb_grief":
-		return "exec zm_grief_tomb.cfg map zm_tomb";
+		return "execgts zm_grief_tomb.cfg map zm_tomb";
 	case "zm_buried":
-		return "exec zm_classic_processing.cfg map zm_buried";
+		return "execgts zm_classic_processing.cfg map zm_buried";
 	case "zm_buried_grief":
-		return "exec zm_grief_processing.cfg map zm_buried";
+		return "execgts zm_grief_processing.cfg map zm_buried";
 	case "zm_town":
-		return "exec zm_standard_town.cfg map zm_transit";
+		return "execgts zm_standard_town.cfg map zm_transit";
 	case "zm_town_grief":
-		return "exec zm_grief_town.cfg map zm_transit";
+		return "execgts zm_grief_town.cfg map zm_transit";
 	case "zm_busdepot":
-		return "exec zm_standard_transit.cfg map zm_transit";
+		return "execgts zm_standard_transit.cfg map zm_transit";
 	case "zm_busdepot_grief":
-		return "exec zm_grief_transit.cfg map zm_transit";
+		return "execgts zm_grief_transit.cfg map zm_transit";
 	case "zm_farm":
-		return "exec zm_standard_farm.cfg map zm_transit";
+		return "execgts zm_standard_farm.cfg map zm_transit";
 	case "zm_farm_grief":
-		return "exec zm_grief_farm.cfg map zm_transit";
+		return "execgts zm_grief_farm.cfg map zm_transit";
 	case "zm_transit":
-		return "exec zm_classic_transit.cfg map zm_transit";
+		return "execgts zm_classic_transit.cfg map zm_transit";
 	case "zm_transit_grief":
-		return "exec zm_grief_transit.cfg map zm_transit";
+		return "execgts zm_grief_transit.cfg map zm_transit";
 	case "zm_prison":
-		return "exec zm_classic_prison.cfg map zm_prison";
+		return "execgts zm_classic_prison.cfg map zm_prison";
 	case "zm_prison_grief":
-		return "exec zm_grief_prison.cfg map zm_prison";
+		return "execgts zm_grief_prison.cfg map zm_prison";
 	case "zm_highrise":
-		return "exec zm_classic_rooftop.cfg map zm_highrise";
+		return "execgts zm_classic_rooftop.cfg map zm_highrise";
 	case "zm_highrise_grief":
-		return "exec zm_grief_rooftop.cfg map zm_highrise";
+		return "execgts zm_grief_rooftop.cfg map zm_highrise";
 	case "zm_nuked":
-		return "exec zm_standard_nuked.cfg map zm_nuked";
+		return "execgts zm_standard_nuked.cfg map zm_nuked";
 	case "zm_nuked_grief":
-		return "exec zm_cleansed_street.cfg map zm_buried";
+		return "execgts zm_cleansed_street.cfg map zm_buried";
 	case "zm_cellblock_grief":
-		return "exec zm_grief_cellblock.cfg map zm_prison";
+		return "execgts zm_grief_cellblock.cfg map zm_prison";
 	case "zm_diner_borough":
-		return "exec zm_cleansed_street.cfg map zm_buried";
+		return "execgts zm_cleansed_street.cfg map zm_buried";
 	/*
 		Insert a new case to add the execution string from the custom map id
-		Exemple: case "zm_minecraft": return "exec zm_minecraft.cfg map zm_minecraft";
+		Exemple: case "zm_minecraft": return "execgts zm_minecraft.cfg map zm_minecraft";
 	*/
 	default:
 		return "Unknown Map";
