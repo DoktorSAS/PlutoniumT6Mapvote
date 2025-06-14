@@ -824,7 +824,7 @@ MapvoteSetRotation(mapid, gametype)
 	str = "map " + mapid;
 	if (gametype_data.size > 1)
 	{
-		str = "exec " + gametype_data[1] + " map " + mapid;
+		str = "execgts " + gametype_data[1] + " map " + mapid;
 	}
 	logPrint("mapvote//gametype//" + gametype_data[0] + "//executing//" + str + "\n");
 	// printf("mapvote//gametype//" + gametype_data[0] + "//executing//" + str + "\n");
