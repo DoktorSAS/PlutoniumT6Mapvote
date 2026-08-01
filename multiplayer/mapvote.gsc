@@ -298,22 +298,19 @@ LUIPlayerMapvote()
 	// self endon("disconnect");
 	// level endon("game_ended");
 
-	self closemenu();
-	self closeingamemenu();
-
 	self setClientDvar("lui_mv_time", getDvarInt("lui_mv_time"));
 	self setClientDvar("lui_mv_hovercolor", getDvar("lui_mv_hovercolor"));
 	waittillframeend;
 
 	// print("level.mapvotedata[firstmap].mapname = " + level.mapvotedata["firstmap"].mapname + ";" + level.mapvotedata["secondmap"].mapname + ";" + level.mapvotedata["thirdmap"].mapname);
 
-	waittillframeend;
-
 	self setClientDvar("lui_mv_maps", getDvar("lui_mv_maps"));
 	self setClientDvar("lui_mv_gametypes", getDvar("lui_mv_gametypes"));
 	self setClientDvar("lui_mv_loadscreens", getDvar("lui_mv_loadscreens"));
 
 	level waittill("mapvote_start");
+	self closemenu();
+	self closeingamemenu();
 	self openMenu("mapvote");
 
 	while (true)
