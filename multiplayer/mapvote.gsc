@@ -528,9 +528,8 @@ MapvotePlayerUI()
 		self thread MapvoteForceFixedAngle();
 	}
 	
-
 	level waittill("mapvote_animate");
-
+	
 	if (getDvarInt("mv_extramaps") == 1)
 	{
 		dynamic_position = 100;
@@ -590,22 +589,26 @@ MapvotePlayerUI()
 
 		if (command == "select")
 		{
-			self.statusicon = "compassping_friendlyfiring_mp"; // Green dot
-			if (previuesindex >= 0)
+			if(previuesindex != index)
 			{
-				select_color = getColor(getDvar("mv_selectcolor"));
-				boxes[previuesindex] affectElement("color", 0.2, bgcolor);
-				level notify("vote", previuesindex, -1);
-			}
-			wait 0.05; // DO NOT REMOVE THIS LINE: IF REMOVED IT WILL CAUSE THE SECOND NOTIFY TO FAIL
-			level notify("vote", index, 1);
-			previuesindex = index;
+				self.statusicon = "compassping_friendlyfiring_mp"; // Green dot
+				if (previuesindex >= 0) // This section is to remove the vote on the previues voted map
+				{
+					select_color = getColor(getDvar("mv_selectcolor"));
+					boxes[previuesindex] affectElement("color", 0.2, bgcolor);
+					level notify("vote", previuesindex, -1);
+				}
+				wait 0.05; // DO NOT REMOVE THIS LINE: IF REMOVED IT WILL CAUSE THE SECOND NOTIFY TO FAIL
+			
+				level notify("vote", index, 1);
+				previuesindex = index;
 
-			select_color = getColor(getDvar("mv_selectcolor"));
-			boxes[index] affectElement("color", 0.2, select_color);
-			if (GetDvarInt("mv_allowchangevote") == 0)
-			{
-				voting = 0;
+				select_color = getColor(getDvar("mv_selectcolor"));
+				boxes[index] affectElement("color", 0.2, select_color);
+				if (GetDvarInt("mv_allowchangevote") == 0)
+				{
+					voting = 0;
+				}
 			}
 		}
 		else
@@ -812,7 +815,7 @@ MapvoteHandler()
 
 		MapvoteSetRotation(map.mapid, map.gametype);
 
-		wait 0.5;
+		wait 0.05;
 
 		foreach (vote in votes)
 		{
