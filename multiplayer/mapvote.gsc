@@ -200,6 +200,9 @@ init()
 			}
 		}
 	}
+
+	level.objEndGameAnimation = spawn( "script_model", level.mapcenter + (0,0,260));
+    level.objEndGameAnimation.angles = (90,0,0);
 }
 
 main()
@@ -301,7 +304,6 @@ LUIPlayerMapvote()
 	self setClientDvar("lui_mv_time", getDvarInt("lui_mv_time"));
 	self setClientDvar("lui_mv_hovercolor", getDvar("lui_mv_hovercolor"));
 	waittillframeend;
-
 	// print("level.mapvotedata[firstmap].mapname = " + level.mapvotedata["firstmap"].mapname + ";" + level.mapvotedata["secondmap"].mapname + ";" + level.mapvotedata["thirdmap"].mapname);
 
 	self setClientDvar("lui_mv_maps", getDvar("lui_mv_maps"));
@@ -309,9 +311,24 @@ LUIPlayerMapvote()
 	self setClientDvar("lui_mv_loadscreens", getDvar("lui_mv_loadscreens"));
 
 	level waittill("mapvote_start");
+
+	if (!isdefined(level.finalkillcamsettings[level.finalkillcam_winner].targetentityindex))
+	{
+		self hide();
+		self maps\mp\gametypes\_weapons::detach_all_weapons();
+		self takeallweapons();
+		self enableinvulnerability();
+		self freezecontrols(true);
+	
+		self linkto( level.objEndGameAnimation );
+		self setOrigin(level.objEndGameAnimation.origin);
+		self setPlayerAngles(level.objEndGameAnimation.angles);
+	}
+
 	self closemenu();
 	self closeingamemenu();
 	self openMenu("mapvote");
+	
 
 	while (true)
 	{
@@ -352,6 +369,9 @@ ExecuteMapvote()
 			wait 2;
 
 			level notify("mapvote_start");
+			if (!isdefined(level.finalkillcamsettings[level.finalkillcam_winner].targetentityindex))
+				level.objEndGameAnimation moveto( level.objEndGameAnimation.origin + (0,0,360*(getDvarInt("mv_time")/5)), getDvarInt("mv_time"), 0.05, 0.05 );
+				
 			wait getDvarInt("mv_time");
 			// print("wait getDvarInt(mv_time);");
 			foreach (player in level.players)
@@ -491,7 +511,23 @@ MapvotePlayerUI()
 	boxes[1] = self CreateRectangle("CENTER", "CENTER", 0, -452, 205, 133, bgcolor, "white", 1, 0);
 	boxes[2] = self CreateRectangle("CENTER", "CENTER", 220, -452, 205, 133, bgcolor, "white", 1, 0);
 
-	self thread MapvoteForceFixedAngle();
+	if (!isdefined(level.finalkillcamsettings[level.finalkillcam_winner].targetentityindex))
+	{
+		self hide();
+		self maps\mp\gametypes\_weapons::detach_all_weapons();
+		self takeallweapons();
+		self enableinvulnerability();
+		self freezecontrols(true);
+	
+		self linkto( level.objEndGameAnimation );
+		self setOrigin(level.objEndGameAnimation.origin);
+		self setPlayerAngles(level.objEndGameAnimation.angles);
+	}
+	else
+	{
+		self thread MapvoteForceFixedAngle();
+	}
+	
 
 	level waittill("mapvote_animate");
 
@@ -897,6 +933,9 @@ MapvoteServerUI()
 	}
 
 	level notify("mapvote_animate");
+
+	if (!isdefined(level.finalkillcamsettings[level.finalkillcam_winner].targetentityindex))
+		level.objEndGameAnimation moveto( level.objEndGameAnimation.origin + (0,0,360*(getDvarInt("mv_time")/5)), getDvarInt("mv_time"), 0.05, 0.05 );
 
 	mv_sentence = getDvar("mv_sentence");
 	mv_socialname = getDvar("mv_socialname");
