@@ -10,40 +10,34 @@
 	1.0.0:
 	- 3 maps support
 	- Credits, sentence and social on bottom left
-	- Simple keyboard and controller button support
+	- Basic support for keyboard and controller buttons
 	- Better dvar organization
 	- Code optimization
-	- Redouce sharder variables to allow other mods to work as intended
+	- Reduces the number of sharder variables to allow other mods to function as intended
 
 	1.0.1:
 	- Fixed client crash issue
-	- mv_gametypes added to set g_gametype before map change
+	- Added mv_gametypes to set g_gametype before a map change
 
 	1.0.2:
-	- mv_gametypes now support also custom cfg files
-
-	1.0.3:
-	- mv_gametypes now work with @ instead of ;
-
-	1.0.4:
-	- mv_gametypes now work with ; instead of @ since the issue was not caused by the symbol
+	- mv_gametypes now also supports custom cfg files
 
 	1.1.0:
-	- Addes support for 5 maps, it can be enable by setting the dvar mv_extramaps to 1
-	- Code cleaned
+	- Adds support for 5 maps; this feature can be enabled by setting the dvar mv_extramaps to 1
+	- Major code clean up
 
 	1.1.1:
-	- Implemented mv_allowchangevote dvar to allow or not the player to change his vote when time is still running
-	- Massive code reorganization for better readability
-	- Optimized of resources
+	- Implemented mv_allowchangevote dvar to allow or disallow the player from changing their vote while the timer is still running
+	- Major code reorganization to improve readability
+	- Resource pptimization
 	- Implemented mv_minplayerstovote dvar to set the minimum number of players required to start the mapvote
 
 	1.1.2:
-	- Implemented LUA/LUI UI support for mod support with controller support
-	- Implemented mv_randomoption dvar that will not display which map and which gametype the last option will be (Random)
-	- Implemented mv_minplayerstovote dvar to set the minimum number of players required to start the mapvote
-	- Implemented mv_gametypes_norepeat that will enable or disable gametypes duplicate
-    - Implemented mv_maps_norepeat that will enable or disable maps duplicate
+	- Implemented LUA/LUI UI with controller support
+	- Implemented mv_randomoption dvar that won't show which map and game mode were selected as the last option (Random)
+	- Implemented mv_minplayerstovote dvar to set the minimum number of players required to start the map vote
+	- Implemented mv_gametypes_norepeat which will enable or disable duplicate game types
+    - Implemented mv_maps_norepeat which will enable or disable map duplication
 */
 
 init()
@@ -225,10 +219,7 @@ finalkillcamwaiter()
 	return 1;
 }
 
-/**
- * Initializes the map vote configuration.
- */
-MapvoteConfig()
+MapvoteConfig() // Initializes the map vote configuration.
 {
 	SetDvarIfNotInizialized("mv_enable", 1);
 	if (getDvarInt("mv_enable") != 1) // Check if mapvote is enable
@@ -283,9 +274,6 @@ OnPlayerConnected()
 		player thread FixBlur();
 	}
 }
-/**
- * Resets the blur effect to 0.
- */
 FixBlur() // Reset blur effect to 0
 {
 	self endon("disconnect");
@@ -344,10 +332,7 @@ LUIPlayerMapvote()
 	}
 }
 
-/**
- * Executes the map vote functionality.
- */
-ExecuteMapvote()
+ExecuteMapvote() // Executes the map vote functionality.
 {
 	level endon("mv_ended");
 	if (getDvarInt("mv_enable") != 1) // Check if mapvote is enable
@@ -403,13 +388,6 @@ ExecuteMapvote()
 	}
 }
 
-/**
- * Removes a specified element from an array and returns a new array without the element.
- *
- * @param array The array from which to remove the element.
- * @param todelete The element to be removed from the array.
- * @return The new array without the specified element.
- */
 ArrayRemoveElement(array, todelete)
 {
 	newarray = [];
@@ -430,13 +408,6 @@ ArrayRemoveElement(array, todelete)
 	return newarray;
 }
 
-/**
- * Selects random maps from the given list.
- *
- * @param mapsIDsList - The list of map IDs to choose from.
- * @param times - The number of maps to select.
- * @return An array containing the randomly selected maps.
- */
 MapvoteChooseRandomMapsSelection(mapsIDsList, times) // Select random map from the list
 {
 	mapschoosed = [];
@@ -457,13 +428,6 @@ MapvoteChooseRandomMapsSelection(mapsIDsList, times) // Select random map from t
 	return mapschoosed;
 }
 
-/**
- * Selects random gametypes from the given list.
- *
- * @param gametypesIDsList - The list of gametypes IDs to choose from.
- * @param times - The number of maps to select.
- * @return An array containing the randomly selected maps.
- */
 MapvoteChooseRandomGametypesSelection(gametypesIDsList, times) // Select random map from the list
 {
 	gametypeschoosed = [];
@@ -483,20 +447,11 @@ MapvoteChooseRandomGametypesSelection(gametypesIDsList, times) // Select random 
 	return gametypeschoosed;
 }
 
-/**
- * Checks if a player is a bot.
- *
- * @param entity The entity to check.
- * @return true if the entity is a bot, false otherwise.
- */
 is_bot(entity) // Check if a players is a bot
 {
 	return isDefined(entity.pers["isBot"]) && entity.pers["isBot"];
 }
 
-/**
- * Initializes the MapvotePlayerUI.
- */
 MapvotePlayerUI()
 {
 	self endon("disconnect");
@@ -651,13 +606,6 @@ MapvoteForceFixedAngle()
 		self setPlayerAngles(angles);
 }
 
-/**
- * Creates a vote display area at the specified coordinates.
- *
- * @param x The x-coordinate of the display area.
- * @param y The y-coordinate of the display area.
- * @return The created display area.
- */
 CreateVoteDisplay(x, y)
 {
 	displayarea = createServerFontString("objective", 2);
@@ -669,14 +617,7 @@ CreateVoteDisplay(x, y)
 	displayarea setValue(0);
 	return displayarea;
 }
-/**
- * Creates a vote display object with the specified coordinates and map.
- *
- * @param x The x-coordinate of the display object.
- * @param y The y-coordinate of the display object.
- * @param map The map associated with the display object.
- * @return The created vote display object.
- */
+
 CreateVoteDisplayObject(map, x, y)
 {
 	displayobject = spawnStruct();
@@ -689,20 +630,11 @@ CreateVoteDisplayObject(map, x, y)
 	return displayobject;
 }
 
-/**
- * Updates the votes for a specific LUI index.
- *
- * @param {int} luiindex - The index of the LUI mapvote option.
- * @param {int} value - The new value of the votes.
- */
 LUIUpdateVotes(luiindex, value)
 {
 	self luiNotifyEvent(&"update_votes", 2, luiindex, value);
 }
 
-/**
- * Closes the map vote menu.
- */
 LUICloseMapvoteMenu()
 {
 	// print("LUICloseMapvoteMenu()");
@@ -824,12 +756,6 @@ MapvoteHandler()
 	}
 }
 
-/**
- * Returns the most voted map from the given array of votes.
- *
- * @param votes The array of votes.
- * @return The map with the highest number of votes.
- */
 MapvoteGetMostVotedMap(votes)
 {
 	winner = votes[0];
@@ -844,18 +770,12 @@ MapvoteGetMostVotedMap(votes)
 	return winner;
 }
 
-/**
- * Sets the rotation for the map vote.
- *
- * @param mapid The ID of the map to be added to the rotation.
- * @param gametype The game type associated with the map.
- */
 MapvoteSetRotation(mapid, gametype)
 {
 	gametype_data = strTok(gametype, ";");
 	/* gametype_data:
-	 * 1: g_gametype value
-	 * 2: cfg file to execue
+	 * 	1: g_gametype value
+	 * 	2: cfg file to execute
 	 */
 	str = "map " + mapid;
 	if (gametype_data.size > 1)
@@ -870,9 +790,6 @@ MapvoteSetRotation(mapid, gametype)
 	level notify("mv_ended");
 }
 
-/**
- * Initializes the map voting user interface on the server.
- */
 MapvoteServerUI()
 {
 	// level endon("game_ended");
@@ -1002,34 +919,19 @@ MapvoteServerUI()
 		player setblur(0, 0);
 	}
 }
-/**
- * Sets the value of a dvar if it is not already initialized.
- * @param dvar The name of the dvar.
- * @param value The value to set for the dvar.
- */
+
 SetDvarIfNotInizialized(dvar, value)
 {
 	if (!IsInizialized(dvar))
 		setDvar(dvar, value);
 }
 
-/**
- * Checks if a dvar is initialized.
- * @param dvar The name of the dvar.
- * @returns True if the dvar is initialized, false otherwise.
- */
 IsInizialized(dvar)
 {
 	result = getDvar(dvar);
 	return result != "";
 }
 
-/**
- * Converts a game type abbreviation to its corresponding full name.
- *
- * @param {string} gametype - The abbreviation of the game type.
- * @returns {string} - The full name of the game type.
- */
 gametypeToName(gametype)
 {
 	switch (tolower(gametype))
@@ -1068,11 +970,6 @@ gametypeToName(gametype)
 	return gametypeToName(getDvar("g_gametype"));
 }
 
-/**
- * Converts a map ID to its corresponding display name.
- * @param {string} mapid - The map ID to convert.
- * @returns {string} - The display name of the map.
- */
 mapToDisplayName(mapid)
 {
 	mapid = tolower(mapid);
@@ -1145,11 +1042,6 @@ mapToDisplayName(mapid)
 	}
 }
 
-/**
- * Returns the corresponding loadscreen image for a given map ID.
- * @param {string} mapid - The map ID.
- * @returns {string} - The loadscreen image name.
- */
 mapToLoadscreen(mapid)
 {
 	mapid = tolower(mapid);
@@ -1236,25 +1128,12 @@ _countPlayers()
 	return count;
 }
 
-/**
- * Checks if the given value is a valid color.
- * A valid color is represented by a string value that is either "0", "1", "2", "3", "4", "5", "6", or "7".
- *
- * @param value - The value to check.
- * @returns true if the value is a valid color, false otherwise.
- */
 isValidColor(value)
 {
 	return value == "0" || value == "1" || value == "2" || value == "3" || value == "4" || value == "5" || value == "6" || value == "7";
 }
 
-/**
- * GetColor function returns the RGB values of a specified color.
- *
- * @param {string} color - The color name.
- * @returns {array} - An array containing the RGB values of the specified color.
- */
-GetColor(color)
+GetColor(color) // returns the RGB values of a specified color.
 {
 	switch (tolower(color))
 	{
@@ -1304,24 +1183,6 @@ GetColor(color)
 	}
 }
 // Drawing
-/**
- * Creates a font string and sets its properties.
- *
- * @param {string} input - The text or value to be displayed in the font string.
- * @param {string} font - The font style of the font string.
- * @param {float} fontScale - The scale of the font string.
- * @param {int} align - The alignment of the font string.
- * @param {bool} relative - Determines if the font string's position is relative to its parent.
- * @param {float} x - The x-coordinate of the font string's position.
- * @param {float} y - The y-coordinate of the font string's position.
- * @param {vector} color - The color of the font string.
- * @param {float} alpha - The transparency of the font string.
- * @param {vector} glowColor - The color of the font string's glow effect.
- * @param {float} glowAlpha - The transparency of the font string's glow effect.
- * @param {int} sort - The sorting order of the font string.
- * @param {bool} isValue - Determines if the input is a value instead of text.
- * @returns {fontString} - The created font string.
- */
 CreateString(input, font, fontScale, align, relative, x, y, color, alpha, glowColor, glowAlpha, sort, isValue)
 {
 	if (self != level)
@@ -1353,21 +1214,7 @@ CreateString(input, font, fontScale, align, relative, x, y, color, alpha, glowCo
 	hud.hideWhenInMenu = 0;
 	return hud;
 }
-/**
- * Creates a rectangle HUD element with the specified properties.
- *
- * @param align The alignment of the rectangle.
- * @param relative The relative position of the rectangle.
- * @param x The x-coordinate of the rectangle.
- * @param y The y-coordinate of the rectangle.
- * @param width The width of the rectangle.
- * @param height The height of the rectangle.
- * @param color The color of the rectangle.
- * @param shader The shader of the rectangle.
- * @param sort The sorting order of the rectangle.
- * @param alpha The transparency of the rectangle.
- * @return The created rectangle HUD element.
- */
+
 CreateRectangle(align, relative, x, y, width, height, color, shader, sort, alpha)
 {
 	boxElem = newClientHudElem(self);
@@ -1390,22 +1237,7 @@ CreateRectangle(align, relative, x, y, width, height, color, shader, sort, alpha
 	boxElem.archived = 0;
 	return boxElem;
 }
-/**
- * Draws a shader on the screen at the specified position with the given dimensions, color, and alpha.
- *
- * @param shader The shader to be drawn.
- * @param x The x-coordinate of the top-left corner of the shader.
- * @param y The y-coordinate of the top-left corner of the shader.
- * @param width The width of the shader.
- * @param height The height of the shader.
- * @param color The color of the shader.
- * @param alpha The alpha value of the shader.
- * @param sort The sorting order of the shader.
- * @param align The alignment of the shader.
- * @param relative Specifies whether the shader's position is relative to the screen or the level.
- * @param isLevel Specifies whether the shader is a level shader or a client shader.
- * @return The created hudelem object representing the drawn shader.
- */
+
 DrawShader(shader, x, y, width, height, color, alpha, sort, align, relative, isLevel)
 {
 	if (isDefined(isLevel))
@@ -1429,13 +1261,8 @@ DrawShader(shader, x, y, width, height, color, alpha, sort, align, relative, isL
 	hud.archived = 0;
 	return hud;
 }
+
 // Animations
-/**
- * A function that affects the specified element over time.
- * @param {string} type - The type of element to affect ("x", "y", "alpha", "color").
- * @param {number} time - The duration of the effect in milliseconds.
- * @param {number} value - The new value for the specified element.
- */
 affectElement(type, time, value)
 {
 	if (type == "x" || type == "y")
