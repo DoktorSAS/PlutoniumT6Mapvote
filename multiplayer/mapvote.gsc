@@ -49,6 +49,7 @@ init()
 	precacheshader("ui_scrollbar_arrow_left");
 	precacheshader("ui_scrollbar_arrow_right");
 	precacheshader("gradient");
+	precacheshader("menu_background_fade");
 
 	level thread OnPlayerConnected();
 	MapvoteConfig();
@@ -260,6 +261,10 @@ MapvoteConfig() // Initializes the map vote configuration.
 
 	setDvarIfNotInizialized("mv_maps_norepeat", 0);
 	setDvarIfNotInizialized("mv_gametypes_norepeat", 0);
+
+	setDvarIfNotInizialized("mv_ads_messages", "");
+	setDvarIfNotInizialized("mv_ads_time_for_msg", 10);
+	
 
 	/*if( level.roundlimit == 1)
 		maps\mp\gametypes\_globallogic_utils::registerpostroundevent(::ExecuteMapvote);*/
@@ -645,7 +650,7 @@ MapvoteHandler()
 {
 	// level endon("game_ended");
 	votes = [];
-
+	
 	if (getDvarInt("mv_lui") == 1)
 	{
 		votes = [];
@@ -790,6 +795,38 @@ MapvoteSetRotation(mapid, gametype)
 	level notify("mv_ended");
 }
 
+destroyNotificationBanner()
+{
+	level waittill("mapvote_end");
+	self.status = 0;
+	self.background destroyElem();
+	self.text destroyElem();
+}
+
+handleNotificationBanner(messages)
+{
+	level waittill("mapvote_animate");
+	self.background affectElement("alpha", 0.5, 1);
+	self.text affectElement("alpha", 0.5, 1);
+	self.status = 1;
+
+	self thread destroyNotificationBanner();
+
+	textAnimationTime = getDvarInt("mv_ads_time_for_msg");
+
+	while(self.status == 1)
+	{
+		foreach(msg in messages)
+		{
+			self [[self.notificate]](msg, textAnimationTime);
+			wait textAnimationTime;
+			if(self.status == 0)
+				break;
+		}
+		wait 0.05;
+	}
+}
+
 MapvoteServerUI()
 {
 	// level endon("game_ended");
@@ -816,6 +853,18 @@ MapvoteServerUI()
 	mapsHUDComponents[1].image fadeovertime(0.5);
 	mapsHUDComponents[2].image = level DrawShader(level.mapvotedata["thirdmap"].loadscreen, 220, -310, 200, 129, (1, 1, 1), 1, 2, "RIGHT", "CENTER", 1);
 	mapsHUDComponents[2].image fadeovertime(0.5);
+
+	if(IsInizialized(mv_ads_messages))
+	{
+		mv_ads_messages = getDvar("mv_ads_messages");
+		messages = strTok(mv_ads_messages,";");
+
+		if(messages.size > 0)
+		{
+			banner = level CreateNotificationBanner("mapvote_ads", "menu_background_fade", 0, -16, 25, "objective", 1.4, 0);
+			banner thread handleNotificationBanner(messages);
+		}
+	}
 
 	arrow_right = undefined;
 	arrow_left = undefined;
@@ -1277,4 +1326,48 @@ affectElement(type, time, value)
 		self.alpha = value;
 	if (type == "color")
 		self.color = value;
+}
+
+NotificationBannerNotificate(text, time)
+{
+    self.text hideelem();
+    padding = [[self.calcPadding]](text, self.text.fontscale);
+    self.text.x = self.startTextX + padding;
+    self.text showelem();
+
+    self.text setTextUnlimited(text);
+    
+    self.text moveOverTime(time);
+    self.text.x = self.endTextX - padding;
+}
+
+NotificationBannerPadding(text, fontscale)
+{
+    padding = 0;
+    if(text.size >= 20)
+    {
+        padding = (fontscale) * text.size;
+    }
+    return padding;
+}
+
+CreateNotificationBanner(id, shader, x, y, height, font, fontscale, alpha)
+{
+    banner = spawnstruct();
+
+    banner.background = DrawShader(shader, x, y, 1000, 25, undefined, 1, 2, "TOP", undefined, 0);
+
+    banner.startTextX = banner.background.x + 500;
+    banner.endTextX = banner.background.x - 500;
+    banner.background.alpha = 0;
+
+    banner.text = createServerFontString(font, fontscale);
+    banner.text setPoint("TOP", undefined, banner.startTextX, banner.background.y/1.8 - fontscale);
+    banner.text.sort = 999;
+    banner.text.alpha = 0;
+
+    banner.calcPadding = ::NotificationBannerPadding;
+    banner.notificate = ::NotificationBannerNotificate;
+
+    return banner;
 }
