@@ -96,7 +96,7 @@ init()
 
 	level thread OnPlayerConnected();
 	MapvoteConfig();
-	setdvar("mv_lui", 1);
+	
 	if (GetDvarInt("mv_lui") == 1)
 	{
 		precachemenu("MapVote");
