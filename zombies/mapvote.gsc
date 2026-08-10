@@ -87,14 +87,23 @@ init()
 	precacheshader("ui_scrollbar_arrow_right");
 	precacheshader("gradient");
 
+	precachestring( &"MapVote" );
+    game["MapVote"] = &"MapVote";
+    level.MapVote = &"MapVote";
+    precachestring( &"open_custom_in_game_menu" );
+    game["OpenCustomInGameMenu"] = &"open_custom_in_game_menu";
+    level.open_custom_in_game_menu = &"open_custom_in_game_menu";
+
 	level thread OnPlayerConnected();
 	MapvoteConfig();
-
+	setdvar("mv_lui", 1);
 	if (GetDvarInt("mv_lui") == 1)
 	{
-		precachemenu("mapvote");
+		precachemenu("MapVote");
 		precachestring(&"update_votes");
 		precachestring(&"mapvote_close");
+		precachestring( &"open_ingame_menu" );
+		precachestring( &"MapVote" );
 
 		setDvar("lui_mv_maps", "ERROR;ERROER;ERROR");
 		setDvar("lui_mv_gametypes", "ERROR;ERROER;ERROR");
@@ -124,7 +133,9 @@ init()
 		}
 
 		mapschoosed = MapvoteChooseRandomMapsSelection(mapsIDsList, times);
-		gametypes = strTok(getDvar("mv_gametypes"), " ");
+
+		mapsIDsList = [];
+		mapsIDsList = strTok(getDvar("mv_gametypes"), " ");
 
 		level.mapvotedata["firstmap"] = spawnStruct();
 		level.mapvotedata["secondmap"] = spawnStruct();
@@ -368,9 +379,6 @@ _intermission()
 	level thread maps\mp\zombies\_zm::zombie_game_over_death();
 }
 
-/**
- * Initializes the map vote configuration.
- */
 MapvoteConfig()
 {
 	SetDvarIfNotInizialized("mv_enable", 1);
@@ -381,7 +389,7 @@ MapvoteConfig()
 	level.mapvotedata = [];
 	SetDvarIfNotInizialized("mv_time", 20);
 	level.mapvotedata["time"] = getDvarInt("mv_time");
-	SetDvarIfNotInizialized("mv_maps", "zm_tomb_grief zm_town_grief zm_farm_grief zm_tomb zm_buried");
+	SetDvarIfNotInizialized("mv_maps", "zm_tomb_grief zm_town_grief zm_farm_grief zm_tomb zm_buried zm_prison");
 
 	// Setting default values if needed
 	SetDvarIfNotInizialized("mv_credits", 1);
@@ -404,11 +412,12 @@ MapvoteConfig()
 		SetDvarIfNotInizialized("mv_backgroundcolor", "grey");
 	}
 
-	SetDvarIfNotInizialized("mv_gametypes", "dm;dm.cfg tdm;tdm.cfg dm;dm.cfg tdm;tdm.cfg sd;sd.cfg sd;sd.cfg");
+	SetDvarIfNotInizialized("mv_gametypes", "");
 	setDvarIfNotInizialized("mv_excludedmaps", "");
 	setDvarIfNotInizialized("mv_allowchangevote", 1);
 	setDvarIfNotInizialized("mv_minplayerstovote", 1);
 	setDvarIfNotInizialized("mv_randomoption", 1);
+	setDvarIfNotInizialized("mv_maps_norepeat", 1);
 
 	/*if( level.roundlimit == 1)
 		maps\mp\gametypes\_globallogic_utils::registerpostroundevent(::ExecuteMapvote);*/
@@ -421,19 +430,19 @@ OnPlayerConnected()
 	{
 		level waittill("connected", player);
 		player thread FixBlur();
+		//player thread LUIPlayerMapvote();
 	}
 }
-/**
- * Resets the blur effect to 0.
- */
+
 FixBlur() // Reset blur effect to 0
 {
 	self endon("disconnect");
 	level endon("game_ended");
 	self waittill("spawned_player");
 	self setblur(0, 0);
-	wait 1;
-	self LUIPlayerMapvote();
+	wait 10;
+	//self IPrintLnBold("LUIPlayerMapvote");
+	//self LUIPlayerMapvote();
 }
 
 LUIPlayerMapvote()
@@ -441,15 +450,8 @@ LUIPlayerMapvote()
 	// self endon("disconnect");
 	// level endon("game_ended");
 
-	self closemenu();
-	self closeingamemenu();
-
 	self setClientDvar("lui_mv_time", getDvarInt("lui_mv_time"));
 	self setClientDvar("lui_mv_hovercolor", getDvar("lui_mv_hovercolor"));
-	waittillframeend;
-
-	print("mapnames: " + level.mapvotedata["firstmap"].mapname + ";" + level.mapvotedata["secondmap"].mapname + ";" + level.mapvotedata["thirdmap"].mapname);
-
 	waittillframeend;
 
 	self setClientDvar("lui_mv_maps", getDvar("lui_mv_maps"));
@@ -457,7 +459,13 @@ LUIPlayerMapvote()
 	self setClientDvar("lui_mv_loadscreens", getDvar("lui_mv_loadscreens"));
 
 	level waittill("mapvote_start");
-	self openMenu("mapvote");
+
+	self closemenu();
+	self closeingamemenu();
+	self setclientscriptmainmenu( level.MapVote );
+    waittillframeend;
+    self luinotifyevent( level.open_custom_in_game_menu, 1, IString("MapVote"));
+    //self luinotifyeventtospectators( level.open_custom_in_game_menu, 1, IString("MapVote"));
 
 	while (true)
 	{
@@ -473,9 +481,6 @@ LUIPlayerMapvote()
 	}
 }
 
-/**
- * Executes the map vote functionality.
- */
 ExecuteMapvote()
 {
 	level endon("mv_ended");
@@ -529,13 +534,6 @@ ExecuteMapvote()
 	}
 }
 
-/**
- * Removes a specified element from an array and returns a new array without the element.
- *
- * @param array The array from which to remove the element.
- * @param todelete The element to be removed from the array.
- * @return The new array without the specified element.
- */
 ArrayRemoveElement(array, todelete)
 {
 	newarray = [];
@@ -549,13 +547,6 @@ ArrayRemoveElement(array, todelete)
 	return newarray;
 }
 
-/**
- * Selects random maps from the given list.
- *
- * @param mapsIDsList - The list of map IDs to choose from.
- * @param times - The number of maps to select.
- * @return An array containing the randomly selected maps.
- */
 MapvoteChooseRandomMapsSelection(mapsIDsList, times) // Select random map from the list
 {
 	mapschoosed = [];
@@ -564,28 +555,23 @@ MapvoteChooseRandomMapsSelection(mapsIDsList, times) // Select random map from t
 		index = randomIntRange(0, mapsIDsList.size);
 		map = mapsIDsList[index];
 		mapschoosed[i] = map;
-		logPrint("map;" + map + ";index;" + index + "\n");
-		mapsIDsList = ArrayRemoveElement(mapsIDsList, map);
+		// logPrint("map;" + map + ";index;" + index + "\n");
+		if (GetDvarInt("mv_maps_norepeat"))
+		{
+			// printf("mv_maps");
+			mapsIDsList = ArrayRemoveElement(mapsIDsList, map);
+		}
 		// arrayremovevalue(mapsIDsList , map);
 	}
 
 	return mapschoosed;
 }
 
-/**
- * Checks if a player is a bot.
- *
- * @param entity The entity to check.
- * @return true if the entity is a bot, false otherwise.
- */
 is_bot(entity) // Check if a players is a bot
 {
 	return isDefined(entity.pers["isBot"]) && entity.pers["isBot"];
 }
 
-/**
- * Initializes the MapvotePlayerUI.
- */
 MapvotePlayerUI()
 {
 	self endon("disconnect");
@@ -664,21 +650,26 @@ MapvotePlayerUI()
 		if (command == "select")
 		{
 			self.statusicon = "compassping_friendlyfiring_mp"; // Green dot
-			if (previuesindex >= 0)
+			if(previuesindex != index)
 			{
-				select_color = getColor(getDvar("mv_selectcolor"));
-				boxes[previuesindex] affectElement("color", 0.2, bgcolor);
-				level notify("vote", previuesindex, -1);
-			}
-			wait 0.05; // DO NOT REMOVE THIS LINE: IF REMOVED IT WILL CAUSE THE SECOND NOTIFY TO FAIL
-			level notify("vote", index, 1);
-			previuesindex = index;
+				self.statusicon = "compassping_friendlyfiring_mp"; // Green dot
+				if (previuesindex >= 0) // This section is to remove the vote on the previues voted map
+				{
+					select_color = getColor(getDvar("mv_selectcolor"));
+					boxes[previuesindex] affectElement("color", 0.2, bgcolor);
+					level notify("vote", previuesindex, -1);
+				}
+				wait 0.05; // DO NOT REMOVE THIS LINE: IF REMOVED IT WILL CAUSE THE SECOND NOTIFY TO FAIL
+			
+				level notify("vote", index, 1);
+				previuesindex = index;
 
-			select_color = getColor(getDvar("mv_selectcolor"));
-			boxes[index] affectElement("color", 0.2, select_color);
-			if (GetDvarInt("mv_allowchangevote") == 0)
-			{
-				voting = 0;
+				select_color = getColor(getDvar("mv_selectcolor"));
+				boxes[index] affectElement("color", 0.2, select_color);
+				if (GetDvarInt("mv_allowchangevote") == 0)
+				{
+					voting = 0;
+				}
 			}
 		}
 		else
@@ -721,13 +712,6 @@ MapvoteForceFixedAngle()
 		self setPlayerAngles(angles);
 }
 
-/**
- * Creates a vote display area at the specified coordinates.
- *
- * @param x The x-coordinate of the display area.
- * @param y The y-coordinate of the display area.
- * @return The created display area.
- */
 CreateVoteDisplay(x, y)
 {
 	displayarea = createServerFontString("objective", 2);
@@ -739,14 +723,7 @@ CreateVoteDisplay(x, y)
 	displayarea setValue(0);
 	return displayarea;
 }
-/**
- * Creates a vote display object with the specified coordinates and map.
- *
- * @param x The x-coordinate of the display object.
- * @param y The y-coordinate of the display object.
- * @param map The map associated with the display object.
- * @return The created vote display object.
- */
+
 CreateVoteDisplayObject(map, x, y)
 {
 	displayobject = spawnStruct();
@@ -759,20 +736,11 @@ CreateVoteDisplayObject(map, x, y)
 	return displayobject;
 }
 
-/**
- * Updates the votes for a specific LUI index.
- *
- * @param {int} luiindex - The index of the LUI mapvote option.
- * @param {int} value - The new value of the votes.
- */
 LUIUpdateVotes(luiindex, value)
 {
 	self luiNotifyEvent(&"update_votes", 2, luiindex, value);
 }
 
-/**
- * Closes the map vote menu.
- */
 LUICloseMapvoteMenu()
 {
 	// print("LUICloseMapvoteMenu()");
@@ -894,12 +862,6 @@ MapvoteHandler()
 	}
 }
 
-/**
- * Returns the most voted map from the given array of votes.
- *
- * @param votes The array of votes.
- * @return The map with the highest number of votes.
- */
 MapvoteGetMostVotedMap(votes)
 {
 	winner = votes[0];
@@ -914,12 +876,6 @@ MapvoteGetMostVotedMap(votes)
 	return winner;
 }
 
-/**
- * Sets the rotation for the map vote.
- *
- * @param mapid The ID of the map to be added to the rotation.
- * @param gametype The game type associated with the map.
- */
 MapvoteSetRotation(mapid, gametype)
 {
 	logPrint("mapvote//gametype//" + mapid);
@@ -929,9 +885,6 @@ MapvoteSetRotation(mapid, gametype)
 	level notify("mv_ended");
 }
 
-/**
- * Initializes the map voting user interface on the server.
- */
 MapvoteServerUI()
 {
 	// level endon("game_ended");
@@ -958,8 +911,6 @@ MapvoteServerUI()
 	mapsHUDComponents[1].image fadeovertime(0.5);
 	mapsHUDComponents[2].image = level DrawShader(level.mapvotedata["thirdmap"].loadscreen, 220, -310, 200, 129, (1, 1, 1), 1, 2, "RIGHT", "CENTER", 1);
 	mapsHUDComponents[2].image fadeovertime(0.5);
-
-	print("mapnames: " + level.mapvotedata["firstmap"].mapname + ";" + level.mapvotedata["secondmap"].mapname + ";" + level.mapvotedata["thirdmap"].mapname);
 
 	arrow_right = undefined;
 	arrow_left = undefined;
@@ -1026,7 +977,6 @@ MapvoteServerUI()
 		}
 		map.image affectElement("y", 1.2, 89 + dynamic_position);
 	}
-	print("after animation");
 	wait 1;
 	level notify("mapvote_start");
 
@@ -1060,34 +1010,19 @@ MapvoteServerUI()
 		player setblur(0, 0);
 	}
 }
-/**
- * Sets the value of a dvar if it is not already initialized.
- * @param dvar The name of the dvar.
- * @param value The value to set for the dvar.
- */
+
 SetDvarIfNotInizialized(dvar, value)
 {
 	if (!IsInizialized(dvar))
 		setDvar(dvar, value);
 }
 
-/**
- * Checks if a dvar is initialized.
- * @param dvar The name of the dvar.
- * @returns True if the dvar is initialized, false otherwise.
- */
 IsInizialized(dvar)
 {
 	result = getDvar(dvar);
 	return result != "";
 }
 
-/**
- * Converts a game type abbreviation to its corresponding full name.
- *
- * @param {string} gametype - The abbreviation of the game type.
- * @returns {string} - The full name of the game type.
- */
 gametypeToName(gametype)
 {
 	switch (tolower(gametype))
@@ -1126,11 +1061,6 @@ gametypeToName(gametype)
 	return gametypeToName(getDvar("g_gametype"));
 }
 
-/**
- * Converts a map ID to its corresponding display name.
- * @param {string} mapid - The map ID to convert.
- * @returns {string} - The display name of the map.
- */
 mapToDisplayName(mapid)
 {
 	mapid = tolower(mapid);
@@ -1176,11 +1106,6 @@ mapToDisplayName(mapid)
 	}
 }
 
-/**
- * Returns the corresponding loadscreen image for a given map ID.
- * @param {string} mapid - The map ID.
- * @returns {string} - The loadscreen image name.
- */
 mapToLoadscreen(mapid)
 {
 	mapid = tolower(mapid);
@@ -1296,24 +1221,11 @@ _countPlayers()
 	return count;
 }
 
-/**
- * Checks if the given value is a valid color.
- * A valid color is represented by a string value that is either "0", "1", "2", "3", "4", "5", "6", or "7".
- *
- * @param value - The value to check.
- * @returns true if the value is a valid color, false otherwise.
- */
 isValidColor(value)
 {
 	return value == "0" || value == "1" || value == "2" || value == "3" || value == "4" || value == "5" || value == "6" || value == "7";
 }
 
-/**
- * GetColor function returns the RGB values of a specified color.
- *
- * @param {string} color - The color name.
- * @returns {array} - An array containing the RGB values of the specified color.
- */
 GetColor(color)
 {
 	switch (tolower(color))
@@ -1364,24 +1276,6 @@ GetColor(color)
 	}
 }
 // Drawing
-/**
- * Creates a font string and sets its properties.
- *
- * @param {string} input - The text or value to be displayed in the font string.
- * @param {string} font - The font style of the font string.
- * @param {float} fontScale - The scale of the font string.
- * @param {int} align - The alignment of the font string.
- * @param {bool} relative - Determines if the font string's position is relative to its parent.
- * @param {float} x - The x-coordinate of the font string's position.
- * @param {float} y - The y-coordinate of the font string's position.
- * @param {vector} color - The color of the font string.
- * @param {float} alpha - The transparency of the font string.
- * @param {vector} glowColor - The color of the font string's glow effect.
- * @param {float} glowAlpha - The transparency of the font string's glow effect.
- * @param {int} sort - The sorting order of the font string.
- * @param {bool} isValue - Determines if the input is a value instead of text.
- * @returns {fontString} - The created font string.
- */
 CreateString(input, font, fontScale, align, relative, x, y, color, alpha, glowColor, glowAlpha, sort, isValue)
 {
 	if (self != level)
@@ -1413,21 +1307,7 @@ CreateString(input, font, fontScale, align, relative, x, y, color, alpha, glowCo
 	hud.hideWhenInMenu = 0;
 	return hud;
 }
-/**
- * Creates a rectangle HUD element with the specified properties.
- *
- * @param align The alignment of the rectangle.
- * @param relative The relative position of the rectangle.
- * @param x The x-coordinate of the rectangle.
- * @param y The y-coordinate of the rectangle.
- * @param width The width of the rectangle.
- * @param height The height of the rectangle.
- * @param color The color of the rectangle.
- * @param shader The shader of the rectangle.
- * @param sort The sorting order of the rectangle.
- * @param alpha The transparency of the rectangle.
- * @return The created rectangle HUD element.
- */
+
 CreateRectangle(align, relative, x, y, width, height, color, shader, sort, alpha)
 {
 	boxElem = newClientHudElem(self);
@@ -1450,22 +1330,7 @@ CreateRectangle(align, relative, x, y, width, height, color, shader, sort, alpha
 	boxElem.archived = 0;
 	return boxElem;
 }
-/**
- * Draws a shader on the screen at the specified position with the given dimensions, color, and alpha.
- *
- * @param shader The shader to be drawn.
- * @param x The x-coordinate of the top-left corner of the shader.
- * @param y The y-coordinate of the top-left corner of the shader.
- * @param width The width of the shader.
- * @param height The height of the shader.
- * @param color The color of the shader.
- * @param alpha The alpha value of the shader.
- * @param sort The sorting order of the shader.
- * @param align The alignment of the shader.
- * @param relative Specifies whether the shader's position is relative to the screen or the level.
- * @param isLevel Specifies whether the shader is a level shader or a client shader.
- * @return The created hudelem object representing the drawn shader.
- */
+
 DrawShader(shader, x, y, width, height, color, alpha, sort, align, relative, isLevel)
 {
 	if (isDefined(isLevel))
@@ -1490,12 +1355,6 @@ DrawShader(shader, x, y, width, height, color, alpha, sort, align, relative, isL
 	return hud;
 }
 // Animations
-/**
- * A function that affects the specified element over time.
- * @param {string} type - The type of element to affect ("x", "y", "alpha", "color").
- * @param {number} time - The duration of the effect in milliseconds.
- * @param {number} value - The new value for the specified element.
- */
 affectElement(type, time, value)
 {
 	if (type == "x" || type == "y")
