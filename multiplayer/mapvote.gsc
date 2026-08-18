@@ -178,7 +178,7 @@ init()
 			}
 		}
 
-		if (getDvar("mv_lui") == 1)
+		if (getDvarInt("mv_lui") == 1)
 		{
 			lui_mv_maps = level.mapvotedata["firstmap"].mapname + ";" + level.mapvotedata["secondmap"].mapname + ";" + level.mapvotedata["thirdmap"].mapname;
 			lui_mv_gametypes = level.mapvotedata["firstmap"].gametypename + ";" + level.mapvotedata["secondmap"].gametypename + ";" + level.mapvotedata["thirdmap"].gametypename;
@@ -189,10 +189,11 @@ init()
 				lui_mv_maps = lui_mv_maps + ";" + level.mapvotedata["fourthmap"].mapname + ";" + level.mapvotedata["fifthmap"].mapname + ";" + level.mapvotedata["sixthmap"].mapname;
 				lui_mv_gametypes = lui_mv_gametypes + ";" + level.mapvotedata["fourthmap"].gametypename + ";" + level.mapvotedata["fifthmap"].gametypename + ";" + level.mapvotedata["sixthmap"].gametypename;
 				lui_mv_loadscreens = lui_mv_loadscreens + ";" + level.mapvotedata["fourthmap"].loadscreen + ";" + level.mapvotedata["fifthmap"].loadscreen + ";" + level.mapvotedata["sixthmap"].loadscreen;
-				setDvar("lui_mv_maps", lui_mv_maps);
-				setDvar("lui_mv_gametypes", lui_mv_gametypes);
-				setDvar("lui_mv_loadscreens", lui_mv_loadscreens);
 			}
+
+			setDvar("lui_mv_maps", lui_mv_maps);
+			setDvar("lui_mv_gametypes", lui_mv_gametypes);
+			setDvar("lui_mv_loadscreens", lui_mv_loadscreens);
 		}
 	}
 
@@ -322,7 +323,6 @@ LUIPlayerMapvote()
 	self closeingamemenu();
 	self openMenu("mapvote");
 	
-
 	while (true)
 	{
 		self waittill("menuresponse", menu, response);
