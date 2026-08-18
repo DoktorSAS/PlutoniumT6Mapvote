@@ -87,16 +87,9 @@ init()
 	precacheshader("ui_scrollbar_arrow_right");
 	precacheshader("gradient");
 
-	precachestring( &"MapVote" );
-    game["MapVote"] = &"MapVote";
-    level.MapVote = &"MapVote";
-    precachestring( &"open_custom_in_game_menu" );
-    game["OpenCustomInGameMenu"] = &"open_custom_in_game_menu";
-    level.open_custom_in_game_menu = &"open_custom_in_game_menu";
-
 	level thread OnPlayerConnected();
 	MapvoteConfig();
-	
+
 	if (GetDvarInt("mv_lui") == 1)
 	{
 		precachemenu("MapVote");
@@ -104,6 +97,13 @@ init()
 		precachestring(&"mapvote_close");
 		precachestring( &"open_ingame_menu" );
 		precachestring( &"MapVote" );
+
+		precachestring( &"MapVote" );
+		game["MapVote"] = &"MapVote";
+		level.MapVote = &"MapVote";
+		precachestring( &"open_custom_in_game_menu" );
+		game["OpenCustomInGameMenu"] = &"open_custom_in_game_menu";
+		level.open_custom_in_game_menu = &"open_custom_in_game_menu";
 
 		setDvar("lui_mv_maps", "ERROR;ERROER;ERROR");
 		setDvar("lui_mv_gametypes", "ERROR;ERROER;ERROR");
@@ -213,7 +213,7 @@ init()
 			}
 		}
 
-		if (getDvar("mv_lui") == 1)
+		if (getDvarInt("mv_lui") == 1)
 		{
 			lui_mv_maps = level.mapvotedata["firstmap"].mapname + ";" + level.mapvotedata["secondmap"].mapname + ";" + level.mapvotedata["thirdmap"].mapname;
 			lui_mv_gametypes = level.mapvotedata["firstmap"].gametypename + ";" + level.mapvotedata["secondmap"].gametypename + ";" + level.mapvotedata["thirdmap"].gametypename;
@@ -224,10 +224,11 @@ init()
 				lui_mv_maps = lui_mv_maps + ";" + level.mapvotedata["fourthmap"].mapname + ";" + level.mapvotedata["fifthmap"].mapname + ";" + level.mapvotedata["sixthmap"].mapname;
 				lui_mv_gametypes = lui_mv_gametypes + ";" + level.mapvotedata["fourthmap"].gametypename + ";" + level.mapvotedata["fifthmap"].gametypename + ";" + level.mapvotedata["sixthmap"].gametypename;
 				lui_mv_loadscreens = lui_mv_loadscreens + ";" + level.mapvotedata["fourthmap"].loadscreen + ";" + level.mapvotedata["fifthmap"].loadscreen + ";" + level.mapvotedata["sixthmap"].loadscreen;
-				setDvar("lui_mv_maps", lui_mv_maps);
-				setDvar("lui_mv_gametypes", lui_mv_gametypes);
-				setDvar("lui_mv_loadscreens", lui_mv_loadscreens);
 			}
+
+			setDvar("lui_mv_maps", lui_mv_maps);
+			setDvar("lui_mv_gametypes", lui_mv_gametypes);
+			setDvar("lui_mv_loadscreens", lui_mv_loadscreens);
 		}
 	}
 }
@@ -389,7 +390,7 @@ MapvoteConfig()
 	level.mapvotedata = [];
 	SetDvarIfNotInizialized("mv_time", 20);
 	level.mapvotedata["time"] = getDvarInt("mv_time");
-	SetDvarIfNotInizialized("mv_maps", "zm_tomb_grief zm_town_grief zm_farm_grief zm_tomb zm_buried zm_prison");
+	SetDvarIfNotInizialized("mv_maps", "zm_town zm_farm zm_buried zm_prison zm_tomb zm_transit zm_buried zm_highrise zm_nuked");
 
 	// Setting default values if needed
 	SetDvarIfNotInizialized("mv_credits", 1);
