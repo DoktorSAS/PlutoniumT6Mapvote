@@ -554,7 +554,6 @@ MapvotePlayerUI()
 				self.statusicon = "compassping_friendlyfiring_mp"; // Green dot
 				if (previuesindex >= 0) // This section is to remove the vote on the previues voted map
 				{
-					select_color = getColor(getDvar("mv_selectcolor"));
 					boxes[previuesindex] affectElement("color", 0.2, bgcolor);
 					level notify("vote", previuesindex, -1);
 				}
